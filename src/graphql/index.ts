@@ -1,6 +1,7 @@
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
-import { Express } from 'express';
+import { Express, json } from 'express';
+import cors from 'cors';
 import { userTypeDefs } from './schema/userSchema';
 import { userResolvers } from './resolvers/userResolver';
 import { verifyAccessToken } from '@utils/jwt';
@@ -83,8 +84,10 @@ export const setupGraphQL = async (app: Express): Promise<void> => {
 
   app.use(
     '/graphql',
+    cors<cors.CorsRequest>(),
+    json(),
     expressMiddleware(server, {
-      context: getContext as any
+      context: getContext
     })
   );
 
