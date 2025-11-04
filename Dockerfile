@@ -11,16 +11,15 @@ COPY package*.json ./
 COPY tsconfig.json ./
 COPY .sequelizerc ./
 
-# Install dependencies
-RUN npm ci --omit=dev && \
+# Install all dependencies (including dev dependencies for build)
+RUN npm ci && \
     npm cache clean --force
 
 # Copy source code
 COPY src ./src
 
-# Build TypeScript
-RUN npm install --save-dev typescript @types/node && \
-    npm run build && \
+# Build TypeScript and prune dev dependencies
+RUN npm run build && \
     npm prune --production
 
 # Stage 2: Production
