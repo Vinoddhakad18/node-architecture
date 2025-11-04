@@ -88,7 +88,7 @@ export const setupGraphQL = async (app: Express): Promise<void> => {
     json(),
     expressMiddleware(server, {
       context: getContext
-    })
+    }) as any
   );
 
   logger.info('GraphQL server configured at /graphql');
