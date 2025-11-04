@@ -4,6 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        NODE_ENV: ${NODE_ENV:-dev}
     container_name: node-art-app
     restart: unless-stopped
     ports:

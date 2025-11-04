@@ -3,6 +3,9 @@
 # Stage 1: Build
 FROM node:24-alpine AS builder
 
+# Build argument to control dependency pruning
+ARG NODE_ENV=production
+
 # Set working directory
 WORKDIR /app
 
@@ -18,9 +21,10 @@ RUN npm install && \
 # Copy source code
 COPY src ./src
 
-# Build TypeScript and prune dev dependencies
+# Build TypeScript and conditionally prune dev dependencies
+# Only prune for production builds, keep dev dependencies for dev/local environments
 RUN npm run build && \
-    npm prune --production
+    if [ "$NODE_ENV" = "production" ] || [ "$NODE_ENV" = "ppd" ]; then npm prune --production; fi
 
 # Stage 2: Production
 FROM node:24-alpine
