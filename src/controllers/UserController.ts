@@ -3,7 +3,7 @@ import { UserModel, User } from '../models/User';
 
 export class UserController {
   // GET /users - Get all users
-  static async getAllUsers(req: Request, res: Response): Promise<void> {
+  static async getAllUsers(_req: Request, res: Response): Promise<void> {
     try {
       const users = await UserModel.findAll();
       res.status(200).json({
