@@ -4,7 +4,7 @@ A clean and scalable Node.js application built with TypeScript following the MVC
 
 ## Features
 
-- TypeScript for type safety
+- TypeScript for type safety 
 - MVC architecture pattern
 - Express.js framework
 - RESTful API design
