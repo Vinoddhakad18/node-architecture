@@ -12,7 +12,7 @@ COPY tsconfig.json ./
 COPY .sequelizerc ./
 
 # Install all dependencies (including dev dependencies for build)
-RUN npm ci && \
+RUN npm install && \
     npm cache clean --force
 
 # Copy source code
