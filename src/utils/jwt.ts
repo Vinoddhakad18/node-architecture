@@ -1,4 +1,4 @@
-import jwt, { SignOptions } from 'jsonwebtoken';
+import jwt, { SignOptions, StringValue } from 'jsonwebtoken';
 import config from '@config/index';
 
 export interface TokenPayload {
@@ -17,7 +17,7 @@ export interface TokenResponse {
  */
 export const generateAccessToken = (payload: TokenPayload): string => {
   const options: SignOptions = {
-    expiresIn: config.jwt.accessExpiresIn as string
+    expiresIn: config.jwt.accessExpiresIn as unknown as StringValue, // ✅ Cast correctly
   };
   return jwt.sign(payload, config.jwt.accessSecret, options);
 };
@@ -27,7 +27,7 @@ export const generateAccessToken = (payload: TokenPayload): string => {
  */
 export const generateRefreshToken = (payload: TokenPayload): string => {
   const options: SignOptions = {
-    expiresIn: config.jwt.refreshExpiresIn as string
+    expiresIn: config.jwt.refreshExpiresIn as unknown as StringValue, // ✅ Fix type
   };
   return jwt.sign(payload, config.jwt.refreshSecret, options);
 };
@@ -49,7 +49,7 @@ export const verifyAccessToken = (token: string): TokenPayload => {
   try {
     const decoded = jwt.verify(token, config.jwt.accessSecret) as TokenPayload;
     return decoded;
-  } catch (error) {
+  } catch {
     throw new Error('Invalid or expired access token');
   }
 };
@@ -61,14 +61,12 @@ export const verifyRefreshToken = (token: string): TokenPayload => {
   try {
     const decoded = jwt.verify(token, config.jwt.refreshSecret) as TokenPayload;
     return decoded;
-  } catch (error) {
+  } catch {
     throw new Error('Invalid or expired refresh token');
   }
 };
 
 /**
- * Decode token without verification (useful for debugging)
+ * Decode token without verification (for debugging)
  */
-export const decodeToken = (token: string): any => {
-  return jwt.decode(token);
-};
+export const decodeToken = (token: string): any => jwt.decode(token);
