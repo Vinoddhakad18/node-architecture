@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: ${BUILD_TARGET:-production}
+    image: node-mvc-app:${NODE_ENV:-production}
+    container_name: node-mvc-app-${NODE_ENV:-production}
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=${PORT:-3000}
+    volumes:
+      # Development: Mount source code for hot reload
+      # Production: Mount logs only
+      - ${VOLUME_SRC:-./logs}:${VOLUME_TARGET:-/app/logs}
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+
+  # Example: Add a database service (PostgreSQL)
+  # Uncomment if you need a database
+  # db:
+  #   image: postgres:16-alpine
+  #   container_name: node-mvc-db
+  #   restart: unless-stopped
+  #   environment:
+  #     - POSTGRES_USER=${DB_USER:-postgres}
+  #     - POSTGRES_PASSWORD=${DB_PASSWORD:-password}
+  #     - POSTGRES_DB=${DB_NAME:-myapp}
+  #   ports:
+  #     - "${DB_PORT:-5432}:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - app-network
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U postgres"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+networks:
+  app-network:
+    driver: bridge
+
+# Uncomment if using database
+# volumes:
+#   postgres_data:

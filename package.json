@@ -1,0 +1,52 @@
+{
+  "name": "node-architecture",
+  "version": "1.0.0",
+  "description": "Node.js MVC Architecture with TypeScript following MVC pattern",
+  "main": "dist/server.js",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "dev": "nodemon --exec ts-node src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "clean": "rm -rf dist",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docker:dev": "docker-compose --env-file .env.development up",
+    "docker:dev:build": "docker-compose --env-file .env.development up --build",
+    "docker:dev:down": "docker-compose --env-file .env.development down",
+    "docker:prod": "docker-compose --env-file .env.production up -d",
+    "docker:prod:build": "docker-compose --env-file .env.production up -d --build",
+    "docker:prod:down": "docker-compose --env-file .env.production down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:clean": "docker-compose down -v --rmi all"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vinoddhakad18/node-architecture.git"
+  },
+  "keywords": [
+    "nodejs",
+    "mvc",
+    "architecture",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Vinoddhakad18/node-architecture/issues"
+  },
+  "homepage": "https://github.com/Vinoddhakad18/node-architecture#readme",
+  "dependencies": {
+    "express": "^5.1.0",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.5",
+    "@types/node": "^24.10.0",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
