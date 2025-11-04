@@ -6,7 +6,7 @@ const router = Router();
 /**
  * Root API route
  */
-router.get('/', (req: Request, res: Response) => {
+router.get('/', (_req: Request, res: Response) => {
   res.json({
     success: true,
     message: 'Welcome to MVC API',
