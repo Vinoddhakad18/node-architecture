@@ -1,0 +1,20 @@
+{
+  "name": "Node Art API Documentation",
+  "version": "1.0.0",
+  "description": "Production-grade Node.js backend API documentation",
+  "title": "Node Art API",
+  "url": "http://localhost:3000/api",
+  "sampleUrl": "http://localhost:3000/api",
+  "header": {
+    "title": "Introduction",
+    "filename": "src/docs/header.md"
+  },
+  "footer": {
+    "title": "License",
+    "filename": "src/docs/footer.md"
+  },
+  "template": {
+    "withCompare": true,
+    "withGenerator": true
+  }
+}
