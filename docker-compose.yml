@@ -3,27 +3,21 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: ${BUILD_TARGET:-production}
-    image: node-mvc-app:${NODE_ENV:-production}
-    container_name: node-mvc-app-${NODE_ENV:-production}
+    image: node-mvc-app:development
+    container_name: node-mvc-app-development
     restart: unless-stopped
-    expose:
-      - "3000"
-    environment:
-      - NODE_ENV=${NODE_ENV:-production}
-      - PORT=${PORT:-3000}
-    volumes:
-      # Development: Mount source code for hot reload
-      # Production: Mount logs only
-      - ${VOLUME_SRC:-./logs}:${VOLUME_TARGET:-/app/logs}
+    env_file:
+      - .env.development
+    ports:
+      - "${NODEPORT}:3000"
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 40s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
 
   nginx:
     build:
@@ -33,48 +27,15 @@ services:
     container_name: node-mvc-nginx
     restart: unless-stopped
     ports:
-      - "${NGINX_PORT:-8080}:80"
+      - "80:80"
     depends_on:
       app:
         condition: service_healthy
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
       - app-network
-    volumes:
-      - nginx_logs:/var/log/nginx
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 5s
-
-  # Example: Add a database service (PostgreSQL)
-  # Uncomment if you need a database
-  # db:
-  #   image: postgres:16-alpine
-  #   container_name: node-mvc-db
-  #   restart: unless-stopped
-  #   environment:
-  #     - POSTGRES_USER=${DB_USER:-postgres}
-  #     - POSTGRES_PASSWORD=${DB_PASSWORD:-password}
-  #     - POSTGRES_DB=${DB_NAME:-myapp}
-  #   ports:
-  #     - "${DB_PORT:-5432}:5432"
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #   networks:
-  #     - app-network
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U postgres"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
 
 networks:
   app-network:
     driver: bridge
-
-volumes:
-  nginx_logs:
-  # Uncomment if using database
-  # postgres_data:
