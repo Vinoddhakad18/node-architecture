@@ -7,8 +7,8 @@ services:
     image: node-mvc-app:${NODE_ENV:-production}
     container_name: node-mvc-app-${NODE_ENV:-production}
     restart: unless-stopped
-    ports:
-      - "${PORT:-3000}:3000"
+    expose:
+      - "3000"
     environment:
       - NODE_ENV=${NODE_ENV:-production}
       - PORT=${PORT:-3000}
@@ -24,6 +24,29 @@ services:
       timeout: 3s
       retries: 3
       start_period: 40s
+
+  nginx:
+    build:
+      context: ./docker/nginx
+      dockerfile: Dockerfile
+    image: node-mvc-nginx:latest
+    container_name: node-mvc-nginx
+    restart: unless-stopped
+    ports:
+      - "${NGINX_PORT:-8080}:80"
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - app-network
+    volumes:
+      - nginx_logs:/var/log/nginx
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
 
   # Example: Add a database service (PostgreSQL)
   # Uncomment if you need a database
@@ -51,6 +74,7 @@ networks:
   app-network:
     driver: bridge
 
-# Uncomment if using database
-# volumes:
-#   postgres_data:
+volumes:
+  nginx_logs:
+  # Uncomment if using database
+  # postgres_data:
