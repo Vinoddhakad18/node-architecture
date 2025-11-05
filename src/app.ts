@@ -14,6 +14,16 @@ export const createApp = (): Application => {
   app.use(express.urlencoded({ extended: true }));
   app.use(logger);
 
+  // Health check endpoint
+  app.get('/health', (_req, res) => {
+    res.status(200).json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: config.nodeEnv,
+    });
+  });
+
   // Routes
   app.use(config.apiPrefix, routes);
 
