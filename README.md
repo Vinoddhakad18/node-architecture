@@ -64,7 +64,7 @@ Run the application in a Docker container with hot reload:
 npm run docker:dev
 
 # Or manually with docker-compose
-docker-compose --env-file .env.development up
+docker compose --env-file .env.development up --build
 ```
 
 The application will be available at `http://localhost:3000`
@@ -72,6 +72,9 @@ The application will be available at `http://localhost:3000`
 To stop:
 ```bash
 npm run docker:dev:down
+
+# Or manually
+docker compose down
 ```
 
 ### Option 3: Docker Production
@@ -194,6 +197,22 @@ npm run docker:dev
 **Production mode:**
 ```bash
 npm run docker:prod
+```
+
+### Check Container Health
+
+Now check container health:
+
+```bash
+docker ps -a
+```
+
+You should see something like:
+
+```
+CONTAINER ID   IMAGE                      STATUS
+a1b2c3d4e5f6   node-mvc-app:development   Up 1m (healthy)
+b2c3d4e5f6g7   node-mvc-nginx:latest      Up 1m
 ```
 
 ### Environment-Based Configuration
