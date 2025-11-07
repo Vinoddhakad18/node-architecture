@@ -31,10 +31,10 @@ export const config: envInterface = {
   apiPrefix: process.env.API_PREFIX || '/api',
   database: {
     host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432', 10),
+    port: parseInt(process.env.DB_PORT || '3306', 10),
     name: process.env.DB_NAME || 'node_app_db',
-    username: process.env.DB_USERNAME || 'postgres',
-    password: process.env.DB_PASSWORD || 'postgres',
+    username: process.env.DB_USER || process.env.DB_USERNAME || 'root',
+    password: process.env.DB_PASSWORD || '',
   },
   jwt: {
     secret: process.env.JWT_SECRET || 'your-secret-key',
