@@ -2,8 +2,8 @@ import express, { Application } from 'express';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { config } from './config';
-import routes from './routes';
-import { errorHandler, notFoundHandler, logger } from './middleware';
+import routes from './application/routes';
+import { errorHandler, notFoundHandler, logger } from './application/middleware';
 
 /**
  * Rate limiter configuration
@@ -39,7 +39,7 @@ export const createApp = (): Application => {
       status: 'healthy',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
-      environment: config.nodeEnv,
+      environment: config.env,
     });
   });
 

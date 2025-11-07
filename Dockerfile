@@ -31,6 +31,9 @@ COPY nodemon.json ./
 # Copy source code
 COPY src ./src
 
+# Copy environment files
+COPY .env.* ./
+
 # Expose port
 EXPOSE 3000
 
@@ -65,6 +68,9 @@ RUN npm install && \
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
+
+# Copy environment files
+COPY .env.* ./
 
 # Change ownership to non-root user
 RUN chown -R nodejs:nodejs /app

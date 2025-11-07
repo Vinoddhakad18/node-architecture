@@ -1,5 +1,5 @@
 import winston from 'winston';
-import { config } from './index';
+import { config } from '../../config';
 
 /**
  * Winston logger configuration
@@ -27,7 +27,7 @@ const consoleFormat = winston.format.combine(
  * Create Winston logger instance
  */
 export const logger = winston.createLogger({
-  level: config.nodeEnv === 'production' ? 'info' : 'debug',
+  level: config.logging.level,
   format: logFormat,
   defaultMeta: { service: 'node-architecture' },
   transports: [
