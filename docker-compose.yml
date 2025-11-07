@@ -9,7 +9,7 @@ services:
     env_file:
       - .env.development
     ports:
-      - "${NODEPORT}:3000"
+      - "${PORT}:3000"
     networks:
       - app-network
     healthcheck:

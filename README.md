@@ -187,6 +187,20 @@ This project uses a **unified Docker configuration** that switches between devel
 - `.env.production` - Production environment variables
 - `.dockerignore` - Files to exclude from Docker builds
 
+### Installation Script
+
+For automated Docker and Docker Compose installation, use the provided script:
+
+Make the script executable:
+```bash
+chmod +x docker-install.sh
+```
+
+Run it:
+```bash
+./docker-install.sh
+```
+
 ### Quick Start
 
 **Development mode (with hot reload):**
