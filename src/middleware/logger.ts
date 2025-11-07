@@ -1,10 +1,13 @@
-import { Request, Response, NextFunction } from 'express';
+import morgan from 'morgan';
+import { stream } from '../config/logger';
 
 /**
- * Simple logging middleware
+ * Morgan HTTP request logger middleware with Winston integration
+ *
+ * Format: ':method :url :status :res[content-length] - :response-time ms'
+ * Outputs to Winston logger through stream
  */
-export const logger = (req: Request, _res: Response, next: NextFunction): void => {
-  const timestamp = new Date().toISOString();
-  console.log(`[${timestamp}] ${req.method} ${req.url}`);
-  next();
-};
+export const logger = morgan(
+  ':method :url :status :res[content-length] - :response-time ms',
+  { stream }
+);

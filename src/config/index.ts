@@ -14,3 +14,6 @@ export const config = {
     password: process.env.DB_PASSWORD || 'nodepassword',
   },
 };
+
+// Export logger for use throughout the application
+export { logger } from './logger';

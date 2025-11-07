@@ -1,5 +1,5 @@
 import { createApp } from './app';
-import { config } from './config';
+import { config, logger } from './config';
 
 /**
  * Start the Express server
@@ -8,11 +8,11 @@ const startServer = (): void => {
   const app = createApp();
 
   app.listen(config.port, () => {
-    console.log('=================================');
-    console.log(`Server running in ${config.nodeEnv} mode`);
-    console.log(`Listening on port ${config.port}`);
-    console.log(`API endpoint: http://localhost:${config.port}${config.apiPrefix}`);
-    console.log('=================================');
+    logger.info('=================================');
+    logger.info(`Server running in ${config.nodeEnv} mode`);
+    logger.info(`Listening on port ${config.port}`);
+    logger.info(`API endpoint: http://localhost:${config.port}${config.apiPrefix}`);
+    logger.info('=================================');
   });
 };
 
