@@ -1,4 +1,5 @@
 import express, { Application } from 'express';
+import helmet from 'helmet';
 import { config } from './config';
 import routes from './routes';
 import { errorHandler, notFoundHandler, logger } from './middleware';
@@ -8,6 +9,9 @@ import { errorHandler, notFoundHandler, logger } from './middleware';
  */
 export const createApp = (): Application => {
   const app: Application = express();
+
+  // Security middleware
+  app.use(helmet());
 
   // Middleware
   app.use(express.json());

@@ -1,5 +1,4 @@
 import { Router, Request, Response } from 'express';
-import userRoutes from './userRoutes';
 
 const router = Router();
 
@@ -11,15 +10,8 @@ router.get('/', (_req: Request, res: Response) => {
     success: true,
     message: 'Welcome to MVC API',
     version: '1.0.0',
-    endpoints: {
-      users: '/api/users',
-    },
+    endpoints: {},
   });
 });
-
-/**
- * Mount route modules
- */
-router.use('/users', userRoutes);
 
 export default router;
