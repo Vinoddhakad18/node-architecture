@@ -1,4 +1,30 @@
 services:
+  mysql:
+    build:
+      context: ./docker/mysql
+      dockerfile: Dockerfile
+    image: node-mvc-mysql:latest
+    container_name: node-mvc-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-myapp}
+      MYSQL_USER: ${MYSQL_USER:-appuser}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-apppassword}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - mysql-logs:/var/log/mysql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
   app:
     build:
       context: .
@@ -10,6 +36,9 @@ services:
       - .env.development
     ports:
       - "${PORT}:3000"
+    depends_on:
+      mysql:
+        condition: service_healthy
     networks:
       - app-network
     healthcheck:
@@ -39,3 +68,9 @@ services:
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  mysql-data:
+    driver: local
+  mysql-logs:
+    driver: local
