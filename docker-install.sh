@@ -33,7 +33,12 @@ sudo systemctl start docker
 echo "👤 Adding current user to Docker group..."
 sudo usermod -aG docker $USER
 
+newgrp docker
+
 echo "✅ Docker Installed Successfully!"
 echo "⚠️ Please log out and log back in (or run: newgrp docker)"
 docker --version
 docker compose version
+
+echo "🚀 Starting Docker containers with development environment..."
+docker compose --env-file .env.development up --build
