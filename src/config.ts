@@ -17,6 +17,8 @@ if (!process.env.NOENV || process.env.NOENV === 'false') {
   }
 
   dotenv.config({ path: envPath });
+  console.log('Loaded .env file from:', envPath);
+  console.log('DB_HOST from process.env:', process.env.DB_HOST);
 } else {
   console.log('NO .ENV. SPECIFIED');
   dotenv.config();

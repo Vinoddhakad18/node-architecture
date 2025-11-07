@@ -34,6 +34,11 @@ services:
     restart: unless-stopped
     env_file:
       - .env.development
+    environment:
+      - DB_HOST=mysql
+      - DB_USERNAME=appuser
+      - DB_PASSWORD=apppassword
+      - DB_NAME=myapp_dev
     ports:
       - "${PORT}:3000"
     depends_on:

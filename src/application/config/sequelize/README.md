@@ -72,6 +72,19 @@ DB_PARANOID=false         # Enable soft deletes (deletedAt)
 # SSL Configuration (Production)
 DB_SSL=false              # Enable SSL
 DB_SSL_REJECT_UNAUTHORIZED=true # Reject invalid certificates
+
+# Replication Configuration (for read/write splitting)
+DB_REPLICATION=false      # Enable read/write replication
+DB_WRITE_HOST=mysql-master # Write database host (master)
+DB_WRITE_PORT=3306        # Write database port
+DB_WRITE_USER=appuser     # Write database user
+DB_WRITE_PASSWORD=apppassword # Write database password
+
+# Read Replicas (comma-separated for multiple replicas)
+DB_READ_HOSTS=mysql-replica-1,mysql-replica-2 # Read replica hosts
+DB_READ_PORTS=3306,3306   # Read replica ports (one per host)
+DB_READ_USERS=appuser,appuser # Read replica users (one per host)
+DB_READ_PASSWORDS=apppassword,apppassword # Read replica passwords
 ```
 
 ## Usage
@@ -199,6 +212,59 @@ process.on('SIGTERM', async () => {
 });
 ```
 
+### 7. Using Read/Write Replication
+
+Enable replication for high availability and load distribution:
+
+```typescript
+// In your .env file
+DB_REPLICATION=true
+DB_WRITE_HOST=mysql-master
+DB_WRITE_PORT=3306
+DB_READ_HOSTS=mysql-replica-1,mysql-replica-2
+DB_READ_PORTS=3306,3306
+
+// Sequelize automatically routes queries:
+// - SELECT queries go to read replicas (round-robin)
+// - INSERT, UPDATE, DELETE go to write master
+
+// Read operations (automatically use read replicas)
+const users = await User.findAll();
+const user = await User.findByPk(1);
+
+// Write operations (automatically use write master)
+await User.create({ username: 'john', email: 'john@example.com' });
+await User.update({ email: 'new@example.com' }, { where: { id: 1 } });
+await User.destroy({ where: { id: 1 } });
+
+// Force write host for specific read queries
+const user = await User.findByPk(1, { useMaster: true });
+
+// In transactions, all queries use the write host
+const t = await sequelize.transaction();
+try {
+  // These will all go to the write master
+  await User.findAll({ transaction: t });
+  await User.create({ username: 'jane' }, { transaction: t });
+  await t.commit();
+} catch (error) {
+  await t.rollback();
+}
+```
+
+**Replication Benefits:**
+- **High Availability**: If a read replica fails, queries continue on other replicas
+- **Load Distribution**: Read queries are distributed across multiple replicas
+- **Performance**: Reduces load on the master database
+- **Scalability**: Easily add more read replicas as needed
+
+**Important Notes:**
+- Sequelize automatically handles query routing
+- SELECT queries use read replicas (round-robin load balancing)
+- INSERT/UPDATE/DELETE always use the write master
+- Transactions always use the write master for consistency
+- Use `useMaster: true` option to force reads from master if needed
+
 ## Best Practices
 
 1. **Never use `force: true` in production** - It will drop all tables
@@ -211,6 +277,10 @@ process.on('SIGTERM', async () => {
 8. **Enable logging** only in development
 9. **Use paranoid mode** for soft deletes if needed
 10. **Validate data** at the model level
+11. **Enable replication** for production to improve performance and availability
+12. **Monitor replica lag** to ensure read replicas are in sync
+13. **Use `useMaster: true`** for critical reads that require latest data
+14. **Keep read replica credentials read-only** for security
 
 ## Troubleshooting
 
@@ -225,6 +295,13 @@ process.on('SIGTERM', async () => {
 - Enable query benchmarking
 - Check for N+1 query problems
 - Use indexes on frequently queried fields
+
+### Replication Issues
+- **Replica lag**: Monitor replication delay, use `useMaster: true` for critical reads
+- **Connection failures**: Ensure all replica hosts are accessible and credentials are correct
+- **Inconsistent reads**: This is normal due to replication lag, use master for consistency
+- **Load balancing**: Sequelize uses round-robin, ensure all replicas have similar capacity
+- **Failover**: If a replica fails, Sequelize will automatically use other available replicas
 
 ### Type Issues
 - Install `@types/sequelize` (already included)

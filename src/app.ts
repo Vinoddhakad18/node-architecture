@@ -4,6 +4,7 @@ import rateLimit from 'express-rate-limit';
 import { config } from './config';
 import routes from './application/routes';
 import { errorHandler, notFoundHandler, logger } from './application/middleware';
+import { connectDatabase } from './application/config/sequelize/database';
 
 /**
  * Rate limiter configuration
@@ -19,7 +20,9 @@ const limiter = rateLimit({
 /**
  * Create and configure Express application
  */
-export const createApp = (): Application => {
+export const createApp = async (): Promise<Application> => {
+  await connectDatabase();
+
   const app: Application = express();
 
   // Security middleware

@@ -4,7 +4,10 @@
       "Bash(npm init:*)",
       "Bash(npm install:*)",
       "Bash(rm:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(docker-compose build:*)",
+      "Bash(docker-compose restart:*)",
+      "Bash(docker-compose logs:*)"
     ],
     "deny": [],
     "ask": []
