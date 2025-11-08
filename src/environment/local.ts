@@ -1,7 +1,7 @@
 export default {
   env: 'local',
   port: 3000,
-  apiPrefix: '/api',
+  apiPrefix: '/api/v1',
   database: {
     host: '<env:DB_HOST>',
     port: '<env:DB_PORT>',

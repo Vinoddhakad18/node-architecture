@@ -1,7 +1,7 @@
 export default {
   env: 'development',
   port: 3000,
-  apiPrefix: '/api',
+  apiPrefix: '/api/v1',
   database: {
     host: 'localhost',
     port: 5432,

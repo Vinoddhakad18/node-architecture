@@ -1,10 +1,12 @@
 import express, { Application } from 'express';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import swaggerUi from 'swagger-ui-express';
 import { config } from './config';
 import routes from './application/routes';
 import { errorHandler, notFoundHandler, logger } from './application/middleware';
 import { connectDatabase } from './application/config/sequelize/database';
+import { swaggerSpec, swaggerUiOptions } from './swagger';
 
 /**
  * Rate limiter configuration
@@ -35,6 +37,15 @@ export const createApp = async (): Promise<Application> => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(logger);
+
+  // Swagger documentation
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+
+  // Swagger JSON endpoint
+  app.get('/api-docs.json', (_req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+  });
 
   // Health check endpoint
   app.get('/health', (_req, res) => {

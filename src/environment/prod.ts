@@ -1,7 +1,7 @@
 export default {
   env: 'production',
   port: process.env.PORT || 3000,
-  apiPrefix: '/api',
+  apiPrefix: '/api/v1',
   database: {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432'),
