@@ -29,6 +29,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: development
     image: node-mvc-app:development
     container_name: node-mvc-app-development
     restart: unless-stopped
@@ -44,6 +45,14 @@ services:
       - DB_NAME=${MYSQL_DATABASE:-node_app_db}
     ports:
       - "${PORT}:3000"
+    volumes:
+      # Mount source code for hot reload
+      - ./src:/app/src
+      # Mount config files
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./nodemon.json:/app/nodemon.json
+      # Prevent node_modules from being overwritten
+      - /app/node_modules
     depends_on:
       mysql:
         condition: service_healthy
