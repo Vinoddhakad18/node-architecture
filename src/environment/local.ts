@@ -2,11 +2,11 @@ export const environment = {
   env: 'local',
   port: 3000,
   database: {
-    host: 'localhost',
-    port: 5432,
-    name: 'myapp_local',
-    username: 'postgres',
-    password: 'postgres',
+    host: '<env:DB_HOST>',
+    port: '<env:DB_PORT>',
+    name: '<env:DB_NAME>',
+    username: '<env:DB_USERNAME>',
+    password: '<env:DB_PASSWORD>',
   },
   jwt: {
     secret: 'your-local-secret-key',

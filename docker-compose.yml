@@ -33,7 +33,7 @@ services:
     container_name: node-mvc-app-development
     restart: unless-stopped
     env_file:
-      - .env.development
+      - .env
     environment:
       - NODE_OPTIONS=--disable-warning=DEP0176
       - DB_HOST=mysql
