@@ -40,8 +40,8 @@ COPY .sequelizerc ./
 # Expose port
 EXPOSE 3000
 
-# Start development server with migrations
-CMD ["sh", "-c", "npm run db:migrate && npm run dev"]
+# Start development server with migrations and seeding
+CMD ["sh", "-c", "npm run db:migrate && npm run db:seed && npm run dev"]
 
 # Stage 4: Builder stage (for production)
 FROM dependencies AS builder
@@ -92,5 +92,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/api', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Start the application with migrations
-CMD ["sh", "-c", "npm run db:migrate && npm run start"]
+# Start the application with migrations and seeding
+CMD ["sh", "-c", "npm run db:migrate && npm run db:seed && npm run start"]
