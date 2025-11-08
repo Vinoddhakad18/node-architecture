@@ -32,7 +32,7 @@ COPY nodemon.json ./
 COPY src ./src
 
 # Copy environment files
-COPY .env.* ./
+COPY .env ./
 
 # Copy Sequelize configuration for migrations
 COPY .sequelizerc ./

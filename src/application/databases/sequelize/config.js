@@ -2,16 +2,48 @@ const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
 
-// Load environment variables
-const env = process.env.NODE_ENV || 'development';
-const envPath = path.join(__dirname, '../../../../', `.env.${env}`);
+// Check if running in Docker (common indicators)
+const isDocker = (() => {
+  try {
+    return fs.existsSync('/.dockerenv') ||
+           process.env.DOCKER_CONTAINER === 'true' ||
+           (fs.existsSync('/proc/1/cgroup') &&
+            fs.readFileSync('/proc/1/cgroup', 'utf8').includes('docker'));
+  } catch (error) {
+    return false;
+  }
+})();
 
-if (fs.existsSync(envPath)) {
-  dotenv.config({ path: envPath });
-  console.log('Loaded .env file from:', envPath);
+// In Docker with docker-compose, env vars are already loaded via env_file
+// So we can skip .env file loading and use process.env directly
+if (isDocker && (process.env.DB_HOST || process.env.NODE_ENV)) {
+  console.log('Running in Docker container - using environment variables from docker-compose');
 } else {
-  console.log(`Warning: .env.${env} file not found, using default .env or process.env`);
-  dotenv.config();
+  // Find the project root by looking for package.json
+  let currentDir = __dirname;
+  let envPath = null;
+
+  // Traverse up the directory tree to find .env file
+  while (currentDir !== path.parse(currentDir).root) {
+    const potentialEnvPath = path.join(currentDir, '.env');
+    const potentialPackageJson = path.join(currentDir, 'package.json');
+
+    if (fs.existsSync(potentialPackageJson)) {
+      // Found project root
+      envPath = potentialEnvPath;
+      break;
+    }
+
+    currentDir = path.dirname(currentDir);
+  }
+
+  if (envPath && fs.existsSync(envPath)) {
+    dotenv.config({ path: envPath });
+    console.log('Loaded .env file from:', envPath);
+  } else {
+    console.log(`Note: .env file not found at ${envPath || 'unknown path'}, using existing environment variables`);
+    dotenv.config();
+  }
 }
 
 // Base configuration shared across environments
@@ -38,6 +70,15 @@ const baseConfig = {
 
 // Environment-specific configurations
 module.exports = {
+  local: {
+    ...baseConfig,
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || '3306', 10),
+    database: process.env.DB_NAME || 'node_app_db',
+    username: process.env.DB_USER || process.env.DB_USERNAME || 'root',
+    password: process.env.DB_PASSWORD || '',
+    logging: process.env.DB_LOGGING === 'true' ? console.log : false,
+  },
   development: {
     ...baseConfig,
     host: process.env.DB_HOST || 'localhost',

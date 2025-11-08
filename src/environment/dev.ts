@@ -1,6 +1,7 @@
-export const environment = {
+export default {
   env: 'development',
   port: 3000,
+  apiPrefix: '/api',
   database: {
     host: 'localhost',
     port: 5432,

@@ -1,5 +1,6 @@
 import { Sequelize } from 'sequelize';
-import { config, logger } from '../../../config';
+import { config } from '../../../config';
+import { logger } from '../logger';
 
 /**
  * Sequelize Database Configuration - MySQL Only

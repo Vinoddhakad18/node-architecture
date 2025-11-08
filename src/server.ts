@@ -1,5 +1,6 @@
 import { createApp } from './app';
-import { config, logger } from './config';
+import { config } from './config';
+import { logger } from './application/config/logger';
 import { gracefulShutdown } from './application/config/sequelize/database';
 
 /**
