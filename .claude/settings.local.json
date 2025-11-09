@@ -13,7 +13,13 @@
       "Bash(curl:*)",
       "Bash(docker-compose up:*)",
       "Bash(docker-compose down:*)",
-      "Bash(npx tsc --noEmit)"
+      "Bash(npx tsc --noEmit)",
+      "Bash(docker logs:*)",
+      "Bash(npm run db:migrate:status:*)",
+      "Bash(npm run db:seed:*)",
+      "Bash(npm run db:seed:undo:all:*)",
+      "Bash(npx sequelize-cli:*)",
+      "Bash(mysql:*)"
     ],
     "deny": [],
     "ask": []

@@ -7,7 +7,7 @@
     "node": ">=24.0.0"
   },
   "scripts": {
-    "dev": "nodemon --exec ts-node src/server.ts",
+    "dev": "nodemon --exec ts-node --transpile-only src/server.ts",
     "dev:fresh": "npm run db:migrate && npm run db:seed && npm run dev",
     "build": "tsc",
     "start": "node dist/server.js",

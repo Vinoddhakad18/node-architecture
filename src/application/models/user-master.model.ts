@@ -1,5 +1,6 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from '../config/sequelize';
+import bcrypt from 'bcryptjs';
 
 /**
  * UserMaster Model Attributes Interface
@@ -54,15 +55,24 @@ export class UserMaster
    * Check if user is active
    */
   public get isActive(): boolean {
-    return this.status === 'active';
+    return this.getDataValue('status') === 'active';
   }
 
   /**
    * Compare password with hashed password
    */
   public async comparePassword(candidatePassword: string): Promise<boolean> {
-    // For now, using direct comparison - TODO: implement proper bcrypt comparison
-    return this.password === candidatePassword;
+    const hashedPassword = this.getDataValue('password');
+    return await bcrypt.compare(candidatePassword, hashedPassword);
+  }
+
+  /**
+   * Custom toJSON to exclude password from responses
+   */
+  public toJSON(): Omit<UserMasterAttributes, 'password'> {
+    const values = { ...this.get() } as any;
+    delete values.password;
+    return values as Omit<UserMasterAttributes, 'password'>;
   }
 }
 
@@ -144,6 +154,20 @@ UserMaster.init(
     underscored: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
+    hooks: {
+      beforeCreate: async (user: UserMaster) => {
+        if (user.password) {
+          const salt = await bcrypt.genSalt(10);
+          user.password = await bcrypt.hash(user.password, salt);
+        }
+      },
+      beforeUpdate: async (user: UserMaster) => {
+        if (user.changed('password')) {
+          const salt = await bcrypt.genSalt(10);
+          user.password = await bcrypt.hash(user.password, salt);
+        }
+      },
+    },
   }
 );
 

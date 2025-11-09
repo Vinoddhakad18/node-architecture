@@ -36,13 +36,28 @@ class AuthService {
    */
   async login(email: string, password: string): Promise<UserMaster> {
     try {
-      // Find user by email
+      // Find user by email - explicitly include password for authentication
       const user = await UserMaster.findOne({
         where: { email },
+        attributes: { include: ['password'] },
       });
 
       if (!user) {
         throw new Error('Invalid email or password');
+      }
+
+      // Debug: Log user data (remove in production)
+      logger.debug('User fetched from database:', {
+        id: user.id,
+        email: user.email,
+        hasPassword: !!user.password,
+        passwordLength: user.password?.length || 0
+      });
+
+      // Check if password exists in database
+      if (!user.password) {
+        logger.error('Password field is missing from user record');
+        throw new Error('Invalid password');
       }
 
       // Check if user is active
@@ -156,7 +171,9 @@ class AuthService {
    */
   async changePassword(id: number, oldPassword: string, newPassword: string): Promise<void> {
     try {
-      const user = await UserMaster.findByPk(id);
+      const user = await UserMaster.findByPk(id, {
+        attributes: { include: ['password'] },
+      });
 
       if (!user) {
         throw new Error('User not found');

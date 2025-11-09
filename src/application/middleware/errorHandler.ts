@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { AppError } from '../../domain/errors/AppError';
 
 /**
  * Global error handling middleware
@@ -9,6 +10,32 @@ export const errorHandler = (
   res: Response,
   _next: NextFunction
 ): void => {
+  // Handle AppError instances
+  if (err instanceof AppError) {
+    // Only log stack trace for server errors (5xx), not client errors (4xx)
+    if (err.statusCode >= 500) {
+      console.error('Error:', err.stack);
+    }
+
+    const responseBody: any = {
+      success: false,
+      message: err.message,
+    };
+
+    // Include validation details if present
+    if (err.details) {
+      try {
+        responseBody.errors = JSON.parse(err.details);
+      } catch {
+        responseBody.details = err.details;
+      }
+    }
+
+    res.status(err.statusCode).json(responseBody);
+    return;
+  }
+
+  // Handle generic errors - always log these
   console.error('Error:', err.stack);
 
   res.status(500).json({

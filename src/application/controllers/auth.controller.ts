@@ -53,19 +53,7 @@ class AuthController {
   async login(req: Request, res: Response): Promise<void> {
     try {
       const { email, password } = req.body;
-
-      // Validate required fields
-      if (!email || !password) {
-        res.status(400).json({
-          success: false,
-          message: 'Please provide email and password',
-        });
-        return;
-      }
-
-      // Login user
       const user = await authService.login(email, password);
-
       res.status(200).json({
         success: true,
         message: 'Login successful',
