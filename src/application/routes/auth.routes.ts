@@ -1,5 +1,15 @@
 import { Router } from 'express';
 import authController from '../controllers/auth.controller';
+import { validateRequest } from '../middleware/validateRequest';
+import {
+  registerSchema,
+  loginSchema,
+  getProfileSchema,
+  updateProfileSchema,
+  deleteAccountSchema,
+  changePasswordSchema,
+  getAllUsersSchema,
+} from '../validations/auth.schema';
 
 const router = Router();
 
@@ -151,7 +161,7 @@ const router = Router();
  *                   type: string
  *                   example: User with this email already exists
  */
-router.post('/register', authController.register);
+router.post('/register', validateRequest(registerSchema), authController.register);
 
 /**
  * @swagger
@@ -197,7 +207,7 @@ router.post('/register', authController.register);
  *                   type: string
  *                   example: Invalid email or password
  */
-router.post('/login', authController.login);
+router.post('/login', validateRequest(loginSchema), authController.login);
 
 /**
  * @swagger
@@ -241,7 +251,7 @@ router.post('/login', authController.login);
  *                   type: string
  *                   example: User not found
  */
-router.get('/profile/:id', authController.getProfile);
+router.get('/profile/:id', validateRequest(getProfileSchema), authController.getProfile);
 
 /**
  * @swagger
@@ -306,7 +316,7 @@ router.get('/profile/:id', authController.getProfile);
  *                   type: string
  *                   example: Failed to update profile
  */
-router.put('/profile/:id', authController.updateProfile);
+router.put('/profile/:id', validateRequest(updateProfileSchema), authController.updateProfile);
 
 /**
  * @swagger
@@ -351,7 +361,7 @@ router.put('/profile/:id', authController.updateProfile);
  *                   type: string
  *                   example: Failed to delete account
  */
-router.delete('/profile/:id', authController.deleteAccount);
+router.delete('/profile/:id', validateRequest(deleteAccountSchema), authController.deleteAccount);
 
 /**
  * @swagger
@@ -402,7 +412,7 @@ router.delete('/profile/:id', authController.deleteAccount);
  *                   type: string
  *                   example: Current password is incorrect
  */
-router.post('/change-password/:id', authController.changePassword);
+router.post('/change-password/:id', validateRequest(changePasswordSchema), authController.changePassword);
 
 /**
  * @swagger
@@ -472,6 +482,6 @@ router.post('/change-password/:id', authController.changePassword);
  *                   type: string
  *                   example: Failed to fetch users
  */
-router.get('/users', authController.getAllUsers);
+router.get('/users', validateRequest(getAllUsersSchema), authController.getAllUsers);
 
 export default router;
