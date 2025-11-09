@@ -14,7 +14,7 @@ export default {
     expiresIn: '24h',
   },
   cors: {
-    origin: 'http://localhost:4200',
+    origin: 'http://localhost:3000',
   },
   logging: {
     level: 'debug',
