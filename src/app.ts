@@ -4,7 +4,7 @@ import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
 import { config } from './config';
 import routes from './application/routes';
-import { errorHandler, notFoundHandler, logger } from './application/middleware';
+import { errorHandler, notFoundHandler, logger, attachResponseHandlers } from './application/middleware';
 import { connectDatabase } from './application/config/sequelize/database';
 import { swaggerSpec, swaggerUiOptions } from './swagger';
 
@@ -37,6 +37,7 @@ export const createApp = async (): Promise<Application> => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(logger);
+  app.use(attachResponseHandlers);
 
   // Swagger documentation
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));

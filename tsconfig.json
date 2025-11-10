@@ -17,6 +17,7 @@
       "@middleware/*": ["application/middleware/*"],
       "@models/*": ["application/models/*"],
       "@routes/*": ["application/routes/*"],
+      "@services/*": ["application/services/*"],
       "@environment/*": ["environment/*"]
     },
     "strict": true,
