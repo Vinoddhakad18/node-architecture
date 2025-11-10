@@ -31,11 +31,14 @@ COPY nodemon.json ./
 # Copy source code
 COPY src ./src
 
+# Copy Sequelize configuration for migrations
+COPY .sequelizerc ./
+
 # Expose port
 EXPOSE 3000
 
-# Start development server with hot reload
-CMD ["npm", "run", "dev"]
+# Start development server with migrations and seeding
+CMD ["sh", "-c", "npm run db:migrate && npm run db:seed && npm run dev"]
 
 # Stage 4: Builder stage (for production)
 FROM dependencies AS builder
@@ -59,12 +62,19 @@ RUN addgroup -g 1001 -S nodejs && \
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
+# Install all dependencies (including devDependencies for sequelize-cli)
 RUN npm install && \
     npm cache clean --force
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
+
+# Copy environment files
+COPY .env.* ./
+
+# Copy Sequelize configuration and migration files for production
+COPY .sequelizerc ./
+COPY src/application/databases ./src/application/databases
 
 # Change ownership to non-root user
 RUN chown -R nodejs:nodejs /app
@@ -79,5 +89,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/api', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Start the application
-CMD ["node", "dist/server.js"]
+# Start the application with migrations and seeding
+CMD ["sh", "-c", "npm run db:migrate && npm run db:seed && npm run start"]

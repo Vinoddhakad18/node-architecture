@@ -2,7 +2,24 @@
   "permissions": {
     "allow": [
       "Bash(npm init:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(rm:*)",
+      "Bash(npm run build:*)",
+      "Bash(docker-compose build:*)",
+      "Bash(docker-compose restart:*)",
+      "Bash(docker-compose logs:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker ps:*)",
+      "Bash(curl:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker-compose down:*)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(docker logs:*)",
+      "Bash(npm run db:migrate:status:*)",
+      "Bash(npm run db:seed:*)",
+      "Bash(npm run db:seed:undo:all:*)",
+      "Bash(npx sequelize-cli:*)",
+      "Bash(mysql:*)"
     ],
     "deny": [],
     "ask": []
