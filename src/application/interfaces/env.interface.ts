@@ -12,7 +12,17 @@ export interface envInterface {
   jwt: {
     secret: string;
     expiresIn: string;
+    refreshSecret?: string;
+    refreshExpiresIn?: string;
+    issuer?: string;
+    audience?: string;
   };
+  JWT_SECRET?: string;
+  JWT_REFRESH_SECRET?: string;
+  JWT_ACCESS_TOKEN_EXPIRY?: string;
+  JWT_REFRESH_TOKEN_EXPIRY?: string;
+  JWT_ISSUER?: string;
+  JWT_AUDIENCE?: string;
   cors: {
     origin: string;
   };

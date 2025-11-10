@@ -48,6 +48,16 @@ environmentConfig.port = process.env.PORT ? parseInt(process.env.PORT) : environ
 // Override API prefix from env
 environmentConfig.apiPrefix = process.env.API_PREFIX || environmentConfig.apiPrefix;
 
+// Override JWT configuration from env
+if (environmentConfig.jwt) {
+  environmentConfig.JWT_SECRET = process.env.JWT_SECRET || environmentConfig.jwt.secret;
+  environmentConfig.JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || environmentConfig.jwt.refreshSecret;
+  environmentConfig.JWT_ACCESS_TOKEN_EXPIRY = process.env.JWT_ACCESS_TOKEN_EXPIRY || environmentConfig.jwt.expiresIn;
+  environmentConfig.JWT_REFRESH_TOKEN_EXPIRY = process.env.JWT_REFRESH_TOKEN_EXPIRY || environmentConfig.jwt.refreshExpiresIn;
+  environmentConfig.JWT_ISSUER = process.env.JWT_ISSUER || environmentConfig.jwt.issuer;
+  environmentConfig.JWT_AUDIENCE = process.env.JWT_AUDIENCE || environmentConfig.jwt.audience;
+}
+
 //console.log("LOADED ENV", environmentConfig);
 
 // Export the config as a named export

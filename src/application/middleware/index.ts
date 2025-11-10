@@ -1,3 +1,4 @@
 export * from './errorHandler';
 export * from './logger';
 export * from './responseHandler';
+export * from './auth.middleware';
