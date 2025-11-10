@@ -162,10 +162,11 @@ Run the application in a Docker container with hot reload:
 
 ```bash
 # Start development environment
-npm run docker:dev
+npm run docker:local
 
 # Or manually with docker-compose
-docker compose --env-file .env.development up --build
+docker compose --env-file .env up --build
+docker compose up
 ```
 
 The application will be available at `http://localhost:3000`
@@ -183,22 +184,6 @@ docker compose down
 Build and run the production-ready Docker image:
 
 ```bash
-# Start production environment (detached mode)
-npm run docker:prod
-
-# Or manually with docker-compose
-docker-compose --env-file .env.production up -d
-```
-
-View logs:
-```bash
-npm run docker:logs
-```
-
-Stop the container:
-```bash
-npm run docker:prod:down
-```
 
 ## Available Scripts
 
@@ -211,15 +196,6 @@ npm run docker:prod:down
 - `npm run start:fresh` - Run migrations, seed, and start production server
 - `npm run clean` - Remove build directory
 
-### Docker Scripts
-- `npm run docker:dev` - Start development environment with Docker
-- `npm run docker:dev:build` - Rebuild and start development environment
-- `npm run docker:dev:down` - Stop development environment
-- `npm run docker:prod` - Start production environment with Docker (detached)
-- `npm run docker:prod:build` - Rebuild and start production environment
-- `npm run docker:prod:down` - Stop production environment
-- `npm run docker:logs` - View container logs (follow mode)
-- `npm run docker:clean` - Remove all containers, volumes, and images
 
 ### Database Scripts (Sequelize CLI)
 - `npm run db:migrate` - Run pending migrations
