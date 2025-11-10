@@ -9,9 +9,13 @@ export default {
     username: 'postgres',
     password: 'postgres',
   },
-  jwt: {
-    secret: 'your-dev-secret-key',
-    expiresIn: '24h',
+   jwt: {
+    secret: '<env:JWT_SECRET>',
+    expiresIn: '15m',
+    refreshSecret: '<env:JWT_REFRESH_SECRET>',
+    refreshExpiresIn: '7d',
+    issuer: 'node-architecture-app',
+    audience: 'node-architecture-users',
   },
   cors: {
     origin: '*',

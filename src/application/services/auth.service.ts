@@ -1,5 +1,7 @@
-import UserMaster, { UserMasterCreationAttributes } from '../models/user-master.model';
+import UserMaster from '../models/user-master.model';
 import { logger } from '../config/logger';
+import jwtUtil from '../utils/jwt.util';
+import { TokenPair } from '../interfaces/jwt.interface';
 
 /**
  * Authentication Service
@@ -7,11 +9,10 @@ import { logger } from '../config/logger';
  */
 class AuthService {
 
-
   /**
-   * Login user
+   * Login user and generate JWT tokens
    */
-  async login(email: string, password: string): Promise<UserMaster> {
+  async login(email: string, password: string): Promise<{ user: UserMaster; tokens: TokenPair }> {
     try {
       // Find user by email - explicitly include password for authentication
       const user = await UserMaster.findOne({
@@ -43,12 +44,44 @@ class AuthService {
       // Update last login
       user.last_login = new Date();
       await user.save();
-
-      logger.info(`User logged in: ${user.email}`);
-      return user;
+    logger.info(`User logged in: ${user.getDataValue('email')}`);
+      // Generate JWT tokens
+      const tokens = jwtUtil.generateTokenPair({
+        userId: user.getDataValue('id'),
+        email: user.getDataValue('email'),
+        role: user.getDataValue('role'),
+      });
+      return { user, tokens };
     } catch (error) {
       logger.error('Error in login service:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Refresh access token using refresh token
+   */
+  async refreshToken(refreshToken: string): Promise<{ accessToken: string }> {
+    try {
+      const accessToken = jwtUtil.refreshAccessToken(refreshToken);
+      logger.info('Access token refreshed successfully');
+      return { accessToken };
+    } catch (error) {
+      logger.error('Error refreshing token:', error);
+      throw new Error('Failed to refresh token');
+    }
+  }
+
+  /**
+   * Verify access token
+   */
+  async verifyToken(token: string): Promise<boolean> {
+    try {
+      jwtUtil.verifyAccessToken(token);
+      return true;
+    } catch (error) {
+      logger.error('Token verification failed:', error);
+      return false;
     }
   }
 

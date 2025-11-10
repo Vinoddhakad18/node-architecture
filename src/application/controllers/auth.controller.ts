@@ -14,13 +14,12 @@ class AuthController {
   async login(req: Request, res: Response): Promise<void> {
     try {
       const { email, password } = req.body;
-      const { user, tokens } = await authService.login(email, password);
+      const { tokens } = await authService.login(email, password);
 
       res.status(200).json({
         success: true,
         message: 'Login successful',
         data: {
-          user: user.toJSON(),
           accessToken: tokens.accessToken,
           refreshToken: tokens.refreshToken,
           expiresIn: tokens.expiresIn,

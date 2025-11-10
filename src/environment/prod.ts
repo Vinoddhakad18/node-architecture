@@ -9,9 +9,13 @@ export default {
     username: process.env.DB_USERNAME || 'postgres',
     password: process.env.DB_PASSWORD || '',
   },
-  jwt: {
-    secret: process.env.JWT_SECRET || 'your-production-secret-key',
-    expiresIn: '1h',
+   jwt: {
+    secret: '<env:JWT_SECRET>',
+    expiresIn: '15m',
+    refreshSecret: '<env:JWT_REFRESH_SECRET>',
+    refreshExpiresIn: '7d',
+    issuer: 'node-architecture-app',
+    audience: 'node-architecture-users',
   },
   cors: {
     origin: process.env.CORS_ORIGIN || 'https://yourapp.com',
