@@ -1,6 +1,7 @@
 import morgan from 'morgan';
-import { Request } from 'express';
+import { Request, RequestHandler } from 'express';
 import { stream, logger as winstonLogger } from '../config/logger';
+import { config } from '../../config';
 
 /**
  * Custom Morgan token for real IP address
@@ -47,26 +48,32 @@ const morganFormat = ':real-ip - :method :url :status :res[content-length] - :re
 
 /**
  * Morgan middleware with conditional logging based on status code
+ * Returns a no-op middleware if HTTP logging is disabled
  */
-export const logger = morgan(morganFormat, {
-  stream,
-  skip: (req, _res) => {
-    // Skip logging for health check endpoint
-    return req.url === '/health';
-  },
-});
+export const logger: RequestHandler = config.logging.http.enabled
+  ? morgan(morganFormat, {
+      stream,
+      skip: (req, _res) => {
+        // Skip logging for health check endpoint
+        return req.url === '/health';
+      },
+    })
+  : (_req, _res, next) => next(); // No-op middleware when HTTP logging is disabled
 
 /**
  * Additional Morgan middleware for error logging (4xx and 5xx status codes)
+ * Returns a no-op middleware if HTTP logging is disabled
  */
-export const errorLogger = morgan(morganFormat, {
-  stream: {
-    write: (message: string) => {
-      winstonLogger.error(message.trim());
-    },
-  },
-  skip: (_req, res) => {
-    // Only log errors (4xx and 5xx)
-    return res.statusCode < 400;
-  },
-});
+export const errorLogger: RequestHandler = config.logging.http.enabled
+  ? morgan(morganFormat, {
+      stream: {
+        write: (message: string) => {
+          winstonLogger.error(message.trim());
+        },
+      },
+      skip: (_req, res) => {
+        // Only log errors (4xx and 5xx)
+        return res.statusCode < 400;
+      },
+    })
+  : (_req, _res, next) => next(); // No-op middleware when HTTP logging is disabled

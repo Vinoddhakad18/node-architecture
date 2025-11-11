@@ -29,10 +29,10 @@ const consoleFormat = winston.format.combine(
  */
 const errorFileRotateTransport = new DailyRotateFile({
   filename: 'logs/error-%DATE%.log',
-  datePattern: 'YYYY-MM-DD',
+  datePattern: config.logging.file.datePattern,
   level: 'error',
-  maxSize: '20m',
-  maxFiles: '14d', // Keep logs for 14 days
+  maxSize: config.logging.file.maxSize,
+  maxFiles: config.logging.file.maxDays,
   format: logFormat,
 });
 
@@ -41,9 +41,9 @@ const errorFileRotateTransport = new DailyRotateFile({
  */
 const combinedFileRotateTransport = new DailyRotateFile({
   filename: 'logs/combined-%DATE%.log',
-  datePattern: 'YYYY-MM-DD',
-  maxSize: '20m',
-  maxFiles: '14d', // Keep logs for 14 days
+  datePattern: config.logging.file.datePattern,
+  maxSize: config.logging.file.maxSize,
+  maxFiles: config.logging.file.maxDays,
   format: logFormat,
 });
 
@@ -52,10 +52,10 @@ const combinedFileRotateTransport = new DailyRotateFile({
  */
 const infoFileRotateTransport = new DailyRotateFile({
   filename: 'logs/info-%DATE%.log',
-  datePattern: 'YYYY-MM-DD',
+  datePattern: config.logging.file.datePattern,
   level: 'info',
-  maxSize: '20m',
-  maxFiles: '14d', // Keep logs for 14 days
+  maxSize: config.logging.file.maxSize,
+  maxFiles: config.logging.file.maxDays,
   format: logFormat,
 });
 
@@ -64,9 +64,9 @@ const infoFileRotateTransport = new DailyRotateFile({
  */
 const exceptionFileRotateTransport = new DailyRotateFile({
   filename: 'logs/exceptions-%DATE%.log',
-  datePattern: 'YYYY-MM-DD',
-  maxSize: '20m',
-  maxFiles: '14d',
+  datePattern: config.logging.file.datePattern,
+  maxSize: config.logging.file.maxSize,
+  maxFiles: config.logging.file.maxDays,
   format: logFormat,
 });
 
@@ -75,14 +75,59 @@ const exceptionFileRotateTransport = new DailyRotateFile({
  */
 const rejectionFileRotateTransport = new DailyRotateFile({
   filename: 'logs/rejections-%DATE%.log',
-  datePattern: 'YYYY-MM-DD',
-  maxSize: '20m',
-  maxFiles: '14d',
+  datePattern: config.logging.file.datePattern,
+  maxSize: config.logging.file.maxSize,
+  maxFiles: config.logging.file.maxDays,
   format: logFormat,
 });
 
 /**
- * Create Winston logger instance
+ * Build transports array based on configuration
+ */
+const transports: winston.transport[] = [];
+
+// Add console transport if enabled
+if (config.logging.console.enabled) {
+  transports.push(
+    new winston.transports.Console({
+      format: consoleFormat,
+    })
+  );
+}
+
+// Add error file transport if enabled
+if (config.logging.file.error.enabled) {
+  transports.push(errorFileRotateTransport);
+}
+
+// Add info file transport if enabled
+if (config.logging.file.info.enabled) {
+  transports.push(infoFileRotateTransport);
+}
+
+// Add combined file transport if enabled
+if (config.logging.file.combined.enabled) {
+  transports.push(combinedFileRotateTransport);
+}
+
+/**
+ * Build exception handlers array based on configuration
+ */
+const exceptionHandlers: winston.transport[] = [];
+if (config.logging.exception.enabled) {
+  exceptionHandlers.push(exceptionFileRotateTransport);
+}
+
+/**
+ * Build rejection handlers array based on configuration
+ */
+const rejectionHandlers: winston.transport[] = [];
+if (config.logging.rejection.enabled) {
+  rejectionHandlers.push(rejectionFileRotateTransport);
+}
+
+/**
+ * Create Winston logger instance with conditional transports
  */
 export const logger = winston.createLogger({
   level: config.logging.level,
@@ -91,22 +136,9 @@ export const logger = winston.createLogger({
     service: 'node-architecture',
     pid: process.pid,
   },
-  transports: [
-    // Console transport
-    new winston.transports.Console({
-      format: consoleFormat,
-    }),
-    // Daily rotating file transports
-    errorFileRotateTransport,
-    infoFileRotateTransport,
-    combinedFileRotateTransport,
-  ],
-  exceptionHandlers: [
-    exceptionFileRotateTransport,
-  ],
-  rejectionHandlers: [
-    rejectionFileRotateTransport,
-  ],
+  transports,
+  exceptionHandlers: exceptionHandlers.length > 0 ? exceptionHandlers : undefined,
+  rejectionHandlers: rejectionHandlers.length > 0 ? rejectionHandlers : undefined,
 });
 
 /**

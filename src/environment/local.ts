@@ -22,5 +22,31 @@ export default {
   },
   logging: {
     level: 'debug',
+    console: {
+      enabled: true,
+    },
+    file: {
+      error: {
+        enabled: true,
+      },
+      info: {
+        enabled: true,
+      },
+      combined: {
+        enabled: true,
+      },
+      maxSize: '20m',
+      maxDays: '14d',
+      datePattern: 'YYYY-MM-DD',
+    },
+    exception: {
+      enabled: true,
+    },
+    rejection: {
+      enabled: true,
+    },
+    http: {
+      enabled: true,
+    },
   },
 };

@@ -58,6 +58,48 @@ if (environmentConfig.jwt) {
   environmentConfig.JWT_AUDIENCE = process.env.JWT_AUDIENCE || environmentConfig.jwt.audience;
 }
 
+// Override logging configuration from env
+if (environmentConfig.logging) {
+  // Override log level
+  environmentConfig.logging.level = process.env.LOG_LEVEL || environmentConfig.logging.level;
+
+  // Override console logging
+  if (process.env.LOG_CONSOLE_ENABLED !== undefined) {
+    environmentConfig.logging.console.enabled = process.env.LOG_CONSOLE_ENABLED === 'true';
+  }
+
+  // Override file logging
+  if (process.env.LOG_FILE_ERROR_ENABLED !== undefined) {
+    environmentConfig.logging.file.error.enabled = process.env.LOG_FILE_ERROR_ENABLED === 'true';
+  }
+  if (process.env.LOG_FILE_INFO_ENABLED !== undefined) {
+    environmentConfig.logging.file.info.enabled = process.env.LOG_FILE_INFO_ENABLED === 'true';
+  }
+  if (process.env.LOG_FILE_COMBINED_ENABLED !== undefined) {
+    environmentConfig.logging.file.combined.enabled = process.env.LOG_FILE_COMBINED_ENABLED === 'true';
+  }
+
+  // Override file configuration
+  environmentConfig.logging.file.maxSize = process.env.LOG_FILE_MAX_SIZE || environmentConfig.logging.file.maxSize;
+  environmentConfig.logging.file.maxDays = process.env.LOG_FILE_MAX_DAYS || environmentConfig.logging.file.maxDays;
+  environmentConfig.logging.file.datePattern = process.env.LOG_FILE_DATE_PATTERN || environmentConfig.logging.file.datePattern;
+
+  // Override exception logging
+  if (process.env.LOG_EXCEPTION_ENABLED !== undefined) {
+    environmentConfig.logging.exception.enabled = process.env.LOG_EXCEPTION_ENABLED === 'true';
+  }
+
+  // Override rejection logging
+  if (process.env.LOG_REJECTION_ENABLED !== undefined) {
+    environmentConfig.logging.rejection.enabled = process.env.LOG_REJECTION_ENABLED === 'true';
+  }
+
+  // Override HTTP logging
+  if (process.env.LOG_HTTP_ENABLED !== undefined) {
+    environmentConfig.logging.http.enabled = process.env.LOG_HTTP_ENABLED === 'true';
+  }
+}
+
 //console.log("LOADED ENV", environmentConfig);
 
 // Export the config as a named export

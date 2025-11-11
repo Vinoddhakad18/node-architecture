@@ -22,5 +22,31 @@ export default {
   },
   logging: {
     level: 'error',
+    console: {
+      enabled: false, // Disable console in production
+    },
+    file: {
+      error: {
+        enabled: true,
+      },
+      info: {
+        enabled: false, // Disable info logs in production
+      },
+      combined: {
+        enabled: true,
+      },
+      maxSize: '50m',
+      maxDays: '30d',
+      datePattern: 'YYYY-MM-DD',
+    },
+    exception: {
+      enabled: true,
+    },
+    rejection: {
+      enabled: true,
+    },
+    http: {
+      enabled: false, // Disable HTTP logging in production for performance
+    },
   },
 };

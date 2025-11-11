@@ -28,5 +28,31 @@ export interface envInterface {
   };
   logging: {
     level: string;
+    console: {
+      enabled: boolean;
+    };
+    file: {
+      error: {
+        enabled: boolean;
+      };
+      info: {
+        enabled: boolean;
+      };
+      combined: {
+        enabled: boolean;
+      };
+      maxSize: string;
+      maxDays: string;
+      datePattern: string;
+    };
+    exception: {
+      enabled: boolean;
+    };
+    rejection: {
+      enabled: boolean;
+    };
+    http: {
+      enabled: boolean;
+    };
   };
 }
