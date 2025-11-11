@@ -79,7 +79,8 @@
 ```
 POST /api/v1/auth/login
 Body: { "email": "user@example.com", "password": "password" }
-Response: { user, accessToken, refreshToken, expiresIn }
+Response: { user, accessToken, refreshToken, expiresAt }
+Note: expiresAt is a Unix timestamp (in seconds) indicating when the access token expires
 ```
 
 ### Refresh Token (New)

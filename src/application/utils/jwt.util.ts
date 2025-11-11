@@ -62,14 +62,14 @@ class JwtUtil {
     const accessToken = this.generateAccessToken(payload);
     const refreshToken = this.generateRefreshToken(payload);
 
-    // Extract expiration time in seconds
+    // Extract expiration timestamp
     const decoded = jwt.decode(accessToken) as DecodedToken;
-    const expiresIn = decoded.exp! - decoded.iat!;
+    const expiresAt = decoded.exp!; // Unix timestamp when token expires
 
     return {
       accessToken,
       refreshToken,
-      expiresIn,
+      expiresAt,
     };
   }
 

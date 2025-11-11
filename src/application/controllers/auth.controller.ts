@@ -22,7 +22,7 @@ class AuthController {
         data: {
           accessToken: tokens.accessToken,
           refreshToken: tokens.refreshToken,
-          expiresIn: tokens.expiresIn,
+          expiresAt: tokens.expiresAt, // Unix timestamp when access token expires
         },
       });
     } catch (error: any) {
