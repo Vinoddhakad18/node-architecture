@@ -4,7 +4,7 @@ import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
 import { config } from './config';
 import routes from './application/routes';
-import { errorHandler, notFoundHandler, logger, attachResponseHandlers } from './application/middleware';
+import { errorHandler, notFoundHandler, logger, errorLogger, attachResponseHandlers } from './application/middleware';
 import { connectDatabase } from './application/config/sequelize/database';
 import { swaggerSpec, swaggerUiOptions } from './swagger';
 
@@ -37,6 +37,7 @@ export const createApp = async (): Promise<Application> => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(logger);
+  app.use(errorLogger);
   app.use(attachResponseHandlers);
 
   // Swagger documentation
@@ -50,11 +51,23 @@ export const createApp = async (): Promise<Application> => {
 
   // Health check endpoint
   app.get('/health', (_req, res) => {
+    const { getUptimeInfo } = require('./application/utils/uptime');
+    const uptimeInfo = getUptimeInfo();
+
     res.status(200).json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
+      serverStartTime: uptimeInfo.startTime,
+      uptime: {
+        seconds: uptimeInfo.uptimeSeconds,
+        formatted: uptimeInfo.uptimeFormatted,
+      },
       environment: config.env,
+      process: {
+        pid: process.pid,
+        memoryUsage: process.memoryUsage(),
+        cpuUsage: process.cpuUsage(),
+      },
     });
   });
 

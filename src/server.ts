@@ -2,32 +2,42 @@ import { createApp } from './app';
 import { config } from './config';
 import { logger } from './application/config/logger';
 import { gracefulShutdown } from './application/config/sequelize/database';
+import { initializeServerStartTime, getFormattedServerUptime } from './application/utils/uptime';
 
 /**
  * Start the Express server
  */
 const startServer = async (): Promise<void> => {
   try {
-    // Step 1: Check database connection before starting server
+    // Step 1: Initialize server start time
+    initializeServerStartTime();
+
+    // Step 2: Check database connection before starting server
     logger.info('=================================');
     logger.info('Initializing application...');
     logger.info('=================================');
 
-    // Step 2: Create Express app (includes database connection)
+    // Step 3: Create Express app (includes database connection)
     const app = await createApp();
 
-    // Step 3: Start server
+    // Step 4: Start server
     app.listen(config.port, () => {
       logger.info('=================================');
       logger.info(`✓ Server started successfully`);
       logger.info(`Environment: ${config.env}`);
       logger.info(`Port: ${config.port}`);
+      logger.info(`Process ID: ${process.pid}`);
       logger.info(`API endpoint: http://localhost:${config.port}${config.apiPrefix}`);
       logger.info(`Health check: http://localhost:${config.port}/health`);
       logger.info('=================================');
     });
 
-    // Step 4: Setup graceful shutdown handlers
+    // Step 5: Log uptime every hour
+    setInterval(() => {
+      logger.info(`Server uptime: ${getFormattedServerUptime()}`);
+    }, 3600000); // 1 hour in milliseconds
+
+    // Step 6: Setup graceful shutdown handlers
     process.on('SIGTERM', () => void gracefulShutdown('SIGTERM'));
     process.on('SIGINT', () => void gracefulShutdown('SIGINT'));
 

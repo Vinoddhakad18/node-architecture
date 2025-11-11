@@ -1,4 +1,5 @@
 import winston from 'winston';
+import DailyRotateFile from 'winston-daily-rotate-file';
 import { config } from '../../config';
 
 /**
@@ -24,36 +25,87 @@ const consoleFormat = winston.format.combine(
 );
 
 /**
+ * Daily rotate file transport configuration for error logs
+ */
+const errorFileRotateTransport = new DailyRotateFile({
+  filename: 'logs/error-%DATE%.log',
+  datePattern: 'YYYY-MM-DD',
+  level: 'error',
+  maxSize: '20m',
+  maxFiles: '14d', // Keep logs for 14 days
+  format: logFormat,
+});
+
+/**
+ * Daily rotate file transport configuration for combined logs (all levels)
+ */
+const combinedFileRotateTransport = new DailyRotateFile({
+  filename: 'logs/combined-%DATE%.log',
+  datePattern: 'YYYY-MM-DD',
+  maxSize: '20m',
+  maxFiles: '14d', // Keep logs for 14 days
+  format: logFormat,
+});
+
+/**
+ * Daily rotate file transport configuration for info logs
+ */
+const infoFileRotateTransport = new DailyRotateFile({
+  filename: 'logs/info-%DATE%.log',
+  datePattern: 'YYYY-MM-DD',
+  level: 'info',
+  maxSize: '20m',
+  maxFiles: '14d', // Keep logs for 14 days
+  format: logFormat,
+});
+
+/**
+ * Daily rotate file transport for exceptions
+ */
+const exceptionFileRotateTransport = new DailyRotateFile({
+  filename: 'logs/exceptions-%DATE%.log',
+  datePattern: 'YYYY-MM-DD',
+  maxSize: '20m',
+  maxFiles: '14d',
+  format: logFormat,
+});
+
+/**
+ * Daily rotate file transport for unhandled rejections
+ */
+const rejectionFileRotateTransport = new DailyRotateFile({
+  filename: 'logs/rejections-%DATE%.log',
+  datePattern: 'YYYY-MM-DD',
+  maxSize: '20m',
+  maxFiles: '14d',
+  format: logFormat,
+});
+
+/**
  * Create Winston logger instance
  */
 export const logger = winston.createLogger({
   level: config.logging.level,
   format: logFormat,
-  defaultMeta: { service: 'node-architecture' },
+  defaultMeta: {
+    service: 'node-architecture',
+    pid: process.pid,
+  },
   transports: [
     // Console transport
     new winston.transports.Console({
       format: consoleFormat,
     }),
-    // File transport for errors
-    new winston.transports.File({
-      filename: 'logs/error.log',
-      level: 'error',
-      maxsize: 5242880, // 5MB
-      maxFiles: 5,
-    }),
-    // File transport for all logs
-    new winston.transports.File({
-      filename: 'logs/combined.log',
-      maxsize: 5242880, // 5MB
-      maxFiles: 5,
-    }),
+    // Daily rotating file transports
+    errorFileRotateTransport,
+    infoFileRotateTransport,
+    combinedFileRotateTransport,
   ],
   exceptionHandlers: [
-    new winston.transports.File({ filename: 'logs/exceptions.log' }),
+    exceptionFileRotateTransport,
   ],
   rejectionHandlers: [
-    new winston.transports.File({ filename: 'logs/rejections.log' }),
+    rejectionFileRotateTransport,
   ],
 });
 
