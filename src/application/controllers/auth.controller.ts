@@ -15,22 +15,10 @@ class AuthController {
     try {
       const { email, password } = req.body;
       const { tokens } = await authService.login(email, password);
-
-      res.status(200).json({
-        success: true,
-        message: 'Login successful',
-        data: {
-          accessToken: tokens.accessToken,
-          refreshToken: tokens.refreshToken,
-          expiresAt: tokens.expiresAt, // Unix timestamp when access token expires
-        },
-      });
+      res.sendSuccess(tokens, 'Login successful');
     } catch (error: any) {
       logger.error('Error in login controller:', error);
-      res.status(401).json({
-        success: false,
-        message: error.message || 'Login failed',
-      });
+      res.sendUnauthorized(error.message || 'Login failed');
     }
   }
 

@@ -30,31 +30,22 @@ export const errorHandler = (
         responseBody.details = err.details;
       }
     }
-
-    res.status(err.statusCode).json(responseBody);
+    res.sendCustom(err.statusCode, null, err.message, false, responseBody.errors);
     return;
   }
 
   // Handle generic errors - always log these
   console.error('Error:', err.stack);
-
-  res.status(500).json({
-    success: false,
-    message: 'Internal Server Error',
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined,
-  });
+  res.sendServiceUnavailable('An unexpected error occurred');  
 };
 
 /**
  * 404 Not Found handler
  */
 export const notFoundHandler = (
-  req: Request,
+  _req: Request,
   res: Response,
   _next: NextFunction
 ): void => {
-  res.status(404).json({
-    success: false,
-    message: `Route ${req.method} ${req.url} not found`,
-  });
+  res.sendNotFound('Resource not found');
 };
