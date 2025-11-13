@@ -22,7 +22,9 @@
       "Bash(mysql:*)",
       "Bash(npm run test:unit:*)",
       "Bash(npx jest --version)",
-      "Bash(npx ts-jest --version)"
+      "Bash(npx ts-jest --version)",
+      "Bash(npx jest:*)",
+      "Bash(npm run test:docker:*)"
     ],
     "deny": [],
     "ask": []

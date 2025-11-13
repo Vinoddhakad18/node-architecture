@@ -51,6 +51,7 @@ services:
       # Mount config files
       - ./tsconfig.json:/app/tsconfig.json
       - ./nodemon.json:/app/nodemon.json
+      - ./jest.config.js:/app/jest.config.js
       # Prevent node_modules from being overwritten
       - /app/node_modules
     depends_on:

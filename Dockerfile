@@ -40,19 +40,26 @@ EXPOSE 3000
 # Start development server with migrations and seeding
 CMD ["sh", "-c", "npm run db:migrate && npm run db:seed && npm run dev"]
 
-# Stage 4: Builder stage (for production)
-FROM dependencies AS builder
+# Stage 4: Test stage
+FROM dependencies AS test
 
 # Copy configuration
 COPY tsconfig.json ./
+COPY jest.config.js ./
 
-# Copy source code
+# Copy source code and tests
 COPY src ./src
 
-# Build TypeScript
-RUN npm run build
+# Run tests
+RUN npm run test:ci
 
-# Stage 5: Production stage
+# Stage 5: Builder stage (for production)
+FROM test AS builder
+
+# Build TypeScript (tests already passed in previous stage)
+RUN npm run build:skip-tests
+
+# Stage 6: Production stage
 FROM base AS production
 
 # Create non-root user for security
