@@ -71,6 +71,37 @@ export const createApp = async (): Promise<Application> => {
     });
   });
 
+  // Migration health check endpoint
+  app.get('/health/migrations', async (_req, res) => {
+    const { checkMigrationHealth, getMigrationStats } = require('./application/utils/migrationHealth');
+
+    try {
+      const [healthResult, stats] = await Promise.all([
+        checkMigrationHealth(),
+        getMigrationStats(),
+      ]);
+
+      const httpStatus =
+        healthResult.status === 'healthy' ? 200 :
+        healthResult.status === 'warning' ? 200 :
+        503;
+
+      res.status(httpStatus).json({
+        ...healthResult,
+        stats,
+        timestamp: new Date().toISOString(),
+        environment: config.env,
+      });
+    } catch (error) {
+      res.status(503).json({
+        status: 'error',
+        message: 'Migration health check failed',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString(),
+      });
+    }
+  });
+
   // Routes
   app.use(config.apiPrefix, routes);
 

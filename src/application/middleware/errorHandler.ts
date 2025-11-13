@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { AppError } from '../../domain/errors/AppError';
+import { logger } from '../config/logger';
 
 /**
  * Global error handling middleware
@@ -14,7 +15,12 @@ export const errorHandler = (
   if (err instanceof AppError) {
     // Only log stack trace for server errors (5xx), not client errors (4xx)
     if (err.statusCode >= 500) {
-      console.error('Error:', err.stack);
+      logger.error('Server error occurred', {
+        message: err.message,
+        statusCode: err.statusCode,
+        stack: err.stack,
+        details: err.details
+      });
     }
 
     const responseBody: any = {
@@ -35,8 +41,12 @@ export const errorHandler = (
   }
 
   // Handle generic errors - always log these
-  console.error('Error:', err.stack);
-  res.sendServiceUnavailable('An unexpected error occurred');  
+  logger.error('Unexpected error occurred', {
+    message: err.message,
+    stack: err.stack,
+    name: err.name
+  });
+  res.sendServiceUnavailable('An unexpected error occurred');
 };
 
 /**
