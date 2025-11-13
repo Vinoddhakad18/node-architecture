@@ -19,3 +19,29 @@ export const loginSchema = z.object({
       .min(1, 'Password is required'),
   }),
 });
+
+/**
+ * Schema for refresh token
+ */
+export const refreshTokenSchema = z.object({
+  body: z.object({
+    refreshToken: z
+      .string({
+        message: 'Refresh token is required',
+      })
+      .min(1, 'Refresh token cannot be empty'),
+  }),
+});
+
+/**
+ * Schema for verify token
+ */
+export const verifyTokenSchema = z.object({
+  body: z.object({
+    token: z
+      .string({
+        message: 'Token is required',
+      })
+      .min(1, 'Token cannot be empty'),
+  }),
+});
