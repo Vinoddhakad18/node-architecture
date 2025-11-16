@@ -1,3 +1,26 @@
+/**
+ * Bootstrap configuration
+ * New Relic must be the first module loaded if enabled
+ * Load environment variables first to check if New Relic should be enabled
+ */
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load environment variables from .env file
+// dotenv handles missing files gracefully, no need for existence check
+const envPath = path.resolve(__dirname, '../.env');
+dotenv.config({ path: envPath });
+
+// Conditionally load New Relic APM
+// Must be loaded before other imports to properly instrument the application
+if (process.env.NEW_RELIC_ENABLED === 'true') {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  require('newrelic');
+  // Using console.log here is acceptable as logger is not yet initialized
+  // eslint-disable-next-line no-console
+  console.log('✓ New Relic APM initialized');
+}
+
 import express, { Application } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';

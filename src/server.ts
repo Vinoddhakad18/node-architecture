@@ -29,6 +29,8 @@ const startServer = async (): Promise<void> => {
       logger.info(`Process ID: ${process.pid}`);
       logger.info(`API endpoint: http://localhost:${config.port}${config.apiPrefix}`);
       logger.info(`Health check: http://localhost:${config.port}/health`);
+      logger.info(`Monitoring: ${config.monitoring?.enabled ? 'Enabled' : 'Disabled'}`);
+      logger.info(`New Relic APM: ${config.newRelic?.enabled ? 'Enabled' : 'Disabled'}`);
       logger.info('=================================');
     });
 

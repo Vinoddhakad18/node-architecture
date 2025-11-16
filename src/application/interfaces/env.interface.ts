@@ -63,4 +63,12 @@ export interface envInterface {
   monitoring: {
     enabled: boolean;
   };
+  newRelic: {
+    enabled: boolean;
+    licenseKey: string;
+    appName: string;
+    logLevel: string;
+    distributedTracingEnabled: boolean;
+    loggingEnabled: boolean;
+  };
 }

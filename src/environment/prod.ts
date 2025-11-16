@@ -57,4 +57,12 @@ export default {
   monitoring: {
     enabled: true, // Keep metrics enabled in production for observability
   },
+  newRelic: {
+    enabled: false, // Enable via env variable in production
+    licenseKey: '<env:NEW_RELIC_LICENSE_KEY>',
+    appName: 'node-architecture-prod',
+    logLevel: 'warn', // Less verbose logging in production
+    distributedTracingEnabled: true,
+    loggingEnabled: true,
+  },
 };

@@ -112,6 +112,22 @@ if (environmentConfig.monitoring) {
   }
 }
 
+// Override New Relic configuration from env
+if (environmentConfig.newRelic) {
+  if (process.env.NEW_RELIC_ENABLED !== undefined) {
+    environmentConfig.newRelic.enabled = process.env.NEW_RELIC_ENABLED === 'true';
+  }
+  environmentConfig.newRelic.licenseKey = process.env.NEW_RELIC_LICENSE_KEY || environmentConfig.newRelic.licenseKey;
+  environmentConfig.newRelic.appName = process.env.NEW_RELIC_APP_NAME || environmentConfig.newRelic.appName;
+  environmentConfig.newRelic.logLevel = process.env.NEW_RELIC_LOG_LEVEL || environmentConfig.newRelic.logLevel;
+  if (process.env.NEW_RELIC_DISTRIBUTED_TRACING_ENABLED !== undefined) {
+    environmentConfig.newRelic.distributedTracingEnabled = process.env.NEW_RELIC_DISTRIBUTED_TRACING_ENABLED === 'true';
+  }
+  if (process.env.NEW_RELIC_LOGGING_ENABLED !== undefined) {
+    environmentConfig.newRelic.loggingEnabled = process.env.NEW_RELIC_LOGGING_ENABLED === 'true';
+  }
+}
+
 //console.log("LOADED ENV", environmentConfig);
 
 // Export the config as a named export

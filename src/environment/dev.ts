@@ -57,4 +57,12 @@ export default {
   monitoring: {
     enabled: true,
   },
+  newRelic: {
+    enabled: false, // Can be enabled via env variable
+    licenseKey: '<env:NEW_RELIC_LICENSE_KEY>',
+    appName: 'node-architecture-dev',
+    logLevel: 'info',
+    distributedTracingEnabled: true,
+    loggingEnabled: true,
+  },
 };
