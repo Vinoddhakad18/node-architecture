@@ -48,6 +48,11 @@ environmentConfig.port = process.env.PORT ? parseInt(process.env.PORT) : environ
 // Override API prefix from env
 environmentConfig.apiPrefix = process.env.API_PREFIX || environmentConfig.apiPrefix;
 
+// Override CORS configuration from env
+if (environmentConfig.cors) {
+  environmentConfig.cors.origin = process.env.CORS_ORIGIN || environmentConfig.cors.origin;
+}
+
 // Override JWT configuration from env
 if (environmentConfig.jwt) {
   environmentConfig.JWT_SECRET = process.env.JWT_SECRET || environmentConfig.jwt.secret;

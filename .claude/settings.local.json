@@ -25,7 +25,9 @@
       "Bash(npx ts-jest --version)",
       "Bash(npx jest:*)",
       "Bash(npm run test:docker:*)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(npm run build:skip-tests:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,10 +1,11 @@
 import express, { Application } from 'express';
 import helmet from 'helmet';
+import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
 import { config } from './config';
 import routes from './application/routes';
-import { errorHandler, notFoundHandler, logger, errorLogger, attachResponseHandlers } from './application/middleware';
+import { errorHandler, notFoundHandler, logger, errorLogger, attachResponseHandlers, requestIdMiddleware } from './application/middleware';
 import { connectDatabase } from './application/config/sequelize/database';
 import { swaggerSpec, swaggerUiOptions } from './swagger';
 
@@ -30,12 +31,22 @@ export const createApp = async (): Promise<Application> => {
   // Security middleware
   app.use(helmet());
 
+  // CORS configuration
+  app.use(cors({
+    origin: config.cors.origin,
+    credentials: true,
+  }));
+
   // Rate limiting
   app.use(limiter);
 
   // Middleware
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+
+  // Request ID tracking - Must be before logger to include in logs
+  app.use(requestIdMiddleware);
+
   app.use(logger);
   app.use(errorLogger);
   app.use(attachResponseHandlers);

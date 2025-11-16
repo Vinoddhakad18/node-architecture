@@ -15,8 +15,12 @@ const logFormat = winston.format.combine(
 const consoleFormat = winston.format.combine(
   winston.format.colorize(),
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-  winston.format.printf(({ timestamp, level, message, ...meta }) => {
-    let msg = `${timestamp} [${level}]: ${message}`;
+  winston.format.printf(({ timestamp, level, message, requestId, ...meta }) => {
+    let msg = `${timestamp} [${level}]`;
+    if (requestId) {
+      msg += ` [ReqID: ${requestId}]`;
+    }
+    msg += `: ${message}`;
     if (Object.keys(meta).length > 0) {
       msg += ` ${JSON.stringify(meta)}`;
     }
@@ -149,3 +153,22 @@ export const stream = {
     logger.info(message.trim());
   },
 };
+
+/**
+ * Helper function to create a child logger with request ID context
+ *
+ * @example
+ * // In your route handler:
+ * const reqLogger = getLoggerWithRequestId(req.requestId);
+ * reqLogger.info('User logged in', { userId: user.id });
+ *
+ * @param requestId - The request ID to include in all logs
+ * @returns Winston logger instance with request ID in default metadata
+ */
+export const getLoggerWithRequestId = (requestId?: string) => {
+  if (requestId) {
+    return logger.child({ requestId });
+  }
+  return logger;
+};
+

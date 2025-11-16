@@ -60,7 +60,9 @@
   },
   "homepage": "https://github.com/Vinoddhakad18/node-architecture#readme",
   "dependencies": {
+    "@types/cors": "^2.8.19",
     "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "ejs": "^3.1.10",
     "express": "^5.1.0",

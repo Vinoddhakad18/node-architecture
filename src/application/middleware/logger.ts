@@ -35,6 +35,14 @@ morgan.token('request-body', (req) => {
 morgan.token('pid', () => process.pid.toString());
 
 /**
+ * Custom Morgan token for request ID
+ */
+morgan.token('request-id', (req) => {
+  const expressReq = req as unknown as Request;
+  return expressReq.requestId || '-';
+});
+
+/**
  * Enhanced Morgan HTTP request logger middleware with Winston integration
  *
  * Logs detailed information including:
@@ -42,9 +50,9 @@ morgan.token('pid', () => process.pid.toString());
  * - Status code and response time
  * - User agent and real IP address
  * - Request body (sanitized)
- * - Content length and process ID
+ * - Content length, process ID, and request ID
  */
-const morganFormat = ':real-ip - :method :url :status :res[content-length] - :response-time ms - :user-agent - PID::pid';
+const morganFormat = ':real-ip - :method :url :status :res[content-length] - :response-time ms - :user-agent - PID::pid - ReqID::request-id';
 
 /**
  * Morgan middleware with conditional logging based on status code

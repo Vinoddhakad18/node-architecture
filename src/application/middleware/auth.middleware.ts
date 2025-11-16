@@ -1,18 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwtUtil from '../utils/jwt.util';
-import { AuthenticatedUser } from '../interfaces/jwt.interface';
 import { logger } from '../config/logger';
-
-/**
- * Extend Express Request interface to include user property
- */
-declare global {
-  namespace Express {
-    interface Request {
-      user?: AuthenticatedUser;
-    }
-  }
-}
 
 /**
  * Authentication Middleware
