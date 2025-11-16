@@ -31,28 +31,16 @@ class AuthController {
       const { refreshToken } = req.body;
 
       if (!refreshToken) {
-        res.status(400).json({
-          success: false,
-          message: 'Refresh token is required',
-        });
+        res.sendBadRequest('Refresh token is required');
         return;
       }
 
       const { accessToken } = await authService.refreshToken(refreshToken);
 
-      res.status(200).json({
-        success: true,
-        message: 'Token refreshed successfully',
-        data: {
-          accessToken,
-        },
-      });
+      res.sendSuccess({ accessToken }, 'Token refreshed successfully');
     } catch (error: any) {
       logger.error('Error in refresh token controller:', error);
-      res.status(401).json({
-        success: false,
-        message: error.message || 'Token refresh failed',
-      });
+      res.sendUnauthorized(error.message || 'Token refresh failed');
     }
   }
 
@@ -65,28 +53,19 @@ class AuthController {
       const { token } = req.body;
 
       if (!token) {
-        res.status(400).json({
-          success: false,
-          message: 'Token is required',
-        });
+        res.sendBadRequest('Token is required');
         return;
       }
 
       const isValid = await authService.verifyToken(token);
 
-      res.status(200).json({
-        success: true,
-        message: isValid ? 'Token is valid' : 'Token is invalid',
-        data: {
-          valid: isValid,
-        },
-      });
+      res.sendSuccess(
+        { valid: isValid },
+        isValid ? 'Token is valid' : 'Token is invalid'
+      );
     } catch (error: any) {
       logger.error('Error in verify token controller:', error);
-      res.status(400).json({
-        success: false,
-        message: error.message || 'Token verification failed',
-      });
+      res.sendBadRequest(error.message || 'Token verification failed');
     }
   }
 

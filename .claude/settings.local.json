@@ -27,7 +27,8 @@
       "Bash(npm run test:docker:*)",
       "Bash(test:*)",
       "Bash(npm run build:skip-tests:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []

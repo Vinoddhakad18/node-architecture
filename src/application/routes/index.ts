@@ -7,14 +7,15 @@ const router = Router();
  * Root API route
  */
 router.get('/', (_req: Request, res: Response) => {
-  res.json({
-    success: true,
-    message: 'Welcome to MVC API',
-    version: '1.0.0',
-    endpoints: {
-      auth: '/auth',
+  res.sendSuccess(
+    {
+      version: '1.0.0',
+      endpoints: {
+        auth: '/auth',
+      },
     },
-  });
+    'Welcome to MVC API'
+  );
 });
 
 /**

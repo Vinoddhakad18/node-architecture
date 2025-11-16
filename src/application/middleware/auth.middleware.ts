@@ -16,19 +16,13 @@ export const authenticate = async (
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-      res.status(401).json({
-        success: false,
-        message: 'Authorization header missing',
-      });
+      res.sendUnauthorized('Authorization header missing');
       return;
     }
 
     // Check if header starts with 'Bearer '
     if (!authHeader.startsWith('Bearer ')) {
-      res.status(401).json({
-        success: false,
-        message: 'Invalid authorization format. Use: Bearer <token>',
-      });
+      res.sendUnauthorized('Invalid authorization format. Use: Bearer <token>');
       return;
     }
 
@@ -36,10 +30,7 @@ export const authenticate = async (
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
     if (!token) {
-      res.status(401).json({
-        success: false,
-        message: 'Token not provided',
-      });
+      res.sendUnauthorized('Token not provided');
       return;
     }
 
@@ -60,28 +51,17 @@ export const authenticate = async (
 
     if (error instanceof Error) {
       if (error.message === 'Token expired') {
-        res.status(401).json({
-          success: false,
-          message: 'Token expired',
-          code: 'TOKEN_EXPIRED',
-        });
+        res.sendUnauthorized('Token expired');
         return;
       }
 
       if (error.message === 'Invalid token') {
-        res.status(401).json({
-          success: false,
-          message: 'Invalid token',
-          code: 'INVALID_TOKEN',
-        });
+        res.sendUnauthorized('Invalid token');
         return;
       }
     }
 
-    res.status(401).json({
-      success: false,
-      message: 'Authentication failed',
-    });
+    res.sendUnauthorized('Authentication failed');
   }
 };
 
@@ -129,19 +109,13 @@ export const optionalAuthenticate = async (
 export const authorize = (...allowedRoles: string[]) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
-      res.status(401).json({
-        success: false,
-        message: 'Authentication required',
-      });
+      res.sendUnauthorized('Authentication required');
       return;
     }
 
     if (!req.user.role || !allowedRoles.includes(req.user.role)) {
       logger.warn(`Unauthorized access attempt by user: ${req.user.email}`);
-      res.status(403).json({
-        success: false,
-        message: 'Insufficient permissions',
-      });
+      res.sendForbidden('Insufficient permissions');
       return;
     }
 
@@ -156,10 +130,7 @@ export const authorize = (...allowedRoles: string[]) => {
 export const checkOwnership = (userIdParam: string = 'userId') => {
   return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
-      res.status(401).json({
-        success: false,
-        message: 'Authentication required',
-      });
+      res.sendUnauthorized('Authentication required');
       return;
     }
 
@@ -167,10 +138,7 @@ export const checkOwnership = (userIdParam: string = 'userId') => {
 
     if (req.user.userId !== requestedUserId) {
       logger.warn(`Ownership check failed for user: ${req.user.email}`);
-      res.status(403).json({
-        success: false,
-        message: 'You can only access your own resources',
-      });
+      res.sendForbidden('You can only access your own resources');
       return;
     }
 

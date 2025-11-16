@@ -7,13 +7,10 @@ const router = Router();
  * Example: Public route (no authentication required)
  */
 router.get('/public', (_req: Request, res: Response) => {
-  res.json({
-    success: true,
-    message: 'This is a public endpoint',
-    data: {
-      info: 'Anyone can access this endpoint',
-    },
-  });
+  res.sendSuccess(
+    { info: 'Anyone can access this endpoint' },
+    'This is a public endpoint'
+  );
 });
 
 /**
@@ -21,14 +18,13 @@ router.get('/public', (_req: Request, res: Response) => {
  * User must provide a valid access token
  */
 router.get('/protected', authenticate, (req: Request, res: Response) => {
-  res.json({
-    success: true,
-    message: 'This is a protected endpoint',
-    data: {
+  res.sendSuccess(
+    {
       user: req.user,
       info: 'You must be authenticated to access this endpoint',
     },
-  });
+    'This is a protected endpoint'
+  );
 });
 
 /**
@@ -36,14 +32,13 @@ router.get('/protected', authenticate, (req: Request, res: Response) => {
  * User must be authenticated and have 'admin' role
  */
 router.get('/admin-only', authenticate, authorize('admin'), (req: Request, res: Response) => {
-  res.json({
-    success: true,
-    message: 'Admin endpoint accessed',
-    data: {
+  res.sendSuccess(
+    {
       user: req.user,
       info: 'Only admins can access this endpoint',
     },
-  });
+    'Admin endpoint accessed'
+  );
 });
 
 /**
@@ -55,14 +50,13 @@ router.post(
   authenticate,
   authorize('admin', 'moderator'),
   (req: Request, res: Response) => {
-    res.json({
-      success: true,
-      message: 'Moderation action successful',
-      data: {
+    res.sendSuccess(
+      {
         user: req.user,
         info: 'Admins and moderators can access this endpoint',
       },
-    });
+      'Moderation action successful'
+    );
   }
 );
 
@@ -76,15 +70,14 @@ router.get(
   authenticate,
   checkOwnership('userId'),
   (req: Request, res: Response) => {
-    res.json({
-      success: true,
-      message: 'User profile retrieved',
-      data: {
+    res.sendSuccess(
+      {
         userId: req.params.userId,
         user: req.user,
         info: 'You can only access your own profile',
       },
-    });
+      'User profile retrieved'
+    );
   }
 );
 
@@ -98,22 +91,18 @@ router.put('/users/:userId/settings', authenticate, (req: Request, res: Response
   const isAdmin = req.user?.role === 'admin';
 
   if (!isOwner && !isAdmin) {
-    res.status(403).json({
-      success: false,
-      message: 'Access denied. You can only modify your own settings or be an admin.',
-    });
+    res.sendForbidden('Access denied. You can only modify your own settings or be an admin.');
     return;
   }
 
-  res.json({
-    success: true,
-    message: 'Settings updated',
-    data: {
+  res.sendSuccess(
+    {
       userId: requestedUserId,
       updatedBy: req.user,
       info: 'Owners can update their own settings, admins can update any user settings',
     },
-  });
+    'Settings updated'
+  );
 });
 
 export default router;
