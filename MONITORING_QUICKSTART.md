@@ -6,7 +6,7 @@ Get your monitoring stack up and running in 5 minutes!
 
 - Docker and Docker Compose installed
 - Node.js application configured (see main README)
-- `.env` file configured
+- `.env` file configured with `MONITORING_ENABLED=true` (monitoring is enabled by default)
 
 ## Step 1: Start the Stack (30 seconds)
 
@@ -114,8 +114,15 @@ Pre-configured dashboard showing:
 
 ### Problem: Metrics endpoint returns 404
 
-**Solution**:
+**Possible Causes**:
+1. Monitoring is disabled in environment configuration
+2. Application needs to be rebuilt
+
+**Solutions**:
 ```bash
+# Check if monitoring is enabled in your .env file
+# Ensure MONITORING_ENABLED=true
+
 # Rebuild the application
 docker-compose up --build -d app
 ```
@@ -196,6 +203,42 @@ curl http://localhost:3000/health
 curl http://localhost:9090/-/healthy
 curl http://localhost:3001/api/health
 ```
+
+## Enabling/Disabling Monitoring
+
+You can enable or disable monitoring at any time using the `MONITORING_ENABLED` environment variable:
+
+### To Disable Monitoring
+
+1. Update your `.env` file:
+```env
+MONITORING_ENABLED=false
+```
+
+2. Restart the application:
+```bash
+docker-compose restart app
+```
+
+When monitoring is disabled:
+- The `/api/v1/metrics` endpoint will return 404
+- Metrics collection middleware will not be loaded
+- Prometheus will show the target as DOWN (this is expected)
+- Health check endpoints (`/health`, `/health/migrations`) remain available
+
+### To Enable Monitoring
+
+1. Update your `.env` file:
+```env
+MONITORING_ENABLED=true
+```
+
+2. Restart the application:
+```bash
+docker-compose restart app
+```
+
+The metrics endpoint will be available again and Prometheus will resume scraping.
 
 ## Need More Help?
 

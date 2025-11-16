@@ -105,6 +105,13 @@ if (environmentConfig.logging) {
   }
 }
 
+// Override monitoring configuration from env
+if (environmentConfig.monitoring) {
+  if (process.env.MONITORING_ENABLED !== undefined) {
+    environmentConfig.monitoring.enabled = process.env.MONITORING_ENABLED === 'true';
+  }
+}
+
 //console.log("LOADED ENV", environmentConfig);
 
 // Export the config as a named export

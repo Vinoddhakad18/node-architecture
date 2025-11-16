@@ -60,4 +60,7 @@ export interface envInterface {
       enabled: boolean;
     };
   };
+  monitoring: {
+    enabled: boolean;
+  };
 }

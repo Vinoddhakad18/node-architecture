@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import authRoutes from './auth.routes';
 import metricsRoutes from './metrics.routes';
+import { config } from '../../config';
 
 const router = Router();
 
@@ -26,7 +27,10 @@ router.use('/auth', authRoutes);
 
 /**
  * Metrics route (Prometheus endpoint)
+ * Conditionally registered based on MONITORING_ENABLED environment variable
  */
-router.use('/metrics', metricsRoutes);
+if (config.monitoring?.enabled) {
+  router.use('/metrics', metricsRoutes);
+}
 
 export default router;

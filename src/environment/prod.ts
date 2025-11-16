@@ -54,4 +54,7 @@ export default {
       enabled: false, // Disable HTTP logging in production for performance
     },
   },
+  monitoring: {
+    enabled: true, // Keep metrics enabled in production for observability
+  },
 };

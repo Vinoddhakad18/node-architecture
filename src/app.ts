@@ -48,8 +48,10 @@ export const createApp = async (): Promise<Application> => {
   // Request ID tracking - Must be before logger to include in logs
   app.use(requestIdMiddleware);
 
-  // Metrics middleware - Track request metrics
-  app.use(metricsMiddleware);
+  // Metrics middleware - Track request metrics (conditional based on MONITORING_ENABLED)
+  if (config.monitoring?.enabled) {
+    app.use(metricsMiddleware);
+  }
 
   app.use(logger);
   app.use(errorLogger);

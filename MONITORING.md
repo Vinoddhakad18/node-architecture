@@ -403,6 +403,10 @@ rule_files:
 Add to your `.env` file:
 
 ```env
+# Monitoring Configuration
+# Enable or disable Prometheus metrics collection and /api/v1/metrics endpoint
+MONITORING_ENABLED=true
+
 # Grafana
 GRAFANA_ADMIN_USER=admin
 GRAFANA_ADMIN_PASSWORD=your-secure-password
@@ -410,6 +414,12 @@ GRAFANA_ADMIN_PASSWORD=your-secure-password
 # Application Version (for metrics)
 APP_VERSION=1.0.0
 ```
+
+**Important**:
+- Set `MONITORING_ENABLED=false` to completely disable metrics collection and the `/api/v1/metrics` endpoint
+- When monitoring is disabled, the metrics middleware will not be loaded and metrics routes will not be registered
+- This can be toggled at any time by changing the environment variable and restarting the application
+- Even with monitoring disabled, health check endpoints (`/health`, `/health/migrations`) remain available
 
 ### Prometheus Scrape Configuration
 

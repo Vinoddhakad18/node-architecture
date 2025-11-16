@@ -54,4 +54,7 @@ export default {
       enabled: true,
     },
   },
+  monitoring: {
+    enabled: true,
+  },
 };
