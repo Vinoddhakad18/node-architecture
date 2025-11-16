@@ -6,6 +6,7 @@ import swaggerUi from 'swagger-ui-express';
 import { config } from './config';
 import routes from './application/routes';
 import { errorHandler, notFoundHandler, logger, errorLogger, attachResponseHandlers, requestIdMiddleware } from './application/middleware';
+import { metricsMiddleware } from './application/middleware/metrics';
 import { connectDatabase } from './application/config/sequelize/database';
 import { swaggerSpec, swaggerUiOptions } from './swagger';
 
@@ -46,6 +47,9 @@ export const createApp = async (): Promise<Application> => {
 
   // Request ID tracking - Must be before logger to include in logs
   app.use(requestIdMiddleware);
+
+  // Metrics middleware - Track request metrics
+  app.use(metricsMiddleware);
 
   app.use(logger);
   app.use(errorLogger);

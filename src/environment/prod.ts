@@ -2,6 +2,11 @@ export default {
   env: 'production',
   port: process.env.PORT || 3000,
   apiPrefix: '/api/v1',
+  app: {
+    name: 'node-architecture',
+    version: process.env.APP_VERSION || '1.0.0',
+    env: 'production',
+  },
   database: {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432'),

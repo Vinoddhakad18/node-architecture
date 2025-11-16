@@ -2,6 +2,11 @@ export interface envInterface {
   env: string;
   port: number;
   apiPrefix: string;
+  app: {
+    name: string;
+    version: string;
+    env: string;
+  };
   database: {
     host: string;
     port: number;

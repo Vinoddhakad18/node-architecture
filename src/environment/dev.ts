@@ -2,6 +2,11 @@ export default {
   env: 'development',
   port: 3000,
   apiPrefix: '/api/v1',
+  app: {
+    name: 'node-architecture',
+    version: '1.0.0',
+    env: 'development',
+  },
   database: {
     host: 'localhost',
     port: 5432,
