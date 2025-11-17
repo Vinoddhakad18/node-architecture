@@ -7,18 +7,29 @@ import logger from '../config/logger';
  * Singleton class that manages Redis connection and operations
  */
 class RedisService {
-  private client: Redis;
+  private client: Redis | null = null;
   private isConnected: boolean = false;
+  private isEnabled: boolean = false;
 
   constructor() {
-    this.client = new Redis(redisConfig);
-    this.setupEventHandlers();
+    // Check if Redis is enabled via environment variable
+    this.isEnabled = process.env.REDIS_ENABLED === 'true';
+
+    if (this.isEnabled) {
+      this.client = new Redis(redisConfig);
+      this.setupEventHandlers();
+      logger.info('Redis client initialization started');
+    } else {
+      logger.info('Redis is disabled via REDIS_ENABLED environment variable');
+    }
   }
 
   /**
    * Setup Redis event handlers for connection monitoring
    */
   private setupEventHandlers(): void {
+    if (!this.client) return;
+
     this.client.on('connect', () => {
       logger.info('Redis client connecting...');
     });
@@ -54,15 +65,27 @@ class RedisService {
 
   /**
    * Get the Redis client instance
+   * Returns null if Redis is disabled
    */
-  public getClient(): Redis {
+  public getClient(): Redis | null {
     return this.client;
   }
 
   /**
+   * Check if Redis is enabled
+   */
+  public isRedisEnabled(): boolean {
+    return this.isEnabled;
+  }
+
+  /**
    * Check if Redis is connected and ready
+   * Returns false if Redis is disabled
    */
   public isReady(): boolean {
+    if (!this.isEnabled || !this.client) {
+      return false;
+    }
     return this.isConnected && this.client.status === 'ready';
   }
 
@@ -77,6 +100,11 @@ class RedisService {
     value: string | number | object,
     ttl?: number
   ): Promise<void> {
+    if (!this.isEnabled || !this.client) {
+      logger.warn('Redis SET operation skipped - Redis is disabled');
+      return;
+    }
+
     try {
       const stringValue = typeof value === 'object'
         ? JSON.stringify(value)
@@ -101,6 +129,11 @@ class RedisService {
    * @returns Parsed value or null if key doesn't exist
    */
   public async get<T = string>(key: string): Promise<T | null> {
+    if (!this.isEnabled || !this.client) {
+      logger.warn('Redis GET operation skipped - Redis is disabled');
+      return null;
+    }
+
     try {
       const value = await this.client.get(key);
 
@@ -130,6 +163,11 @@ class RedisService {
    * @returns Number of keys deleted
    */
   public async del(key: string | string[]): Promise<number> {
+    if (!this.isEnabled || !this.client) {
+      logger.warn('Redis DEL operation skipped - Redis is disabled');
+      return 0;
+    }
+
     try {
       const keys = Array.isArray(key) ? key : [key];
       const result = await this.client.del(...keys);
@@ -148,6 +186,11 @@ class RedisService {
    * @returns true if timeout was set, false if key doesn't exist
    */
   public async expire(key: string, seconds: number): Promise<boolean> {
+    if (!this.isEnabled || !this.client) {
+      logger.warn('Redis EXPIRE operation skipped - Redis is disabled');
+      return false;
+    }
+
     try {
       const result = await this.client.expire(key, seconds);
       logger.debug(`Redis EXPIRE: ${key} (${seconds}s, result: ${result === 1})`);
@@ -164,6 +207,11 @@ class RedisService {
    * @returns TTL in seconds (-1 if no expiration, -2 if key doesn't exist)
    */
   public async ttl(key: string): Promise<number> {
+    if (!this.isEnabled || !this.client) {
+      logger.warn('Redis TTL operation skipped - Redis is disabled');
+      return -2;
+    }
+
     try {
       const ttl = await this.client.ttl(key);
       logger.debug(`Redis TTL: ${key} (${ttl}s)`);
@@ -180,6 +228,11 @@ class RedisService {
    * @returns true if key exists, false otherwise
    */
   public async exists(key: string): Promise<boolean> {
+    if (!this.isEnabled || !this.client) {
+      logger.warn('Redis EXISTS operation skipped - Redis is disabled');
+      return false;
+    }
+
     try {
       const result = await this.client.exists(key);
       logger.debug(`Redis EXISTS: ${key} (${result === 1})`);
@@ -196,6 +249,11 @@ class RedisService {
    * @returns New value after increment
    */
   public async incr(key: string): Promise<number> {
+    if (!this.isEnabled || !this.client) {
+      logger.warn('Redis INCR operation skipped - Redis is disabled');
+      return 0;
+    }
+
     try {
       const result = await this.client.incr(key);
       logger.debug(`Redis INCR: ${key} (new value: ${result})`);
@@ -213,6 +271,11 @@ class RedisService {
    * @returns New value after increment
    */
   public async incrBy(key: string, increment: number): Promise<number> {
+    if (!this.isEnabled || !this.client) {
+      logger.warn('Redis INCRBY operation skipped - Redis is disabled');
+      return 0;
+    }
+
     try {
       const result = await this.client.incrby(key, increment);
       logger.debug(`Redis INCRBY: ${key} by ${increment} (new value: ${result})`);
@@ -229,6 +292,11 @@ class RedisService {
    * @returns New value after decrement
    */
   public async decr(key: string): Promise<number> {
+    if (!this.isEnabled || !this.client) {
+      logger.warn('Redis DECR operation skipped - Redis is disabled');
+      return 0;
+    }
+
     try {
       const result = await this.client.decr(key);
       logger.debug(`Redis DECR: ${key} (new value: ${result})`);
@@ -246,6 +314,11 @@ class RedisService {
    * @returns New value after decrement
    */
   public async decrBy(key: string, decrement: number): Promise<number> {
+    if (!this.isEnabled || !this.client) {
+      logger.warn('Redis DECRBY operation skipped - Redis is disabled');
+      return 0;
+    }
+
     try {
       const result = await this.client.decrby(key, decrement);
       logger.debug(`Redis DECRBY: ${key} by ${decrement} (new value: ${result})`);
@@ -264,6 +337,11 @@ class RedisService {
    * @returns Number of fields added
    */
   public async hset(key: string, field: string, value: string): Promise<number> {
+    if (!this.isEnabled || !this.client) {
+      logger.warn('Redis HSET operation skipped - Redis is disabled');
+      return 0;
+    }
+
     try {
       const result = await this.client.hset(key, field, value);
       logger.debug(`Redis HSET: ${key}.${field}`);
@@ -281,6 +359,11 @@ class RedisService {
    * @returns Field value or null
    */
   public async hget(key: string, field: string): Promise<string | null> {
+    if (!this.isEnabled || !this.client) {
+      logger.warn('Redis HGET operation skipped - Redis is disabled');
+      return null;
+    }
+
     try {
       const result = await this.client.hget(key, field);
       logger.debug(`Redis HGET: ${key}.${field} (${result ? 'found' : 'not found'})`);
@@ -297,6 +380,11 @@ class RedisService {
    * @returns All fields and values
    */
   public async hgetall(key: string): Promise<Record<string, string>> {
+    if (!this.isEnabled || !this.client) {
+      logger.warn('Redis HGETALL operation skipped - Redis is disabled');
+      return {};
+    }
+
     try {
       const result = await this.client.hgetall(key);
       logger.debug(`Redis HGETALL: ${key} (${Object.keys(result).length} fields)`);
@@ -314,6 +402,11 @@ class RedisService {
    * @returns Number of fields deleted
    */
   public async hdel(key: string, ...field: string[]): Promise<number> {
+    if (!this.isEnabled || !this.client) {
+      logger.warn('Redis HDEL operation skipped - Redis is disabled');
+      return 0;
+    }
+
     try {
       const result = await this.client.hdel(key, ...field);
       logger.debug(`Redis HDEL: ${key} (deleted ${result} field(s))`);
@@ -331,6 +424,11 @@ class RedisService {
    * @returns Array of matching keys
    */
   public async keys(pattern: string): Promise<string[]> {
+    if (!this.isEnabled || !this.client) {
+      logger.warn('Redis KEYS operation skipped - Redis is disabled');
+      return [];
+    }
+
     try {
       const keys = await this.client.keys(pattern);
       logger.debug(`Redis KEYS: ${pattern} (found ${keys.length} key(s))`);
@@ -346,6 +444,11 @@ class RedisService {
    * USE WITH EXTREME CAUTION!
    */
   public async flushDb(): Promise<void> {
+    if (!this.isEnabled || !this.client) {
+      logger.warn('Redis FLUSHDB operation skipped - Redis is disabled');
+      return;
+    }
+
     try {
       if (process.env.NODE_ENV === 'production') {
         throw new Error('Cannot flush Redis in production');
@@ -363,6 +466,11 @@ class RedisService {
    * USE WITH EXTREME CAUTION!
    */
   public async flushAll(): Promise<void> {
+    if (!this.isEnabled || !this.client) {
+      logger.warn('Redis FLUSHALL operation skipped - Redis is disabled');
+      return;
+    }
+
     try {
       if (process.env.NODE_ENV === 'production') {
         throw new Error('Cannot flush Redis in production');
@@ -380,6 +488,11 @@ class RedisService {
    * @returns PONG string
    */
   public async ping(): Promise<string> {
+    if (!this.isEnabled || !this.client) {
+      logger.warn('Redis PING operation skipped - Redis is disabled');
+      throw new Error('Redis is disabled');
+    }
+
     try {
       const result = await this.client.ping();
       logger.debug('Redis PING: PONG');
@@ -396,6 +509,11 @@ class RedisService {
    * @returns Redis server information
    */
   public async info(section?: string): Promise<string> {
+    if (!this.isEnabled || !this.client) {
+      logger.warn('Redis INFO operation skipped - Redis is disabled');
+      throw new Error('Redis is disabled');
+    }
+
     try {
       const result = section ? await this.client.info(section) : await this.client.info();
       logger.debug(`Redis INFO: ${section || 'all'}`);
@@ -410,6 +528,11 @@ class RedisService {
    * Graceful shutdown - close Redis connection
    */
   public async disconnect(): Promise<void> {
+    if (!this.isEnabled || !this.client) {
+      logger.info('Redis disconnect skipped - Redis is disabled');
+      return;
+    }
+
     try {
       await this.client.quit();
       logger.info('Redis client disconnected gracefully');

@@ -1,7 +1,7 @@
 import { Sequelize } from 'sequelize';
 import { config } from '../../../config';
 import { logger } from '../logger';
-import redisService from '../../services/redis.service';
+import redisService from '../../helpers/redis.helper';
 
 /**
  * Sequelize Database Configuration - MySQL Only

@@ -121,7 +121,7 @@ The Redis service is available as a singleton instance.
 #### Import the Service
 
 ```typescript
-import redisService from './application/services/redis.service';
+import redisService from './application/helpers/redis.helper';
 ```
 
 #### Basic Operations
@@ -502,7 +502,7 @@ docker-compose exec redis redis-cli -a redispassword ping
 Create a test file: `src/__tests__/redis.test.ts`
 
 ```typescript
-import redisService from '../application/services/redis.service';
+import redisService from '../application/helpers/redis.helper';
 
 describe('Redis Service', () => {
   beforeAll(async () => {

@@ -1,4 +1,4 @@
-import redisService from './redis.service';
+import redisService from '../helpers/redis.helper';
 import { RedisTTL, RedisKeys } from '../config/redis.config';
 import logger from '../config/logger';
 

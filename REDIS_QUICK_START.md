@@ -34,7 +34,7 @@ REDIS_HOST=localhost
 ### Example 1: Simple Cache
 
 ```typescript
-import redisService from './application/services/redis.service';
+import redisService from './application/helpers/redis.helper';
 import { RedisTTL } from './application/config/redis.config';
 
 // In your controller

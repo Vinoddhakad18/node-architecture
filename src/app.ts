@@ -32,7 +32,7 @@ import { errorHandler, notFoundHandler, logger, errorLogger, attachResponseHandl
 import { metricsMiddleware } from './application/middleware/metrics';
 import { connectDatabase } from './application/config/sequelize/database';
 import { swaggerSpec, swaggerUiOptions } from './swagger';
-import redisService from './application/services/redis.service';
+import redisService from './application/helpers/redis.helper';
 
 /**
  * Rate limiter configuration
@@ -97,14 +97,19 @@ export const createApp = async (): Promise<Application> => {
 
     // Check Redis health
     let redisStatus = 'disconnected';
-    try {
-      const isReady = redisService.isReady();
-      if (isReady) {
-        await redisService.ping();
-        redisStatus = 'connected';
+
+    if (!redisService.isRedisEnabled()) {
+      redisStatus = 'disabled';
+    } else {
+      try {
+        const isReady = redisService.isReady();
+        if (isReady) {
+          await redisService.ping();
+          redisStatus = 'connected';
+        }
+      } catch (error) {
+        redisStatus = 'error';
       }
-    } catch (error) {
-      redisStatus = 'error';
     }
 
     res.status(200).json({
