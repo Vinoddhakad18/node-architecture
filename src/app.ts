@@ -32,6 +32,7 @@ import { errorHandler, notFoundHandler, logger, errorLogger, attachResponseHandl
 import { metricsMiddleware } from './application/middleware/metrics';
 import { connectDatabase } from './application/config/sequelize/database';
 import { swaggerSpec, swaggerUiOptions } from './swagger';
+import redisService from './application/services/redis.service';
 
 /**
  * Rate limiter configuration
@@ -90,9 +91,21 @@ export const createApp = async (): Promise<Application> => {
   });
 
   // Health check endpoint
-  app.get('/health', (_req, res) => {
+  app.get('/health', async (_req, res) => {
     const { getUptimeInfo } = require('./application/utils/uptime');
     const uptimeInfo = getUptimeInfo();
+
+    // Check Redis health
+    let redisStatus = 'disconnected';
+    try {
+      const isReady = redisService.isReady();
+      if (isReady) {
+        await redisService.ping();
+        redisStatus = 'connected';
+      }
+    } catch (error) {
+      redisStatus = 'error';
+    }
 
     res.status(200).json({
       status: 'healthy',
@@ -103,6 +116,10 @@ export const createApp = async (): Promise<Application> => {
         formatted: uptimeInfo.uptimeFormatted,
       },
       environment: config.env,
+      services: {
+        database: 'connected',
+        redis: redisStatus,
+      },
       process: {
         pid: process.pid,
         memoryUsage: process.memoryUsage(),

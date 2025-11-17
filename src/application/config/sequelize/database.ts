@@ -1,6 +1,7 @@
 import { Sequelize } from 'sequelize';
 import { config } from '../../../config';
 import { logger } from '../logger';
+import redisService from '../../services/redis.service';
 
 /**
  * Sequelize Database Configuration - MySQL Only
@@ -140,8 +141,14 @@ export const gracefulShutdown = async (signal: string): Promise<void> => {
   logger.info(`\n${signal} received. Starting graceful shutdown...`);
 
   try {
+    // Close database connection
     await sequelize.close();
     logger.info('✓ Database connection closed successfully');
+
+    // Close Redis connection
+    await redisService.disconnect();
+    logger.info('✓ Redis connection closed successfully');
+
     process.exit(0);
   } catch (error) {
     logger.error('✗ Error during graceful shutdown:', error);

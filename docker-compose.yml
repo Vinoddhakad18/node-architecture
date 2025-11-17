@@ -25,6 +25,29 @@ services:
       retries: 3
       start_period: 30s
 
+  redis:
+    build:
+      context: ./docker/redis
+      dockerfile: Dockerfile
+    image: node-mvc-redis:latest
+    container_name: node-mvc-redis
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redispassword}
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+      - redis-logs:/var/log/redis
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
   app:
     build:
       context: .
@@ -43,6 +66,9 @@ services:
       - DB_USERNAME=${MYSQL_USER:-node_user}
       - DB_PASSWORD=${MYSQL_PASSWORD:-nodepassword}
       - DB_NAME=${MYSQL_DATABASE:-node_app_db}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-redispassword}
     ports:
       - "${PORT}:3000"
     volumes:
@@ -56,6 +82,8 @@ services:
       - /app/node_modules
     depends_on:
       mysql:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - app-network
@@ -143,6 +171,10 @@ volumes:
   mysql-data:
     driver: local
   mysql-logs:
+    driver: local
+  redis-data:
+    driver: local
+  redis-logs:
     driver: local
   prometheus-data:
     driver: local

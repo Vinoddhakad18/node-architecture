@@ -1,0 +1,12 @@
+# Ignore documentation and unnecessary files
+README.md
+*.md
+
+# Ignore git files
+.git
+.gitignore
+
+# Ignore backup files
+*.bak
+*.backup
+*.old

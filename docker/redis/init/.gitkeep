@@ -1,0 +1,5 @@
+# Redis Initialization Scripts
+
+Place any Redis initialization scripts (Lua scripts, data loading scripts, etc.) in this directory.
+
+These scripts can be run manually after Redis starts or integrated into your application's startup process.
