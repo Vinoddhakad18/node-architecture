@@ -1,24 +1,43 @@
-import Redis from 'ioredis';
-import { redisConfig } from '../config/redis.config';
+import Redis, { Cluster } from 'ioredis';
+import { redisConfig, redisClusterConfig, isClusterMode, getClusterNodes } from '../config/redis.config';
 import logger from '../config/logger';
 
 /**
  * Redis Service
  * Singleton class that manages Redis connection and operations
+ * Supports both standalone and cluster modes
  */
 class RedisService {
-  private client: Redis | null = null;
+  private client: Redis | Cluster | null = null;
   private isConnected: boolean = false;
   private isEnabled: boolean = false;
+  private clusterMode: boolean = false;
 
   constructor() {
     // Check if Redis is enabled via environment variable
     this.isEnabled = process.env.REDIS_ENABLED === 'true';
 
     if (this.isEnabled) {
-      this.client = new Redis(redisConfig);
+      this.clusterMode = isClusterMode();
+
+      if (this.clusterMode) {
+        // Initialize Redis Cluster
+        const clusterNodes = getClusterNodes();
+        this.client = new Redis.Cluster(clusterNodes, redisClusterConfig);
+        logger.info('Redis Cluster client initialization started', {
+          nodes: clusterNodes,
+          nodeCount: clusterNodes.length
+        });
+      } else {
+        // Initialize Standalone Redis
+        this.client = new Redis(redisConfig);
+        logger.info('Redis standalone client initialization started', {
+          host: redisConfig.host,
+          port: redisConfig.port,
+        });
+      }
+
       this.setupEventHandlers();
-      logger.info('Redis client initialization started');
     } else {
       logger.info('Redis is disabled via REDIS_ENABLED environment variable');
     }
@@ -31,44 +50,86 @@ class RedisService {
     if (!this.client) return;
 
     this.client.on('connect', () => {
-      logger.info('Redis client connecting...');
+      logger.info(`Redis ${this.clusterMode ? 'cluster' : 'standalone'} client connecting...`);
     });
 
     this.client.on('ready', () => {
       this.isConnected = true;
-      logger.info('Redis client connected and ready', {
-        host: redisConfig.host,
-        port: redisConfig.port,
-        db: redisConfig.db,
-      });
+      if (this.clusterMode) {
+        logger.info('Redis Cluster client connected and ready', {
+          mode: 'cluster',
+          nodes: getClusterNodes().length,
+        });
+      } else {
+        logger.info('Redis client connected and ready', {
+          mode: 'standalone',
+          host: redisConfig.host,
+          port: redisConfig.port,
+          db: redisConfig.db,
+        });
+      }
     });
 
     this.client.on('error', (err: Error) => {
-      logger.error('Redis client error:', { error: err.message, stack: err.stack });
+      logger.error(`Redis ${this.clusterMode ? 'cluster' : 'standalone'} client error:`, {
+        error: err.message,
+        stack: err.stack
+      });
       this.isConnected = false;
     });
 
     this.client.on('close', () => {
-      logger.warn('Redis connection closed');
+      logger.warn(`Redis ${this.clusterMode ? 'cluster' : 'standalone'} connection closed`);
       this.isConnected = false;
     });
 
     this.client.on('reconnecting', (delay: number) => {
-      logger.info(`Redis client reconnecting in ${delay}ms...`);
+      logger.info(`Redis ${this.clusterMode ? 'cluster' : 'standalone'} client reconnecting in ${delay}ms...`);
     });
 
     this.client.on('end', () => {
-      logger.warn('Redis connection ended');
+      logger.warn(`Redis ${this.clusterMode ? 'cluster' : 'standalone'} connection ended`);
       this.isConnected = false;
     });
+
+    // Cluster-specific events
+    if (this.clusterMode && this.client instanceof Redis.Cluster) {
+      this.client.on('node error', (err: Error, address: string) => {
+        logger.error('Redis Cluster node error:', {
+          error: err.message,
+          address
+        });
+      });
+
+      this.client.on('+node', (node: Redis) => {
+        logger.info('Redis Cluster node added:', {
+          host: node.options.host,
+          port: node.options.port
+        });
+      });
+
+      this.client.on('-node', (node: Redis) => {
+        logger.info('Redis Cluster node removed:', {
+          host: node.options.host,
+          port: node.options.port
+        });
+      });
+    }
   }
 
   /**
    * Get the Redis client instance
    * Returns null if Redis is disabled
    */
-  public getClient(): Redis | null {
+  public getClient(): Redis | Cluster | null {
     return this.client;
+  }
+
+  /**
+   * Check if Redis is running in cluster mode
+   */
+  public isClusterMode(): boolean {
+    return this.clusterMode;
   }
 
   /**

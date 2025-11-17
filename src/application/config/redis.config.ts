@@ -1,30 +1,38 @@
-import { RedisOptions } from 'ioredis';
+import { RedisOptions, ClusterOptions, ClusterNode } from 'ioredis';
 
 /**
- * Redis Configuration
- * Configures connection settings, retry strategy, and reconnection logic
+ * Check if Redis Cluster mode is enabled
+ * Default: true (cluster mode enabled)
  */
-export const redisConfig: RedisOptions = {
-  // Connection settings
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379', 10),
+export const isClusterMode = (): boolean => {
+  return process.env.REDIS_CLUSTER_ENABLED !== 'false';
+};
+
+/**
+ * Parse cluster nodes from environment variable
+ * Format: host1:port1,host2:port2,host3:port3
+ */
+const parseClusterNodes = (): ClusterNode[] => {
+  const nodesStr = process.env.REDIS_CLUSTER_NODES || 'localhost:6379,localhost:6380,localhost:6381';
+  return nodesStr.split(',').map(node => {
+    const [host, port] = node.trim().split(':');
+    return {
+      host: host || 'localhost',
+      port: parseInt(port, 10) || 6379,
+    };
+  });
+};
+
+/**
+ * Common Redis options for both standalone and cluster modes
+ */
+const commonRedisOptions = {
   password: process.env.REDIS_PASSWORD || undefined,
-  db: parseInt(process.env.REDIS_DB || '0', 10),
   keyPrefix: process.env.REDIS_KEY_PREFIX || 'app:',
-
-  // Connection timeout
   connectTimeout: parseInt(process.env.REDIS_CONNECT_TIMEOUT || '10000', 10),
-
-  // Max retries per request
   maxRetriesPerRequest: parseInt(process.env.REDIS_MAX_RETRIES_PER_REQUEST || '3', 10),
-
-  // Enable ready check
   enableReadyCheck: true,
-
-  // Enable offline queue
   enableOfflineQueue: true,
-
-  // Lazy connect (connect on first command)
   lazyConnect: false,
 
   /**
@@ -32,7 +40,6 @@ export const redisConfig: RedisOptions = {
    * Implements exponential backoff with max delay
    */
   retryStrategy(times: number): number | void {
-    const maxRetryTime = 30000; // 30 seconds
     const delay = Math.min(times * 50, 2000);
 
     if (times > 20) {
@@ -56,6 +63,67 @@ export const redisConfig: RedisOptions = {
 
     return false;
   },
+};
+
+/**
+ * Standalone Redis Configuration
+ * Used when REDIS_CLUSTER_ENABLED=false
+ */
+export const redisConfig: RedisOptions = {
+  ...commonRedisOptions,
+  // Connection settings for standalone mode
+  host: process.env.REDIS_HOST || 'localhost',
+  port: parseInt(process.env.REDIS_PORT || '6379', 10),
+  db: parseInt(process.env.REDIS_DB || '0', 10),
+};
+
+/**
+ * Redis Cluster Configuration
+ * Used when REDIS_CLUSTER_ENABLED=true (default)
+ */
+export const redisClusterConfig: ClusterOptions = {
+  ...commonRedisOptions,
+  // Cluster-specific settings
+  clusterRetryStrategy(times: number): number | null {
+    const delay = Math.min(times * 50, 2000);
+    if (times > 20) {
+      return null;
+    }
+    return delay;
+  },
+
+  // Enable automatic node discovery
+  enableAutoPipelining: process.env.REDIS_CLUSTER_AUTO_PIPELINING !== 'false',
+
+  // Redirect configuration
+  maxRedirections: parseInt(process.env.REDIS_CLUSTER_MAX_REDIRECTIONS || '16', 10),
+
+  // Refresh configuration
+  enableReadyCheck: true,
+
+  // Scale reads configuration
+  scaleReads: process.env.REDIS_CLUSTER_SCALE_READS as 'master' | 'slave' | 'all' || 'slave',
+
+  // NAT mapping (useful for Docker/Kubernetes)
+  natMap: process.env.REDIS_CLUSTER_NAT_MAP ?
+    JSON.parse(process.env.REDIS_CLUSTER_NAT_MAP) : undefined,
+
+  // Slots refresh configuration
+  slotsRefreshTimeout: parseInt(process.env.REDIS_CLUSTER_SLOTS_REFRESH_TIMEOUT || '1000', 10),
+
+  // TLS/SSL support - applied to each node connection
+  redisOptions: process.env.REDIS_TLS_ENABLED === 'true' ? {
+    tls: {
+      rejectUnauthorized: process.env.REDIS_TLS_REJECT_UNAUTHORIZED !== 'false',
+    },
+  } : undefined,
+};
+
+/**
+ * Get cluster nodes configuration
+ */
+export const getClusterNodes = (): ClusterNode[] => {
+  return parseClusterNodes();
 };
 
 /**
