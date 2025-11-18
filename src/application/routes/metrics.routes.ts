@@ -25,7 +25,7 @@ router.get('/', async (_req: Request, res: Response) => {
     const metrics = await register.metrics();
     res.end(metrics);
   } catch (error) {
-    res.status(500).end(error);
+    res.sendServerError('Error collecting metrics', error);
   }
 });
 

@@ -42,11 +42,12 @@ const defaultHandler = (
   res: Response,
   options: Required<RateLimitOptions>
 ) => {
-  res.status(options.statusCode).json({
-    error: 'Too Many Requests',
-    message: options.message,
-    retryAfter: Math.ceil(options.windowMs / 1000),
-  });
+  res.sendCustom(
+    options.statusCode,
+    { retryAfter: Math.ceil(options.windowMs / 1000) },
+    options.message,
+    false
+  );
 };
 
 /**

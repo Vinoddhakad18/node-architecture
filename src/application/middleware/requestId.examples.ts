@@ -55,7 +55,7 @@ export const exampleRoute3 = async (req: Request, res: Response) => {
     res.json({ success: true });
   } catch (error) {
     logger.error('Operation failed', { error });
-    res.status(500).json({ error: 'Internal server error' });
+    res.sendServerError('Internal server error', error);
   }
 };
 
@@ -104,10 +104,6 @@ export const exampleRoute5 = async (req: Request, res: Response) => {
     });
 
     // Return request ID in error response for support purposes
-    res.status(500).json({
-      error: 'Internal server error',
-      requestId: req.requestId,
-      message: 'Please provide this request ID to support',
-    });
+    res.sendServerError('Internal server error - Please provide this request ID to support', error);
   }
 };

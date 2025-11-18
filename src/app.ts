@@ -112,7 +112,7 @@ export const createApp = async (): Promise<Application> => {
       }
     }
 
-    res.status(200).json({
+    res.sendSuccess({
       status: 'healthy',
       timestamp: new Date().toISOString(),
       serverStartTime: uptimeInfo.startTime,
@@ -130,7 +130,7 @@ export const createApp = async (): Promise<Application> => {
         memoryUsage: process.memoryUsage(),
         cpuUsage: process.cpuUsage(),
       },
-    });
+    }, 'Health check successful');
   });
 
   // Migration health check endpoint
@@ -143,24 +143,22 @@ export const createApp = async (): Promise<Application> => {
         getMigrationStats(),
       ]);
 
-      const httpStatus =
-        healthResult.status === 'healthy' ? 200 :
-        healthResult.status === 'warning' ? 200 :
-        503;
+      const isHealthy = healthResult.status === 'healthy' || healthResult.status === 'warning';
+      const httpStatus = isHealthy ? 200 : 503;
 
-      res.status(httpStatus).json({
-        ...healthResult,
-        stats,
-        timestamp: new Date().toISOString(),
-        environment: config.env,
-      });
+      res.sendCustom(
+        httpStatus,
+        {
+          ...healthResult,
+          stats,
+          timestamp: new Date().toISOString(),
+          environment: config.env,
+        },
+        healthResult.message || 'Migration health check',
+        isHealthy
+      );
     } catch (error) {
-      res.status(503).json({
-        status: 'error',
-        message: 'Migration health check failed',
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString(),
-      });
+      res.sendServiceUnavailable('Migration health check failed');
     }
   });
 
