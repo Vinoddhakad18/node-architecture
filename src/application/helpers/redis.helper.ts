@@ -24,22 +24,28 @@ class RedisService {
         // Initialize Redis Cluster
         const clusterNodes = getClusterNodes();
         this.client = new Redis.Cluster(clusterNodes, redisClusterConfig);
-        logger.info('Redis Cluster client initialization started', {
-          nodes: clusterNodes,
-          nodeCount: clusterNodes.length
-        });
+        if (logger) {
+          logger.info('Redis Cluster client initialization started', {
+            nodes: clusterNodes,
+            nodeCount: clusterNodes.length
+          });
+        }
       } else {
         // Initialize Standalone Redis
         this.client = new Redis(redisConfig);
-        logger.info('Redis standalone client initialization started', {
-          host: redisConfig.host,
-          port: redisConfig.port,
-        });
+        if (logger) {
+          logger.info('Redis standalone client initialization started', {
+            host: redisConfig.host,
+            port: redisConfig.port,
+          });
+        }
       }
 
       this.setupEventHandlers();
     } else {
-      logger.info('Redis is disabled via REDIS_ENABLED environment variable');
+      if (logger) {
+        logger.info('Redis is disabled via REDIS_ENABLED environment variable');
+      }
     }
   }
 
@@ -50,69 +56,87 @@ class RedisService {
     if (!this.client) return;
 
     this.client.on('connect', () => {
-      logger.info(`Redis ${this.clusterMode ? 'cluster' : 'standalone'} client connecting...`);
+      if (logger) {
+        logger.info(`Redis ${this.clusterMode ? 'cluster' : 'standalone'} client connecting...`);
+      }
     });
 
     this.client.on('ready', () => {
       this.isConnected = true;
-      if (this.clusterMode) {
-        logger.info('Redis Cluster client connected and ready', {
-          mode: 'cluster',
-          nodes: getClusterNodes().length,
-        });
-      } else {
-        logger.info('Redis client connected and ready', {
-          mode: 'standalone',
-          host: redisConfig.host,
-          port: redisConfig.port,
-          db: redisConfig.db,
-        });
+      if (logger) {
+        if (this.clusterMode) {
+          logger.info('Redis Cluster client connected and ready', {
+            mode: 'cluster',
+            nodes: getClusterNodes().length,
+          });
+        } else {
+          logger.info('Redis client connected and ready', {
+            mode: 'standalone',
+            host: redisConfig.host,
+            port: redisConfig.port,
+            db: redisConfig.db,
+          });
+        }
       }
     });
 
     this.client.on('error', (err: Error) => {
-      logger.error(`Redis ${this.clusterMode ? 'cluster' : 'standalone'} client error:`, {
-        error: err.message,
-        stack: err.stack
-      });
+      if (logger) {
+        logger.error(`Redis ${this.clusterMode ? 'cluster' : 'standalone'} client error:`, {
+          error: err.message,
+          stack: err.stack
+        });
+      }
       this.isConnected = false;
     });
 
     this.client.on('close', () => {
-      logger.warn(`Redis ${this.clusterMode ? 'cluster' : 'standalone'} connection closed`);
+      if (logger) {
+        logger.warn(`Redis ${this.clusterMode ? 'cluster' : 'standalone'} connection closed`);
+      }
       this.isConnected = false;
     });
 
     this.client.on('reconnecting', (delay: number) => {
-      logger.info(`Redis ${this.clusterMode ? 'cluster' : 'standalone'} client reconnecting in ${delay}ms...`);
+      if (logger) {
+        logger.info(`Redis ${this.clusterMode ? 'cluster' : 'standalone'} client reconnecting in ${delay}ms...`);
+      }
     });
 
     this.client.on('end', () => {
-      logger.warn(`Redis ${this.clusterMode ? 'cluster' : 'standalone'} connection ended`);
+      if (logger) {
+        logger.warn(`Redis ${this.clusterMode ? 'cluster' : 'standalone'} connection ended`);
+      }
       this.isConnected = false;
     });
 
     // Cluster-specific events
     if (this.clusterMode && this.client instanceof Redis.Cluster) {
       this.client.on('node error', (err: Error, address: string) => {
-        logger.error('Redis Cluster node error:', {
-          error: err.message,
-          address
-        });
+        if (logger) {
+          logger.error('Redis Cluster node error:', {
+            error: err.message,
+            address
+          });
+        }
       });
 
       this.client.on('+node', (node: Redis) => {
-        logger.info('Redis Cluster node added:', {
-          host: node.options.host,
-          port: node.options.port
-        });
+        if (logger) {
+          logger.info('Redis Cluster node added:', {
+            host: node.options.host,
+            port: node.options.port
+          });
+        }
       });
 
       this.client.on('-node', (node: Redis) => {
-        logger.info('Redis Cluster node removed:', {
-          host: node.options.host,
-          port: node.options.port
-        });
+        if (logger) {
+          logger.info('Redis Cluster node removed:', {
+            host: node.options.host,
+            port: node.options.port
+          });
+        }
       });
     }
   }
