@@ -12,7 +12,7 @@ import { Request, Response } from 'express';
 /**
  * Example: Send 200 OK response
  */
-export const getUsers = async (req: Request, res: Response) => {
+export const getUsers = async (_req: Request, res: Response) => {
   const users = [{ id: 1, name: 'John' }, { id: 2, name: 'Jane' }];
 
   // Method 1: With data and custom message
@@ -28,7 +28,7 @@ export const getUsers = async (req: Request, res: Response) => {
 /**
  * Example: Send 201 Created response
  */
-export const createUser = async (req: Request, res: Response) => {
+export const createUser = async (_req: Request, res: Response) => {
   const newUser = { id: 3, name: 'Bob', email: 'bob@example.com' };
 
   // With data and custom message
@@ -41,7 +41,7 @@ export const createUser = async (req: Request, res: Response) => {
 /**
  * Example: Send 202 Accepted response (for async operations)
  */
-export const processJob = async (req: Request, res: Response) => {
+export const processJob = async (_req: Request, res: Response) => {
   const jobId = 'job-123';
 
   res.sendAccepted({ jobId }, 'Job accepted for processing');
@@ -50,7 +50,7 @@ export const processJob = async (req: Request, res: Response) => {
 /**
  * Example: Send 204 No Content response
  */
-export const deleteUser = async (req: Request, res: Response) => {
+export const deleteUser = async (_req: Request, res: Response) => {
   // After successful deletion
   res.sendNoContent();
 };
@@ -60,7 +60,7 @@ export const deleteUser = async (req: Request, res: Response) => {
 /**
  * Example: Send 400 Bad Request response
  */
-export const invalidRequest = async (req: Request, res: Response) => {
+export const invalidRequest = async (_req: Request, res: Response) => {
   // Method 1: With custom message
   res.sendBadRequest('Invalid input parameters');
 
@@ -77,7 +77,7 @@ export const invalidRequest = async (req: Request, res: Response) => {
 /**
  * Example: Send 401 Unauthorized response
  */
-export const unauthorized = async (req: Request, res: Response) => {
+export const unauthorized = async (_req: Request, res: Response) => {
   // Method 1: With custom message
   res.sendUnauthorized('Invalid credentials');
 
@@ -88,14 +88,14 @@ export const unauthorized = async (req: Request, res: Response) => {
 /**
  * Example: Send 403 Forbidden response
  */
-export const forbidden = async (req: Request, res: Response) => {
+export const forbidden = async (_req: Request, res: Response) => {
   res.sendForbidden('You do not have permission to access this resource');
 };
 
 /**
  * Example: Send 404 Not Found response
  */
-export const notFound = async (req: Request, res: Response) => {
+export const notFound = async (_req: Request, res: Response) => {
   // Method 1: Custom message
   res.sendNotFound('User not found');
 
@@ -106,7 +106,7 @@ export const notFound = async (req: Request, res: Response) => {
 /**
  * Example: Send 409 Conflict response
  */
-export const conflict = async (req: Request, res: Response) => {
+export const conflict = async (_req: Request, res: Response) => {
   // Method 1: With message only
   res.sendConflict('User with this email already exists');
 
@@ -121,7 +121,7 @@ export const conflict = async (req: Request, res: Response) => {
 /**
  * Example: Send 422 Validation Error response
  */
-export const validationError = async (req: Request, res: Response) => {
+export const validationError = async (_req: Request, res: Response) => {
   const errors = [
     { field: 'email', message: 'Email is required' },
     { field: 'password', message: 'Password must be at least 8 characters' }
@@ -137,7 +137,7 @@ export const validationError = async (req: Request, res: Response) => {
 /**
  * Example: Send 429 Too Many Requests response
  */
-export const rateLimited = async (req: Request, res: Response) => {
+export const rateLimited = async (_req: Request, res: Response) => {
   res.sendTooManyRequests('You have exceeded the rate limit');
 };
 
@@ -146,7 +146,7 @@ export const rateLimited = async (req: Request, res: Response) => {
 /**
  * Example: Send 500 Internal Server Error response
  */
-export const serverError = async (req: Request, res: Response) => {
+export const serverError = async (_req: Request, res: Response) => {
   try {
     // Some operation that might fail
     throw new Error('Database connection failed');
@@ -165,14 +165,14 @@ export const serverError = async (req: Request, res: Response) => {
 /**
  * Example: Send 501 Not Implemented response
  */
-export const notImplemented = async (req: Request, res: Response) => {
+export const notImplemented = async (_req: Request, res: Response) => {
   res.sendNotImplemented('This feature is not yet implemented');
 };
 
 /**
  * Example: Send 503 Service Unavailable response
  */
-export const serviceUnavailable = async (req: Request, res: Response) => {
+export const serviceUnavailable = async (_req: Request, res: Response) => {
   res.sendServiceUnavailable('Database is currently unavailable');
 };
 
@@ -181,7 +181,7 @@ export const serviceUnavailable = async (req: Request, res: Response) => {
 /**
  * Example: Send custom response with any status code
  */
-export const customResponse = async (req: Request, res: Response) => {
+export const customResponse = async (_req: Request, res: Response) => {
   res.sendCustom(
     418,                           // status code
     { message: 'I am a teapot' },  // data
@@ -197,7 +197,7 @@ export const customResponse = async (req: Request, res: Response) => {
  * Complete example: User controller with all response types
  */
 export class UserController {
-  async getAll(req: Request, res: Response) {
+  async getAll(_req: Request, res: Response) {
     try {
       const users = await getUsersFromDB();
       res.sendSuccess(users, 'Users retrieved successfully');
@@ -206,12 +206,13 @@ export class UserController {
     }
   }
 
-  async getById(req: Request, res: Response) {
+  async getById(req: Request, res: Response): Promise<void> {
     try {
       const user = await getUserById(req.params.id);
 
       if (!user) {
-        return res.sendNotFound('User not found');
+        res.sendNotFound('User not found');
+        return;
       }
 
       res.sendSuccess(user);
@@ -220,14 +221,15 @@ export class UserController {
     }
   }
 
-  async create(req: Request, res: Response) {
+  async create(req: Request, res: Response): Promise<void> {
     try {
       const { email, password, name } = req.body;
 
       // Check if user exists
       const existingUser = await getUserByEmail(email);
       if (existingUser) {
-        return res.sendConflict('User with this email already exists');
+        res.sendConflict('User with this email already exists');
+        return;
       }
 
       const newUser = await createUserInDB({ email, password, name });
@@ -237,12 +239,13 @@ export class UserController {
     }
   }
 
-  async update(req: Request, res: Response) {
+  async update(req: Request, res: Response): Promise<void> {
     try {
       const user = await updateUserInDB(req.params.id, req.body);
 
       if (!user) {
-        return res.sendNotFound('User not found');
+        res.sendNotFound('User not found');
+        return;
       }
 
       res.sendSuccess(user, 'User updated successfully');
@@ -251,12 +254,13 @@ export class UserController {
     }
   }
 
-  async delete(req: Request, res: Response) {
+  async delete(req: Request, res: Response): Promise<void> {
     try {
       const deleted = await deleteUserFromDB(req.params.id);
 
       if (!deleted) {
-        return res.sendNotFound('User not found');
+        res.sendNotFound('User not found');
+        return;
       }
 
       res.sendNoContent();
@@ -265,14 +269,15 @@ export class UserController {
     }
   }
 
-  async authenticate(req: Request, res: Response) {
+  async authenticate(req: Request, res: Response): Promise<void> {
     try {
       const { email, password } = req.body;
 
       const user = await authenticateUser(email, password);
 
       if (!user) {
-        return res.sendUnauthorized('Invalid email or password');
+        res.sendUnauthorized('Invalid email or password');
+        return;
       }
 
       res.sendSuccess({ user, token: 'jwt-token' }, 'Login successful');
@@ -281,12 +286,13 @@ export class UserController {
     }
   }
 
-  async validatePermission(req: Request, res: Response) {
+  async validatePermission(req: Request, res: Response): Promise<void> {
     try {
       const hasPermission = await checkUserPermission(req.params.id);
 
       if (!hasPermission) {
-        return res.sendForbidden('You do not have permission to perform this action');
+        res.sendForbidden('You do not have permission to perform this action');
+        return;
       }
 
       res.sendSuccess(null, 'Permission granted');
@@ -298,10 +304,10 @@ export class UserController {
 
 // Mock database functions (replace with actual implementations)
 async function getUsersFromDB(): Promise<any[]> { return []; }
-async function getUserById(id: string): Promise<any> { return null; }
-async function getUserByEmail(email: string): Promise<any> { return null; }
+async function getUserById(_id: string): Promise<any> { return null; }
+async function getUserByEmail(_email: string): Promise<any> { return null; }
 async function createUserInDB(data: any): Promise<any> { return data; }
-async function updateUserInDB(id: string, data: any): Promise<any> { return null; }
-async function deleteUserFromDB(id: string): Promise<boolean> { return false; }
-async function authenticateUser(email: string, password: string): Promise<any> { return null; }
-async function checkUserPermission(userId: string): Promise<boolean> { return false; }
+async function updateUserInDB(_id: string, _data: any): Promise<any> { return null; }
+async function deleteUserFromDB(_id: string): Promise<boolean> { return false; }
+async function authenticateUser(_email: string, _password: string): Promise<any> { return null; }
+async function checkUserPermission(_userId: string): Promise<boolean> { return false; }

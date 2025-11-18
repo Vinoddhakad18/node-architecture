@@ -83,7 +83,7 @@ class ResponseHandler {
   /**
    * 204 No Content - Successful request with no content to return
    */
-  sendNoContent(req: Request, res: Response): Response {
+  sendNoContent(_req: Request, res: Response): Response {
     return res.status(204).send();
   }
 

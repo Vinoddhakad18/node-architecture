@@ -12,8 +12,8 @@ export const jwtConfig = {
   refreshSecret: config.JWT_REFRESH_SECRET || 'your-super-secret-refresh-key-change-in-production',
 
   // Token expiration times
-  accessTokenExpiry: (config.JWT_ACCESS_TOKEN_EXPIRY || '15m') as string, // 15 minutes
-  refreshTokenExpiry: (config.JWT_REFRESH_TOKEN_EXPIRY || '7d') as string, // 7 days
+  accessTokenExpiry: config.JWT_ACCESS_TOKEN_EXPIRY || '15m', // 15 minutes
+  refreshTokenExpiry: config.JWT_REFRESH_TOKEN_EXPIRY || '7d', // 7 days
 
   // Token issuer
   issuer: config.JWT_ISSUER || 'node-architecture-app',

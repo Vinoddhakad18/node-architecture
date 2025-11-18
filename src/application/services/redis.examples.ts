@@ -1,6 +1,6 @@
 import redisService from '../helpers/redis.helper';
 import { RedisTTL, RedisKeys } from '../config/redis.config';
-import logger from '../config/logger';
+import { logger } from '../config/logger';
 
 /**
  * Redis Usage Examples
@@ -140,6 +140,16 @@ export async function hashOperations() {
 }
 
 /**
+ * Cached user type for example
+ */
+interface CachedUser {
+  id: number;
+  name: string;
+  email: string;
+  createdAt: string;
+}
+
+/**
  * Example 5: Caching Database Query Results
  */
 export async function cacheQueryResults() {
@@ -150,7 +160,7 @@ export async function cacheQueryResults() {
     const cacheKey = RedisKeys.cache(`user:${userId}`);
 
     // Check cache first
-    let user = await redisService.get(cacheKey);
+    let user = await redisService.get<CachedUser>(cacheKey);
 
     if (user) {
       logger.info('User found in cache:', user);
@@ -158,7 +168,7 @@ export async function cacheQueryResults() {
       logger.info('Cache miss - fetching from database...');
 
       // Simulate database query
-      const dbUser = {
+      const dbUser: CachedUser = {
         id: userId,
         name: 'Bob Wilson',
         email: 'bob@example.com',

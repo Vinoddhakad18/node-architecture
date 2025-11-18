@@ -15,7 +15,7 @@ class JwtUtil {
   generateAccessToken(payload: JwtPayload): string {
     try {
       const options: SignOptions = {
-        expiresIn: jwtConfig.accessTokenExpiry as string | number,
+        expiresIn: jwtConfig.accessTokenExpiry as SignOptions['expiresIn'],
         issuer: jwtConfig.issuer,
         audience: jwtConfig.audience,
         algorithm: 'HS256',
@@ -38,9 +38,9 @@ class JwtUtil {
   generateRefreshToken(payload: JwtPayload): string {
     try {
       const options: SignOptions = {
-        expiresIn: jwtConfig.refreshTokenExpiry as string | number,
+        expiresIn: jwtConfig.refreshTokenExpiry as SignOptions['expiresIn'],
         issuer: jwtConfig.issuer,
-        audience: jwtConfig.audience as string,
+        audience: jwtConfig.audience,
         algorithm: 'HS256',
       };
 

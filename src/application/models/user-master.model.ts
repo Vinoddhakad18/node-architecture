@@ -27,7 +27,7 @@ export interface UserMasterAttributes {
 export interface UserMasterCreationAttributes
   extends Optional<
     UserMasterAttributes,
-    'id' | 'mobile' | 'role' | 'status' 
+    'id' | 'mobile' | 'role' | 'status' | 'last_login' | 'created_by' | 'updated_by' | 'created_at' | 'updated_at'
   > {}
 
 /**

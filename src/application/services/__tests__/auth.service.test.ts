@@ -6,7 +6,7 @@
 import authService from '../auth.service';
 import UserMaster from '../../models/user-master.model';
 import jwtUtil from '../../utils/jwt.util';
-import bcrypt from 'bcryptjs';
+import _bcrypt from 'bcryptjs';
 
 // Mock dependencies
 jest.mock('../../models/user-master.model');

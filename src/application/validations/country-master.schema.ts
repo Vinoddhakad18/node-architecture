@@ -7,14 +7,14 @@ export const createCountrySchema = z.object({
   body: z.object({
     name: z
       .string({
-        required_error: 'Country name is required',
+        error: 'Country name is required',
       })
       .min(1, 'Country name cannot be empty')
       .max(100, 'Country name must not exceed 100 characters')
       .trim(),
     code: z
       .string({
-        required_error: 'Country code is required',
+        error: 'Country code is required',
       })
       .min(2, 'Country code must be at least 2 characters')
       .max(3, 'Country code must not exceed 3 characters')
@@ -27,7 +27,7 @@ export const createCountrySchema = z.object({
       .nullable(),
     status: z
       .enum(['active', 'inactive'], {
-        errorMap: () => ({ message: 'Status must be either active or inactive' }),
+        error: 'Status must be either active or inactive',
       })
       .optional()
       .default('active'),
@@ -41,7 +41,7 @@ export const updateCountrySchema = z.object({
   params: z.object({
     id: z
       .string({
-        required_error: 'Country ID is required',
+        error: 'Country ID is required',
       })
       .transform(val => parseInt(val, 10))
       .refine(val => !isNaN(val) && val > 0, {
@@ -69,7 +69,7 @@ export const updateCountrySchema = z.object({
       .nullable(),
     status: z
       .enum(['active', 'inactive'], {
-        errorMap: () => ({ message: 'Status must be either active or inactive' }),
+        error: 'Status must be either active or inactive',
       })
       .optional(),
   }),
@@ -82,7 +82,7 @@ export const getCountryByIdSchema = z.object({
   params: z.object({
     id: z
       .string({
-        required_error: 'Country ID is required',
+        error: 'Country ID is required',
       })
       .transform(val => parseInt(val, 10))
       .refine(val => !isNaN(val) && val > 0, {
@@ -98,7 +98,7 @@ export const getCountryByCodeSchema = z.object({
   params: z.object({
     code: z
       .string({
-        required_error: 'Country code is required',
+        error: 'Country code is required',
       })
       .min(2, 'Country code must be at least 2 characters')
       .max(3, 'Country code must not exceed 3 characters'),
@@ -112,7 +112,7 @@ export const deleteCountrySchema = z.object({
   params: z.object({
     id: z
       .string({
-        required_error: 'Country ID is required',
+        error: 'Country ID is required',
       })
       .transform(val => parseInt(val, 10))
       .refine(val => !isNaN(val) && val > 0, {
@@ -143,18 +143,18 @@ export const listCountriesSchema = z.object({
     search: z.string().optional(),
     status: z
       .enum(['active', 'inactive'], {
-        errorMap: () => ({ message: 'Status must be either active or inactive' }),
+        error: 'Status must be either active or inactive',
       })
       .optional(),
     sortBy: z
       .enum(['name', 'code', 'created_at', 'updated_at'], {
-        errorMap: () => ({ message: 'Invalid sort field' }),
+        error: 'Invalid sort field',
       })
       .optional()
       .default('name'),
     sortOrder: z
       .enum(['ASC', 'DESC'], {
-        errorMap: () => ({ message: 'Sort order must be ASC or DESC' }),
+        error: 'Sort order must be ASC or DESC',
       })
       .optional()
       .default('ASC'),

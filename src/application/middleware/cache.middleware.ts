@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import redisService from '../helpers/redis.helper';
-import logger from '../config/logger';
+import { logger } from '../config/logger';
 import { RedisTTL } from '../config/redis.config';
 
 /**
@@ -77,7 +77,7 @@ export const cacheMiddleware = (options: CacheOptions = {}) => {
 
       if (cachedData) {
         logger.info(`Cache hit: ${cacheKey}`, {
-          requestId: req.id,
+          requestId: req.requestId,
           url: req.originalUrl,
         });
 
@@ -86,7 +86,7 @@ export const cacheMiddleware = (options: CacheOptions = {}) => {
       }
 
       logger.debug(`Cache miss: ${cacheKey}`, {
-        requestId: req.id,
+        requestId: req.requestId,
         url: req.originalUrl,
       });
 
@@ -100,7 +100,7 @@ export const cacheMiddleware = (options: CacheOptions = {}) => {
           .set(cacheKey, JSON.stringify(data), ttl)
           .then(() => {
             logger.info(`Response cached: ${cacheKey}`, {
-              requestId: req.id,
+              requestId: req.requestId,
               ttl,
             });
           })
@@ -108,7 +108,7 @@ export const cacheMiddleware = (options: CacheOptions = {}) => {
             logger.error('Cache set error:', {
               error: err.message,
               key: cacheKey,
-              requestId: req.id,
+              requestId: req.requestId,
             });
           });
 
@@ -121,7 +121,7 @@ export const cacheMiddleware = (options: CacheOptions = {}) => {
       logger.error('Cache middleware error:', {
         error: error instanceof Error ? error.message : 'Unknown error',
         key: cacheKey,
-        requestId: req.id,
+        requestId: req.requestId,
       });
 
       // Continue without cache on error (fail-safe)
@@ -166,7 +166,7 @@ export const invalidateCacheMiddleware = (options: {
             if (deletedCount > 0) {
               logger.info(`Cache invalidated: ${deletedCount} key(s) deleted`, {
                 pattern: fullPattern,
-                requestId: req.id,
+                requestId: req.requestId,
               });
             }
           })
@@ -174,7 +174,7 @@ export const invalidateCacheMiddleware = (options: {
             logger.error('Cache invalidation error:', {
               error: err.message,
               pattern: fullPattern,
-              requestId: req.id,
+              requestId: req.requestId,
             });
           });
       }

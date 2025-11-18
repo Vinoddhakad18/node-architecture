@@ -201,7 +201,7 @@ class CountryMasterController {
    * Get all active countries (for dropdowns)
    * GET /api/v1/countries/active/list
    */
-  async findAllActive(req: Request, res: Response): Promise<void> {
+  async findAllActive(_req: Request, res: Response): Promise<void> {
     try {
       const countries = await countryMasterService.findAllActive();
 

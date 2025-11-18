@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import redisService from '../helpers/redis.helper';
-import logger from '../config/logger';
+import { logger } from '../config/logger';
 import { RedisKeys } from '../config/redis.config';
 
 /**
@@ -38,7 +38,7 @@ const defaultKeyGenerator = (req: Request): string => {
  * Default rate limit exceeded handler
  */
 const defaultHandler = (
-  req: Request,
+  _req: Request,
   res: Response,
   options: Required<RateLimitOptions>
 ) => {
@@ -140,7 +140,7 @@ export const redisRateLimitMiddleware = (options: RateLimitOptions) => {
           currentCount,
           max,
           ttl,
-          requestId: req.id,
+          requestId: req.requestId,
           url: req.originalUrl,
         });
 
@@ -162,14 +162,14 @@ export const redisRateLimitMiddleware = (options: RateLimitOptions) => {
         currentCount,
         max,
         remaining: max - currentCount,
-        requestId: req.id,
+        requestId: req.requestId,
       });
 
       next();
     } catch (error) {
       logger.error('Rate limit middleware error:', {
         error: error instanceof Error ? error.message : 'Unknown error',
-        requestId: req.id,
+        requestId: req.requestId,
       });
 
       // On error, allow the request (fail open)
