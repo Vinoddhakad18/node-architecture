@@ -44,7 +44,8 @@
       "Bash(taskkill:*)",
       "Bash(npm run db:migrate:*)",
       "Bash(netstat:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

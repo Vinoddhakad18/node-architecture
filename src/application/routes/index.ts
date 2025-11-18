@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import authRoutes from './auth.routes';
 import metricsRoutes from './metrics.routes';
+import countryMasterRoutes from './country-master.routes';
 import { config } from '../../config';
 
 const router = Router();
@@ -14,6 +15,7 @@ router.get('/', (_req: Request, res: Response) => {
       version: '1.0.0',
       endpoints: {
         auth: '/auth',
+        countries: '/countries',
       },
     },
     'Welcome to MVC API'
@@ -24,6 +26,11 @@ router.get('/', (_req: Request, res: Response) => {
  * Authentication routes
  */
 router.use('/auth', authRoutes);
+
+/**
+ * Country Master routes
+ */
+router.use('/countries', countryMasterRoutes);
 
 /**
  * Metrics route (Prometheus endpoint)

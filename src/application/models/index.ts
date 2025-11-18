@@ -4,3 +4,4 @@
  */
 
 export { UserMaster, UserMasterAttributes, UserMasterCreationAttributes } from './user-master.model';
+export { CountryMaster, CountryMasterAttributes, CountryMasterCreationAttributes } from './country-master.model';
