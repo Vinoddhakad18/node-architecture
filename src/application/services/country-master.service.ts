@@ -1,6 +1,18 @@
 import { Op } from 'sequelize';
 import CountryMaster, { CountryMasterCreationAttributes } from '../models/country-master.model';
 import { logger } from '../config/logger';
+import redisService from '../helpers/redis.helper';
+import { RedisTTL } from '../config/redis.config';
+
+/**
+ * Cache key constants for country-master
+ */
+const CACHE_KEYS = {
+  COUNTRY_BY_ID: (id: number) => `country:id:${id}`,
+  COUNTRY_BY_CODE: (code: string) => `country:code:${code.toUpperCase()}`,
+  COUNTRIES_ACTIVE: 'countries:active',
+  COUNTRIES_LIST: (options: string) => `countries:list:${options}`,
+};
 
 /**
  * Query options for listing countries
@@ -43,6 +55,9 @@ class CountryMasterService {
         updated_by: userId || null,
       });
 
+      // Invalidate list caches
+      await this.invalidateListCaches();
+
       logger.info(`Country created: ${country.name} (${country.code})`);
       return country;
     } catch (error) {
@@ -64,6 +79,18 @@ class CountryMasterService {
         sortBy = 'name',
         sortOrder = 'ASC',
       } = options;
+
+      // Generate cache key based on query options
+      const cacheKey = CACHE_KEYS.COUNTRIES_LIST(
+        JSON.stringify({ page, limit, search, status, sortBy, sortOrder })
+      );
+
+      // Try to get from cache
+      const cached = await redisService.get<PaginatedResult<CountryMaster>>(cacheKey);
+      if (cached) {
+        logger.debug(`Cache hit for countries list: ${cacheKey}`);
+        return cached;
+      }
 
       const offset = (page - 1) * limit;
       const where: any = {};
@@ -88,7 +115,7 @@ class CountryMasterService {
         order: [[sortBy, sortOrder]],
       });
 
-      return {
+      const result = {
         data: rows,
         pagination: {
           total: count,
@@ -97,6 +124,12 @@ class CountryMasterService {
           totalPages: Math.ceil(count / limit),
         },
       };
+
+      // Cache the result
+      await redisService.set(cacheKey, result, RedisTTL.MEDIUM);
+      logger.debug(`Cache set for countries list: ${cacheKey}`);
+
+      return result;
     } catch (error) {
       logger.error('Error fetching countries:', error);
       throw error;
@@ -108,7 +141,23 @@ class CountryMasterService {
    */
   async findById(id: number): Promise<CountryMaster | null> {
     try {
+      const cacheKey = CACHE_KEYS.COUNTRY_BY_ID(id);
+
+      // Try to get from cache
+      const cached = await redisService.get<CountryMaster>(cacheKey);
+      if (cached) {
+        logger.debug(`Cache hit for country id: ${id}`);
+        return cached;
+      }
+
       const country = await CountryMaster.findByPk(id);
+
+      if (country) {
+        // Cache the result
+        await redisService.set(cacheKey, country.toJSON(), RedisTTL.LONG);
+        logger.debug(`Cache set for country id: ${id}`);
+      }
+
       return country;
     } catch (error) {
       logger.error(`Error fetching country with id ${id}:`, error);
@@ -121,9 +170,25 @@ class CountryMasterService {
    */
   async findByCode(code: string): Promise<CountryMaster | null> {
     try {
+      const cacheKey = CACHE_KEYS.COUNTRY_BY_CODE(code);
+
+      // Try to get from cache
+      const cached = await redisService.get<CountryMaster>(cacheKey);
+      if (cached) {
+        logger.debug(`Cache hit for country code: ${code}`);
+        return cached;
+      }
+
       const country = await CountryMaster.findOne({
         where: { code: code.toUpperCase() },
       });
+
+      if (country) {
+        // Cache the result
+        await redisService.set(cacheKey, country.toJSON(), RedisTTL.LONG);
+        logger.debug(`Cache set for country code: ${code}`);
+      }
+
       return country;
     } catch (error) {
       logger.error(`Error fetching country with code ${code}:`, error);
@@ -146,10 +211,20 @@ class CountryMasterService {
         return null;
       }
 
+      const oldCode = country.code;
+
       await country.update({
         ...data,
         updated_by: userId || country.updated_by,
       });
+
+      // Invalidate caches
+      await this.invalidateCountryCache(id, oldCode);
+      // If code was updated, also invalidate the new code cache
+      if (data.code && data.code !== oldCode) {
+        await redisService.del(CACHE_KEYS.COUNTRY_BY_CODE(data.code));
+      }
+      await this.invalidateListCaches();
 
       logger.info(`Country updated: ${country.name} (${country.code})`);
       return country;
@@ -170,10 +245,16 @@ class CountryMasterService {
         return false;
       }
 
+      const code = country.code;
+
       await country.update({
         status: 'inactive',
         updated_by: userId || country.updated_by,
       });
+
+      // Invalidate caches
+      await this.invalidateCountryCache(id, code);
+      await this.invalidateListCaches();
 
       logger.info(`Country deleted (soft): ${country.name} (${country.code})`);
       return true;
@@ -188,11 +269,19 @@ class CountryMasterService {
    */
   async hardDelete(id: number): Promise<boolean> {
     try {
+      // Get country data before deletion for cache invalidation
+      const country = await CountryMaster.findByPk(id);
+      const code = country?.code;
+
       const result = await CountryMaster.destroy({
         where: { id },
       });
 
       if (result > 0) {
+        // Invalidate caches
+        await this.invalidateCountryCache(id, code);
+        await this.invalidateListCaches();
+
         logger.info(`Country hard deleted: id ${id}`);
         return true;
       }
@@ -209,10 +298,24 @@ class CountryMasterService {
    */
   async findAllActive(): Promise<CountryMaster[]> {
     try {
+      const cacheKey = CACHE_KEYS.COUNTRIES_ACTIVE;
+
+      // Try to get from cache
+      const cached = await redisService.get<CountryMaster[]>(cacheKey);
+      if (cached) {
+        logger.debug('Cache hit for active countries');
+        return cached;
+      }
+
       const countries = await CountryMaster.findAll({
         where: { status: 'active' },
         order: [['name', 'ASC']],
       });
+
+      // Cache the result - use LONG TTL as active countries rarely change
+      await redisService.set(cacheKey, countries.map(c => c.toJSON()), RedisTTL.LONG);
+      logger.debug('Cache set for active countries');
+
       return countries;
     } catch (error) {
       logger.error('Error fetching active countries:', error);
@@ -235,6 +338,46 @@ class CountryMasterService {
     } catch (error) {
       logger.error(`Error checking country code ${code}:`, error);
       throw error;
+    }
+  }
+
+  /**
+   * Invalidate cache for a specific country
+   */
+  private async invalidateCountryCache(id: number, code?: string): Promise<void> {
+    try {
+      const keysToDelete = [CACHE_KEYS.COUNTRY_BY_ID(id)];
+
+      if (code) {
+        keysToDelete.push(CACHE_KEYS.COUNTRY_BY_CODE(code));
+      }
+
+      await redisService.del(keysToDelete);
+      logger.debug(`Cache invalidated for country id: ${id}, code: ${code}`);
+    } catch (error) {
+      logger.error('Error invalidating country cache:', error);
+      // Don't throw - cache invalidation failure shouldn't break the operation
+    }
+  }
+
+  /**
+   * Invalidate all list caches (findAll, findAllActive)
+   */
+  private async invalidateListCaches(): Promise<void> {
+    try {
+      // Delete active countries cache
+      await redisService.del(CACHE_KEYS.COUNTRIES_ACTIVE);
+
+      // Delete all list caches by pattern
+      const listKeys = await redisService.keys('countries:list:*');
+      if (listKeys.length > 0) {
+        await redisService.del(listKeys);
+      }
+
+      logger.debug('List caches invalidated for countries');
+    } catch (error) {
+      logger.error('Error invalidating list caches:', error);
+      // Don't throw - cache invalidation failure shouldn't break the operation
     }
   }
 }
