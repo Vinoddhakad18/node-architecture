@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { AppError } from '../../domain/errors/AppError';
-import { logger } from '../config/logger';
+import { AppError } from '@/domain/errors/AppError';
+import { logger } from '@config/logger';
 
 /**
  * Global error handling middleware

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import countryMasterService from '../services/country-master.service';
-import { logger } from '../config/logger';
+import countryMasterService from '@services/country-master.service';
+import { logger } from '@config/logger';
 
 /**
  * Country Master Controller

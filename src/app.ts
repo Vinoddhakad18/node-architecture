@@ -26,13 +26,13 @@ import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
-import { config } from './config';
-import routes from './application/routes';
-import { errorHandler, notFoundHandler, logger, errorLogger, attachResponseHandlers, requestIdMiddleware } from './application/middleware';
-import { metricsMiddleware } from './application/middleware/metrics';
-import { connectDatabase } from './application/config/sequelize/database';
+import { config } from '@/config';
+import routes from '@routes/index';
+import { errorHandler, notFoundHandler, logger, errorLogger, attachResponseHandlers, requestIdMiddleware } from '@middleware/index';
+import { metricsMiddleware } from '@middleware/metrics';
+import { connectDatabase } from '@config/sequelize/database';
 import { swaggerSpec, swaggerUiOptions } from './swagger';
-import redisService from './application/helpers/redis.helper';
+import redisService from '@helpers/redis.helper';
 
 /**
  * Rate limiter configuration

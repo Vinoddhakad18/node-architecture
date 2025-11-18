@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import authRoutes from './auth.routes';
 import metricsRoutes from './metrics.routes';
 import countryMasterRoutes from './country-master.routes';
-import { config } from '../../config';
+import { config } from '@/config';
 
 const router = Router();
 

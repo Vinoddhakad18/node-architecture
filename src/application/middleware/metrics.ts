@@ -9,7 +9,7 @@ import {
   normalizeRoutePath,
   getRequestSize,
   getResponseSize,
-} from '../config/metrics';
+} from '@config/metrics';
 
 /**
  * Prometheus metrics middleware
@@ -81,7 +81,7 @@ export const metricsMiddleware = (req: Request, res: Response, next: NextFunctio
  *   throw error;
  * }
  */
-import { dbQueryDuration, dbQueryCounter } from '../config/metrics';
+import { dbQueryDuration, dbQueryCounter } from '@config/metrics';
 
 export const trackDbQuery = (operation: string, model: string) => {
   const startTime = Date.now();
@@ -101,7 +101,7 @@ export const trackDbQuery = (operation: string, model: string) => {
  * trackAuthAttempt('success');
  * trackAuthAttempt('failure');
  */
-import { authAttempts } from '../config/metrics';
+import { authAttempts } from '@config/metrics';
 
 export const trackAuthAttempt = (status: 'success' | 'failure') => {
   authAttempts.inc({ status });
@@ -115,7 +115,7 @@ export const trackAuthAttempt = (status: 'success' | 'failure') => {
  * trackUserOperation('registration');
  * trackUserOperation('profile_update');
  */
-import { userOperations } from '../config/metrics';
+import { userOperations } from '@config/metrics';
 
 export const trackUserOperation = (operation: string) => {
   userOperations.inc({ operation });
@@ -129,7 +129,7 @@ export const trackUserOperation = (operation: string) => {
  * trackCacheHit('user_cache');
  * trackCacheMiss('user_cache');
  */
-import { cacheHits, cacheMisses } from '../config/metrics';
+import { cacheHits, cacheMisses } from '@config/metrics';
 
 export const trackCacheHit = (cacheName: string) => {
   cacheHits.inc({ cache_name: cacheName });

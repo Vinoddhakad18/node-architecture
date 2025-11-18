@@ -1,7 +1,7 @@
-import UserMaster from '../models/user-master.model';
-import { logger } from '../config/logger';
-import jwtUtil from '../utils/jwt.util';
-import { TokenPair } from '../interfaces/jwt.interface';
+import UserMaster from '@models/user-master.model';
+import { logger } from '@config/logger';
+import jwtUtil from '@application/utils/jwt.util';
+import { TokenPair } from '@interfaces/jwt.interface';
 
 /**
  * Authentication Service

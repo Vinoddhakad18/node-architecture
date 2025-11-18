@@ -1,6 +1,6 @@
 import client from 'prom-client';
 import { Request, Response } from 'express';
-import { config } from '../../config';
+import { config } from '@/config';
 
 // Create a Registry which registers the metrics
 export const register = new client.Registry();

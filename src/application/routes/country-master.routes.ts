@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import countryMasterController from '../controllers/country-master.controller';
-import { validateRequest } from '../middleware/validateRequest';
-import { authenticate } from '../middleware/auth.middleware';
+import countryMasterController from '@controllers/country-master.controller';
+import { validateRequest } from '@middleware/validateRequest';
+import { authenticate } from '@middleware/auth.middleware';
 import {
   createCountrySchema,
   updateCountrySchema,
@@ -9,7 +9,7 @@ import {
   getCountryByCodeSchema,
   deleteCountrySchema,
   listCountriesSchema,
-} from '../validations/country-master.schema';
+} from '@application/validations/country-master.schema';
 
 const router = Router();
 

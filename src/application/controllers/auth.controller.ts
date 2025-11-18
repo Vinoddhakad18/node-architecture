@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import authService from '../services/auth.service';
-import { logger } from '../config/logger';
-import { trackAuthAttempt } from '../middleware/metrics';
+import authService from '@services/auth.service';
+import { logger } from '@config/logger';
+import { trackAuthAttempt } from '@middleware/metrics';
 
 /**
  * Authentication Controller

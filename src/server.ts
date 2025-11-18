@@ -1,8 +1,8 @@
 import { createApp } from './app';
-import { config } from './config';
-import { logger } from './application/config/logger';
-import { gracefulShutdown } from './application/config/sequelize/database';
-import { initializeServerStartTime, getFormattedServerUptime } from './application/utils/uptime';
+import { config } from '@/config';
+import { logger } from '@config/logger';
+import { gracefulShutdown } from '@config/sequelize/database';
+import { initializeServerStartTime, getFormattedServerUptime } from '@application/utils/uptime';
 
 /**
  * Start the Express server

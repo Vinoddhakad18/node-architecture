@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import jwtUtil from '../utils/jwt.util';
-import { logger } from '../config/logger';
+import jwtUtil from '@application/utils/jwt.util';
+import { logger } from '@config/logger';
 
 /**
  * Authentication Middleware

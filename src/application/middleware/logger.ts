@@ -1,7 +1,7 @@
 import morgan from 'morgan';
 import { Request, RequestHandler } from 'express';
-import { stream, logger as winstonLogger } from '../config/logger';
-import { config } from '../../config';
+import { stream, logger as winstonLogger } from '@config/logger';
+import { config } from '@/config';
 
 /**
  * Custom Morgan token for real IP address
