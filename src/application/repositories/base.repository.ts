@@ -1,4 +1,4 @@
-import { Model, ModelStatic, FindOptions, CreateOptions, UpdateOptions, DestroyOptions, Transaction } from 'sequelize';
+import { Model, ModelStatic, FindOptions, CreateOptions, UpdateOptions, DestroyOptions, Transaction, CreationAttributes, WhereOptions } from 'sequelize';
 
 /**
  * Base Repository Interface
@@ -54,7 +54,7 @@ export abstract class BaseRepository<
    * Create a new record
    */
   async create(data: TCreationAttributes, options?: CreateOptions): Promise<TModel> {
-    return this.model.create(data as any, options);
+    return this.model.create(data as CreationAttributes<TModel>, options);
   }
 
   /**
@@ -69,7 +69,7 @@ export abstract class BaseRepository<
     if (!record) {
       return null;
     }
-    await record.update(data as any, options);
+    await record.update(data as Partial<TModel>, options);
     return record;
   }
 
@@ -78,7 +78,7 @@ export abstract class BaseRepository<
    */
   async delete(id: number, options?: DestroyOptions): Promise<boolean> {
     const result = await this.model.destroy({
-      where: { id } as any,
+      where: { id } as unknown as WhereOptions<TAttributes>,
       ...options,
     });
     return result > 0;
@@ -105,7 +105,7 @@ export abstract class BaseRepository<
     data: TCreationAttributes[],
     options?: CreateOptions
   ): Promise<TModel[]> {
-    return this.model.bulkCreate(data as any[], options);
+    return this.model.bulkCreate(data as CreationAttributes<TModel>[], options);
   }
 
   /**

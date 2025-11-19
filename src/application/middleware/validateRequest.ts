@@ -13,7 +13,7 @@ export const validateRequest = (schema: ZodType) => {
     } catch (error) {
       if (error instanceof ZodError) {
         const errorMessages = error.issues.map((issue) => ({
-          path: issue.path.slice(1).join('.'),
+          field: issue.path.slice(1).join('.'),
           message: issue.message,
         }));
         return res.sendBadRequest('Validation failed', errorMessages);

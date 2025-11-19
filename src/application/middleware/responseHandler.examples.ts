@@ -187,7 +187,7 @@ export const customResponse = async (_req: Request, res: Response) => {
     { message: 'I am a teapot' },  // data
     'Teapot response',             // message
     true,                          // success flag
-    null                           // errors (optional)
+    undefined                      // errors (optional)
   );
 };
 

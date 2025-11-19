@@ -1,4 +1,4 @@
-import { Op, FindOptions } from 'sequelize';
+import { Op, FindOptions, WhereOptions } from 'sequelize';
 import { BaseRepository } from './base.repository';
 import CountryMaster, {
   CountryMasterAttributes,
@@ -34,9 +34,9 @@ export class CountryRepository extends BaseRepository<
     return this.findAll({
       ...options,
       where: {
-        ...(options?.where as any),
+        ...(options?.where as WhereOptions<CountryMasterAttributes>),
         status: 'active',
-      },
+      } as WhereOptions<CountryMasterAttributes>,
       order: [['name', 'ASC']],
     });
   }
@@ -45,9 +45,9 @@ export class CountryRepository extends BaseRepository<
    * Check if country code exists
    */
   async isCodeExists(code: string, excludeId?: number): Promise<boolean> {
-    const where: any = { code: code.toUpperCase() };
+    const where: WhereOptions<CountryMasterAttributes> = { code: code.toUpperCase() };
     if (excludeId) {
-      where.id = { [Op.ne]: excludeId };
+      (where as Record<string, unknown>).id = { [Op.ne]: excludeId };
     }
     return this.exists({ where });
   }
@@ -59,12 +59,12 @@ export class CountryRepository extends BaseRepository<
     return this.findAll({
       ...options,
       where: {
-        ...(options?.where as any),
+        ...(options?.where as WhereOptions<CountryMasterAttributes>),
         [Op.or]: [
           { name: { [Op.like]: `%${query}%` } },
           { code: { [Op.like]: `%${query}%` } },
         ],
-      },
+      } as WhereOptions<CountryMasterAttributes>,
     });
   }
 
@@ -75,7 +75,7 @@ export class CountryRepository extends BaseRepository<
     const result = await this.update(id, {
       status: 'inactive',
       updated_by: updatedBy,
-    } as any);
+    } as Partial<CountryMasterAttributes>);
     return result !== null;
   }
 
@@ -86,7 +86,7 @@ export class CountryRepository extends BaseRepository<
     const result = await this.update(id, {
       status: 'active',
       updated_by: updatedBy,
-    } as any);
+    } as Partial<CountryMasterAttributes>);
     return result !== null;
   }
 

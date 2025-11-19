@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { AppError } from '@/domain/errors/AppError';
 import { logger } from '@config/logger';
+import { ValidationError, ErrorDetail } from '@interfaces/common.interface';
 
 /**
  * Global error handling middleware
@@ -23,7 +24,12 @@ export const errorHandler = (
       });
     }
 
-    const responseBody: any = {
+    const responseBody: {
+      success: boolean;
+      message: string;
+      errors?: ValidationError[] | ErrorDetail;
+      details?: string;
+    } = {
       success: false,
       message: err.message,
     };
@@ -31,7 +37,7 @@ export const errorHandler = (
     // Include validation details if present
     if (err.details) {
       try {
-        responseBody.errors = JSON.parse(err.details);
+        responseBody.errors = JSON.parse(err.details) as ValidationError[] | ErrorDetail;
       } catch {
         responseBody.details = err.details;
       }

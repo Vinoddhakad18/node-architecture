@@ -94,7 +94,7 @@ export const cacheMiddleware = (options: CacheOptions = {}) => {
       const originalJson = res.json.bind(res);
 
       // Override res.json to cache the response
-      res.json = (data: any) => {
+      res.json = <T>(data: T) => {
         // Cache the response data
         redisService
           .set(cacheKey, JSON.stringify(data), ttl)
@@ -149,7 +149,7 @@ export const invalidateCacheMiddleware = (options: {
     const originalSend = res.send.bind(res);
 
     // Override send to invalidate cache after response
-    res.send = (data: any) => {
+    res.send = <T>(data: T) => {
       // Invalidate cache asynchronously (don't block response)
       if (res.statusCode >= 200 && res.statusCode < 300) {
         const fullPattern = pattern.startsWith(keyPrefix) ? pattern : `${keyPrefix}:${pattern}`;

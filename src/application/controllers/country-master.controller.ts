@@ -1,6 +1,7 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import countryMasterService from '@services/country-master.service';
 import { logger } from '@config/logger';
+import { AuthenticatedRequest, getErrorMessage } from '@interfaces/common.interface';
 
 /**
  * Country Master Controller
@@ -11,10 +12,10 @@ class CountryMasterController {
    * Create a new country
    * POST /api/v1/countries
    */
-  async create(req: Request, res: Response): Promise<void> {
+  async create(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { name, code, currency_code, status } = req.body;
-      const userId = (req as any).user?.userId;
+      const userId = req.user?.userId;
 
       // Check if code already exists
       const codeExists = await countryMasterService.isCodeExists(code);
@@ -29,9 +30,9 @@ class CountryMasterController {
       );
 
       res.sendCreated(country, 'Country created successfully');
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error in create country controller:', error);
-      res.sendServerError(error.message || 'Failed to create country');
+      res.sendServerError(getErrorMessage(error) || 'Failed to create country');
     }
   }
 
@@ -39,7 +40,7 @@ class CountryMasterController {
    * Get all countries with pagination
    * GET /api/v1/countries
    */
-  async findAll(req: Request, res: Response): Promise<void> {
+  async findAll(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const {
         page = 1,
@@ -60,9 +61,9 @@ class CountryMasterController {
       });
 
       res.sendSuccess(result, 'Countries retrieved successfully');
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error in findAll countries controller:', error);
-      res.sendServerError(error.message || 'Failed to retrieve countries');
+      res.sendServerError(getErrorMessage(error) || 'Failed to retrieve countries');
     }
   }
 
@@ -70,7 +71,7 @@ class CountryMasterController {
    * Get country by ID
    * GET /api/v1/countries/:id
    */
-  async findById(req: Request, res: Response): Promise<void> {
+  async findById(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
@@ -82,9 +83,9 @@ class CountryMasterController {
       }
 
       res.sendSuccess(country, 'Country retrieved successfully');
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error in findById country controller:', error);
-      res.sendServerError(error.message || 'Failed to retrieve country');
+      res.sendServerError(getErrorMessage(error) || 'Failed to retrieve country');
     }
   }
 
@@ -92,7 +93,7 @@ class CountryMasterController {
    * Get country by code
    * GET /api/v1/countries/code/:code
    */
-  async findByCode(req: Request, res: Response): Promise<void> {
+  async findByCode(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { code } = req.params;
 
@@ -104,9 +105,9 @@ class CountryMasterController {
       }
 
       res.sendSuccess(country, 'Country retrieved successfully');
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error in findByCode country controller:', error);
-      res.sendServerError(error.message || 'Failed to retrieve country');
+      res.sendServerError(getErrorMessage(error) || 'Failed to retrieve country');
     }
   }
 
@@ -114,11 +115,11 @@ class CountryMasterController {
    * Update country
    * PUT /api/v1/countries/:id
    */
-  async update(req: Request, res: Response): Promise<void> {
+  async update(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const { name, code, currency_code, status } = req.body;
-      const userId = (req as any).user?.userId;
+      const userId = req.user?.userId;
 
       // Check if code already exists (excluding current record)
       if (code) {
@@ -146,9 +147,9 @@ class CountryMasterController {
       }
 
       res.sendSuccess(country, 'Country updated successfully');
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error in update country controller:', error);
-      res.sendServerError(error.message || 'Failed to update country');
+      res.sendServerError(getErrorMessage(error) || 'Failed to update country');
     }
   }
 
@@ -156,10 +157,10 @@ class CountryMasterController {
    * Delete country (soft delete)
    * DELETE /api/v1/countries/:id
    */
-  async delete(req: Request, res: Response): Promise<void> {
+  async delete(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const userId = (req as any).user?.userId;
+      const userId = req.user?.userId;
 
       const deleted = await countryMasterService.delete(Number(id), userId);
 
@@ -169,9 +170,9 @@ class CountryMasterController {
       }
 
       res.sendSuccess(null, 'Country deleted successfully');
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error in delete country controller:', error);
-      res.sendServerError(error.message || 'Failed to delete country');
+      res.sendServerError(getErrorMessage(error) || 'Failed to delete country');
     }
   }
 
@@ -179,7 +180,7 @@ class CountryMasterController {
    * Hard delete country
    * DELETE /api/v1/countries/:id/permanent
    */
-  async hardDelete(req: Request, res: Response): Promise<void> {
+  async hardDelete(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
@@ -191,9 +192,9 @@ class CountryMasterController {
       }
 
       res.sendSuccess(null, 'Country permanently deleted');
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error in hardDelete country controller:', error);
-      res.sendServerError(error.message || 'Failed to permanently delete country');
+      res.sendServerError(getErrorMessage(error) || 'Failed to permanently delete country');
     }
   }
 
@@ -201,14 +202,14 @@ class CountryMasterController {
    * Get all active countries (for dropdowns)
    * GET /api/v1/countries/active/list
    */
-  async findAllActive(_req: Request, res: Response): Promise<void> {
+  async findAllActive(_req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const countries = await countryMasterService.findAllActive();
 
       res.sendSuccess(countries, 'Active countries retrieved successfully');
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error in findAllActive countries controller:', error);
-      res.sendServerError(error.message || 'Failed to retrieve active countries');
+      res.sendServerError(getErrorMessage(error) || 'Failed to retrieve active countries');
     }
   }
 }

@@ -25,7 +25,8 @@ router.get('/', async (_req: Request, res: Response) => {
     const metrics = await register.metrics();
     res.end(metrics);
   } catch (error) {
-    res.sendServerError('Error collecting metrics', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    res.sendServerError('Error collecting metrics', errorMessage);
   }
 });
 

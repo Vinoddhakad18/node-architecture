@@ -1,36 +1,33 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
+import { ValidationError, ErrorDetail, ResponseMeta } from '@interfaces/common.interface';
 
 /**
  * Response Handler Middleware
  * Provides standardized response methods for all HTTP status codes
  */
 
-interface ResponseData {
+interface ResponseData<T = unknown> {
   success: boolean;
   message: string;
-  data?: any;
-  errors?: any;
-  meta?: {
-    timestamp: string;
-    path: string;
-    method: string;
-  };
+  data?: T;
+  errors?: ValidationError[] | ErrorDetail | string;
+  meta?: ResponseMeta;
 }
 
 class ResponseHandler {
   /**
    * Base response method
    */
-  private sendResponse(
+  private sendResponse<T = unknown>(
     req: Request,
     res: Response,
-    data: any,
+    data: T | null,
     message: string,
     statusCode: number,
     success: boolean,
-    errors?: any
+    errors?: ValidationError[] | ErrorDetail | string
   ): Response {
-    const response: ResponseData = {
+    const response: ResponseData<T> = {
       success,
       message,
     };
@@ -62,22 +59,22 @@ class ResponseHandler {
   /**
    * 200 OK - Standard success response
    */
-  sendSuccess(req: Request, res: Response, data?: any, message: string = 'Request successful'): Response {
-    return this.sendResponse(req, res, data, message, 200, true);
+  sendSuccess<T = unknown>(req: Request, res: Response, data?: T, message: string = 'Request successful'): Response {
+    return this.sendResponse(req, res, data ?? null, message, 200, true);
   }
 
   /**
    * 201 Created - Resource created successfully
    */
-  sendCreated(req: Request, res: Response, data?: any, message: string = 'Resource created successfully'): Response {
-    return this.sendResponse(req, res, data, message, 201, true);
+  sendCreated<T = unknown>(req: Request, res: Response, data?: T, message: string = 'Resource created successfully'): Response {
+    return this.sendResponse(req, res, data ?? null, message, 201, true);
   }
 
   /**
    * 202 Accepted - Request accepted for processing
    */
-  sendAccepted(req: Request, res: Response, data?: any, message: string = 'Request accepted for processing'): Response {
-    return this.sendResponse(req, res, data, message, 202, true);
+  sendAccepted<T = unknown>(req: Request, res: Response, data?: T, message: string = 'Request accepted for processing'): Response {
+    return this.sendResponse(req, res, data ?? null, message, 202, true);
   }
 
   /**
@@ -92,7 +89,7 @@ class ResponseHandler {
   /**
    * 400 Bad Request - Invalid request data
    */
-  sendBadRequest(req: Request, res: Response, message: string = 'Bad request', errors?: any): Response {
+  sendBadRequest(req: Request, res: Response, message: string = 'Bad request', errors?: ValidationError[] | ErrorDetail | string): Response {
     return this.sendResponse(req, res, null, message, 400, false, errors);
   }
 
@@ -120,14 +117,14 @@ class ResponseHandler {
   /**
    * 409 Conflict - Request conflicts with current state
    */
-  sendConflict(req: Request, res: Response, message: string = 'Resource conflict', errors?: any): Response {
+  sendConflict(req: Request, res: Response, message: string = 'Resource conflict', errors?: ValidationError[] | ErrorDetail | string): Response {
     return this.sendResponse(req, res, null, message, 409, false, errors);
   }
 
   /**
    * 422 Unprocessable Entity - Validation error
    */
-  sendValidationError(req: Request, res: Response, errors: any, message: string = 'Validation failed'): Response {
+  sendValidationError(req: Request, res: Response, errors: ValidationError[] | ErrorDetail | string, message: string = 'Validation failed'): Response {
     return this.sendResponse(req, res, null, message, 422, false, errors);
   }
 
@@ -143,7 +140,7 @@ class ResponseHandler {
   /**
    * 500 Internal Server Error - Generic server error
    */
-  sendServerError(req: Request, res: Response, message: string = 'Internal server error', error?: any): Response {
+  sendServerError(req: Request, res: Response, message: string = 'Internal server error', error?: ErrorDetail | string): Response {
     const errorDetails = process.env.NODE_ENV === 'development' ? error : undefined;
     return this.sendResponse(req, res, null, message, 500, false, errorDetails);
   }
@@ -167,14 +164,14 @@ class ResponseHandler {
   /**
    * Send custom response with any status code
    */
-  sendCustom(
+  sendCustom<T = unknown>(
     req: Request,
     res: Response,
     statusCode: number,
-    data: any,
+    data: T | null,
     message: string,
     success: boolean,
-    errors?: any
+    errors?: ValidationError[] | ErrorDetail | string
   ): Response {
     return this.sendResponse(req, res, data, message, statusCode, success, errors);
   }
@@ -184,22 +181,22 @@ class ResponseHandler {
 export const responseHandler = new ResponseHandler();
 
 // Export as Express middleware to attach methods to res object
-export const attachResponseHandlers = (req: Request, res: Response, next: any): void => {
-  res.sendSuccess = (data?: any, message?: string) => responseHandler.sendSuccess(req, res, data, message);
-  res.sendCreated = (data?: any, message?: string) => responseHandler.sendCreated(req, res, data, message);
-  res.sendAccepted = (data?: any, message?: string) => responseHandler.sendAccepted(req, res, data, message);
+export const attachResponseHandlers = (req: Request, res: Response, next: NextFunction): void => {
+  res.sendSuccess = <T = unknown>(data?: T, message?: string) => responseHandler.sendSuccess(req, res, data, message);
+  res.sendCreated = <T = unknown>(data?: T, message?: string) => responseHandler.sendCreated(req, res, data, message);
+  res.sendAccepted = <T = unknown>(data?: T, message?: string) => responseHandler.sendAccepted(req, res, data, message);
   res.sendNoContent = () => responseHandler.sendNoContent(req, res);
-  res.sendBadRequest = (message?: string, errors?: any) => responseHandler.sendBadRequest(req, res, message, errors);
+  res.sendBadRequest = (message?: string, errors?: ValidationError[] | ErrorDetail | string) => responseHandler.sendBadRequest(req, res, message, errors);
   res.sendUnauthorized = (message?: string) => responseHandler.sendUnauthorized(req, res, message);
   res.sendForbidden = (message?: string) => responseHandler.sendForbidden(req, res, message);
   res.sendNotFound = (message?: string) => responseHandler.sendNotFound(req, res, message);
-  res.sendConflict = (message?: string, errors?: any) => responseHandler.sendConflict(req, res, message, errors);
-  res.sendValidationError = (errors: any, message?: string) => responseHandler.sendValidationError(req, res, errors, message);
+  res.sendConflict = (message?: string, errors?: ValidationError[] | ErrorDetail | string) => responseHandler.sendConflict(req, res, message, errors);
+  res.sendValidationError = (errors: ValidationError[] | ErrorDetail | string, message?: string) => responseHandler.sendValidationError(req, res, errors, message);
   res.sendTooManyRequests = (message?: string) => responseHandler.sendTooManyRequests(req, res, message);
-  res.sendServerError = (message?: string, error?: any) => responseHandler.sendServerError(req, res, message, error);
+  res.sendServerError = (message?: string, error?: ErrorDetail | string) => responseHandler.sendServerError(req, res, message, error);
   res.sendNotImplemented = (message?: string) => responseHandler.sendNotImplemented(req, res, message);
   res.sendServiceUnavailable = (message?: string) => responseHandler.sendServiceUnavailable(req, res, message);
-  res.sendCustom = (statusCode: number, data: any, message: string, success: boolean, errors?: any) =>
+  res.sendCustom = <T = unknown>(statusCode: number, data: T | null, message: string, success: boolean, errors?: ValidationError[] | ErrorDetail | string) =>
     responseHandler.sendCustom(req, res, statusCode, data, message, success, errors);
 
   next();
@@ -209,21 +206,21 @@ export const attachResponseHandlers = (req: Request, res: Response, next: any): 
 declare global {
   namespace Express {
     interface Response {
-      sendSuccess: (data?: any, message?: string) => Response;
-      sendCreated: (data?: any, message?: string) => Response;
-      sendAccepted: (data?: any, message?: string) => Response;
+      sendSuccess: <T = unknown>(data?: T, message?: string) => Response;
+      sendCreated: <T = unknown>(data?: T, message?: string) => Response;
+      sendAccepted: <T = unknown>(data?: T, message?: string) => Response;
       sendNoContent: () => Response;
-      sendBadRequest: (message?: string, errors?: any) => Response;
+      sendBadRequest: (message?: string, errors?: ValidationError[] | ErrorDetail | string) => Response;
       sendUnauthorized: (message?: string) => Response;
       sendForbidden: (message?: string) => Response;
       sendNotFound: (message?: string) => Response;
-      sendConflict: (message?: string, errors?: any) => Response;
-      sendValidationError: (errors: any, message?: string) => Response;
+      sendConflict: (message?: string, errors?: ValidationError[] | ErrorDetail | string) => Response;
+      sendValidationError: (errors: ValidationError[] | ErrorDetail | string, message?: string) => Response;
       sendTooManyRequests: (message?: string) => Response;
-      sendServerError: (message?: string, error?: any) => Response;
+      sendServerError: (message?: string, error?: ErrorDetail | string) => Response;
       sendNotImplemented: (message?: string) => Response;
       sendServiceUnavailable: (message?: string) => Response;
-      sendCustom: (statusCode: number, data: any, message: string, success: boolean, errors?: any) => Response;
+      sendCustom: <T = unknown>(statusCode: number, data: T | null, message: string, success: boolean, errors?: ValidationError[] | ErrorDetail | string) => Response;
     }
   }
 }

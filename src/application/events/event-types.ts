@@ -64,7 +64,7 @@ export interface UserCreatedPayload extends BaseEventPayload {
 
 export interface UserUpdatedPayload extends BaseEventPayload {
   userId: number;
-  changes: Record<string, { old: any; new: any }>;
+  changes: Record<string, { old: unknown; new: unknown }>;
 }
 
 export interface UserDeletedPayload extends BaseEventPayload {
@@ -106,7 +106,7 @@ export interface CountryCreatedPayload extends BaseEventPayload {
 
 export interface CountryUpdatedPayload extends BaseEventPayload {
   countryId: number;
-  changes: Record<string, { old: any; new: any }>;
+  changes: Record<string, { old: unknown; new: unknown }>;
 }
 
 export interface CountryDeletedPayload extends BaseEventPayload {
@@ -143,7 +143,7 @@ export interface CacheInvalidatedPayload extends BaseEventPayload {
  */
 export interface SystemErrorPayload extends BaseEventPayload {
   error: Error;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 /**

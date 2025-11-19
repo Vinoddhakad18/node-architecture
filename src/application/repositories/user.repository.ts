@@ -1,4 +1,4 @@
-import { Op, FindOptions } from 'sequelize';
+import { Op, FindOptions, WhereOptions } from 'sequelize';
 import { BaseRepository } from './base.repository';
 import UserMaster, {
   UserMasterAttributes,
@@ -54,9 +54,9 @@ export class UserRepository extends BaseRepository<
     return this.findAll({
       ...options,
       where: {
-        ...(options?.where as any),
+        ...(options?.where as WhereOptions<UserMasterAttributes>),
         status: UserStatus.ACTIVE,
-      },
+      } as WhereOptions<UserMasterAttributes>,
     });
   }
 
@@ -67,9 +67,9 @@ export class UserRepository extends BaseRepository<
     return this.findAll({
       ...options,
       where: {
-        ...(options?.where as any),
+        ...(options?.where as WhereOptions<UserMasterAttributes>),
         role,
-      },
+      } as WhereOptions<UserMasterAttributes>,
     });
   }
 
@@ -77,9 +77,9 @@ export class UserRepository extends BaseRepository<
    * Check if email exists
    */
   async isEmailExists(email: string, excludeId?: number): Promise<boolean> {
-    const where: any = { email: email.toLowerCase() };
+    const where: WhereOptions<UserMasterAttributes> = { email: email.toLowerCase() };
     if (excludeId) {
-      where.id = { [Op.ne]: excludeId };
+      (where as Record<string, unknown>).id = { [Op.ne]: excludeId };
     }
     return this.exists({ where });
   }
@@ -88,9 +88,9 @@ export class UserRepository extends BaseRepository<
    * Check if mobile exists
    */
   async isMobileExists(mobile: string, excludeId?: number): Promise<boolean> {
-    const where: any = { mobile };
+    const where: WhereOptions<UserMasterAttributes> = { mobile };
     if (excludeId) {
-      where.id = { [Op.ne]: excludeId };
+      (where as Record<string, unknown>).id = { [Op.ne]: excludeId };
     }
     return this.exists({ where });
   }
@@ -112,7 +112,7 @@ export class UserRepository extends BaseRepository<
     const result = await this.update(id, {
       status: UserStatus.DELETED,
       updated_by: updatedBy,
-    } as any);
+    } as Partial<UserMasterAttributes>);
     return result !== null;
   }
 
@@ -123,7 +123,7 @@ export class UserRepository extends BaseRepository<
     const result = await this.update(id, {
       status: UserStatus.INACTIVE,
       updated_by: updatedBy,
-    } as any);
+    } as Partial<UserMasterAttributes>);
     return result !== null;
   }
 
@@ -134,7 +134,7 @@ export class UserRepository extends BaseRepository<
     const result = await this.update(id, {
       status: UserStatus.ACTIVE,
       updated_by: updatedBy,
-    } as any);
+    } as Partial<UserMasterAttributes>);
     return result !== null;
   }
 
@@ -145,12 +145,12 @@ export class UserRepository extends BaseRepository<
     return this.findAll({
       ...options,
       where: {
-        ...(options?.where as any),
+        ...(options?.where as WhereOptions<UserMasterAttributes>),
         [Op.or]: [
           { name: { [Op.like]: `%${query}%` } },
           { email: { [Op.like]: `%${query}%` } },
         ],
-      },
+      } as WhereOptions<UserMasterAttributes>,
     });
   }
 }

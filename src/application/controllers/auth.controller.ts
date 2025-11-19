@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import authService from '@services/auth.service';
 import { logger } from '@config/logger';
 import { trackAuthAttempt } from '@middleware/metrics';
+import { getErrorMessage } from '@interfaces/common.interface';
 
 /**
  * Authentication Controller
@@ -18,10 +19,10 @@ class AuthController {
       const { tokens } = await authService.login(email, password);
       trackAuthAttempt('success');
       res.sendSuccess(tokens, 'Login successful');
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error in login controller:', error);
       trackAuthAttempt('failure');
-      res.sendUnauthorized(error.message || 'Login failed');
+      res.sendUnauthorized(getErrorMessage(error) || 'Login failed');
     }
   }
 
@@ -41,9 +42,9 @@ class AuthController {
       const { accessToken } = await authService.refreshToken(refreshToken);
 
       res.sendSuccess({ accessToken }, 'Token refreshed successfully');
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error in refresh token controller:', error);
-      res.sendUnauthorized(error.message || 'Token refresh failed');
+      res.sendUnauthorized(getErrorMessage(error) || 'Token refresh failed');
     }
   }
 
@@ -66,9 +67,9 @@ class AuthController {
         { valid: isValid },
         isValid ? 'Token is valid' : 'Token is invalid'
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error in verify token controller:', error);
-      res.sendBadRequest(error.message || 'Token verification failed');
+      res.sendBadRequest(getErrorMessage(error) || 'Token verification failed');
     }
   }
 

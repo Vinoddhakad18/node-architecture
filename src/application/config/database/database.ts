@@ -1,4 +1,4 @@
-import { Sequelize } from 'sequelize';
+import { Sequelize, Options } from 'sequelize';
 import { config } from '@/config';
 import { logger } from '@config/logger';
 import redisService from '@helpers/redis.helper';
@@ -18,7 +18,7 @@ const DB_CONNECTION_RETRY_DELAY = 5000; // 5 seconds
 const isReplicationEnabled = process.env.DB_REPLICATION === 'true';
 
 // Build configuration
-const sequelizeConfig: any = {
+const sequelizeConfig: Options = {
   dialect: 'mysql',
   logging: process.env.DB_LOGGING === 'true' ? console.log : false,
 

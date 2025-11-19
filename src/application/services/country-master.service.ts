@@ -1,5 +1,5 @@
-import { Op } from 'sequelize';
-import CountryMaster, { CountryMasterCreationAttributes } from '@models/country-master.model';
+import { Op, WhereOptions } from 'sequelize';
+import CountryMaster, { CountryMasterCreationAttributes, CountryMasterAttributes } from '@models/country-master.model';
 import { logger } from '@config/logger';
 import redisService from '@helpers/redis.helper';
 import { RedisTTL } from '@config/redis';
@@ -93,19 +93,21 @@ class CountryMasterService {
       }
 
       const offset = (page - 1) * limit;
-      const where: any = {};
+      const where: WhereOptions<CountryMasterAttributes> = {};
 
       // Apply search filter
       if (search) {
-        where[Op.or] = [
-          { name: { [Op.like]: `%${search}%` } },
-          { code: { [Op.like]: `%${search}%` } },
-        ];
+        Object.assign(where, {
+          [Op.or]: [
+            { name: { [Op.like]: `%${search}%` } },
+            { code: { [Op.like]: `%${search}%` } },
+          ],
+        });
       }
 
       // Apply status filter
       if (status) {
-        where.status = status;
+        Object.assign(where, { status });
       }
 
       const { rows, count } = await CountryMaster.findAndCountAll({
@@ -328,9 +330,9 @@ class CountryMasterService {
    */
   async isCodeExists(code: string, excludeId?: number): Promise<boolean> {
     try {
-      const where: any = { code: code.toUpperCase() };
+      const where: WhereOptions<CountryMasterAttributes> = { code: code.toUpperCase() };
       if (excludeId) {
-        where.id = { [Op.ne]: excludeId };
+        (where as Record<string, unknown>).id = { [Op.ne]: excludeId };
       }
 
       const country = await CountryMaster.findOne({ where });

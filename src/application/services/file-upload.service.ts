@@ -1,4 +1,5 @@
-import FileMetadata, { FileMetadataCreationAttributes } from '../models/file-metadata.model';
+import { WhereOptions } from 'sequelize';
+import FileMetadata, { FileMetadataCreationAttributes, FileMetadataAttributes } from '../models/file-metadata.model';
 import { getStorageProvider } from '../config/storage';
 import { generateStorageKey, getFileCategory } from '../middleware/upload.middleware';
 import redisService from '../helpers/redis.helper';
@@ -19,7 +20,7 @@ export interface FileUploadInput {
   mimeType: string;
   size: number;
   description?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, string | number | boolean>;
   prefix?: string;
 }
 
@@ -88,7 +89,7 @@ class FileUploadService {
       });
 
       return file;
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Clean up storage if database save fails
       try {
         await storage.delete(storageKey);
@@ -176,12 +177,12 @@ class FileUploadService {
     } = options;
 
     const offset = (page - 1) * limit;
-    const where: any = {};
+    const where: WhereOptions<FileMetadataAttributes> = {};
 
-    if (status) where.status = status;
-    if (category) where.category = category;
-    if (mimeType) where.mime_type = mimeType;
-    if (createdBy) where.created_by = createdBy;
+    if (status) (where as Record<string, unknown>).status = status;
+    if (category) (where as Record<string, unknown>).category = category;
+    if (mimeType) (where as Record<string, unknown>).mime_type = mimeType;
+    if (createdBy) (where as Record<string, unknown>).created_by = createdBy;
 
     const { count, rows } = await FileMetadata.findAndCountAll({
       where,
@@ -367,8 +368,8 @@ class FileUploadService {
     totalSize: number;
     byCategory: Record<string, { count: number; size: number }>;
   }> {
-    const where: any = { status: 'active' };
-    if (userId) where.created_by = userId;
+    const where: WhereOptions<FileMetadataAttributes> = { status: 'active' };
+    if (userId) (where as Record<string, unknown>).created_by = userId;
 
     const files = await FileMetadata.findAll({
       where,
