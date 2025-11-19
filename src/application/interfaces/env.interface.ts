@@ -71,4 +71,20 @@ export interface envInterface {
     distributedTracingEnabled: boolean;
     loggingEnabled: boolean;
   };
+  storage?: {
+    type: 's3' | 'local';
+    maxFileSize?: number;
+    s3?: {
+      region: string;
+      bucket: string;
+      accessKeyId: string;
+      secretAccessKey: string;
+      endpoint?: string;
+      forcePathStyle?: boolean;
+    };
+    local?: {
+      basePath: string;
+      baseUrl: string;
+    };
+  };
 }

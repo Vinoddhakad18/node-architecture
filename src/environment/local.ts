@@ -65,4 +65,20 @@ export default {
     distributedTracingEnabled: true,
     loggingEnabled: true,
   },
+  storage: {
+    type: 'local', // Use local storage for development
+    maxFileSize: 10 * 1024 * 1024, // 10 MB
+    s3: {
+      region: '<env:AWS_REGION>',
+      bucket: '<env:AWS_S3_BUCKET>',
+      accessKeyId: '<env:AWS_ACCESS_KEY_ID>',
+      secretAccessKey: '<env:AWS_SECRET_ACCESS_KEY>',
+      endpoint: '<env:AWS_S3_ENDPOINT>', // For MinIO or other S3-compatible services
+      forcePathStyle: true,
+    },
+    local: {
+      basePath: './uploads',
+      baseUrl: 'http://localhost:3000/uploads',
+    },
+  },
 };

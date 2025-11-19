@@ -65,4 +65,20 @@ export default {
     distributedTracingEnabled: true,
     loggingEnabled: true,
   },
+  storage: {
+    type: 's3',
+    maxFileSize: 50 * 1024 * 1024, // 50 MB
+    s3: {
+      region: process.env.AWS_REGION || 'us-east-1',
+      bucket: process.env.AWS_S3_BUCKET || '',
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+      endpoint: process.env.AWS_S3_ENDPOINT,
+      forcePathStyle: false,
+    },
+    local: {
+      basePath: './uploads',
+      baseUrl: process.env.APP_URL || 'https://yourapp.com/uploads',
+    },
+  },
 };
