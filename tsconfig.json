@@ -12,10 +12,13 @@
       "@config/*": ["application/config/*"],
       "@constants/*": ["application/constants/*"],
       "@controllers/*": ["application/controllers/*"],
+      "@dtos/*": ["application/dtos/*"],
+      "@events/*": ["application/events/*"],
       "@helpers/*": ["application/helpers/*"],
       "@interfaces/*": ["application/interfaces/*"],
       "@middleware/*": ["application/middleware/*"],
       "@models/*": ["application/models/*"],
+      "@repositories/*": ["application/repositories/*"],
       "@routes/*": ["application/routes/*"],
       "@services/*": ["application/services/*"],
       "@environment/*": ["environment/*"]
