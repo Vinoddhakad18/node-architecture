@@ -1,8 +1,8 @@
 import FileMetadata, { FileMetadataCreationAttributes } from '../models/file-metadata.model';
-import { getStorageProvider } from './storage';
+import { getStorageProvider } from '../config/storage';
 import { generateStorageKey, getFileCategory } from '../middleware/upload.middleware';
 import redisService from '../helpers/redis.helper';
-import { RedisTTL } from '../config/redis.config';
+import { RedisTTL } from '../config/redis';
 import { logger } from '../config/logger';
 
 // Cache key patterns

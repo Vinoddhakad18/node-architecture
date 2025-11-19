@@ -1,5 +1,5 @@
 import { QueryTypes } from 'sequelize';
-import { sequelize } from '../config/sequelize/database';
+import { sequelize } from '../config/database';
 import { logger } from '../config/logger';
 
 /**

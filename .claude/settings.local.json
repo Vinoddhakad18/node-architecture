@@ -46,7 +46,12 @@
       "Bash(netstat:*)",
       "Bash(findstr:*)",
       "Bash(node:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(git mv:*)",
+      "Bash(rmdir:*)",
+      "Bash(timeout:*)",
+      "Bash(nul)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

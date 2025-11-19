@@ -1,5 +1,5 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
-import { jwtConfig } from '../config/jwt.config';
+import { jwtConfig } from '../config/jwt';
 import { JwtPayload, TokenPair, DecodedToken, JwtVerifyOptions } from '../interfaces/jwt.interface';
 import { logger } from '../config/logger';
 

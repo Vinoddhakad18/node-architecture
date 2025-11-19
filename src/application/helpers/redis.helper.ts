@@ -1,5 +1,5 @@
 import Redis, { Cluster } from 'ioredis';
-import { redisConfig, redisClusterConfig, isClusterMode, getClusterNodes } from '@config/redis.config';
+import { redisConfig, redisClusterConfig, isClusterMode, getClusterNodes } from '@config/redis';
 import { logger } from '@config/logger';
 
 /**

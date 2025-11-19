@@ -1,7 +1,7 @@
 import { createApp } from './app';
 import { config } from '@/config';
 import { logger } from '@config/logger';
-import { gracefulShutdown } from '@config/sequelize/database';
+import { gracefulShutdown } from '@config/database';
 import { initializeServerStartTime, getFormattedServerUptime } from '@application/utils/uptime';
 
 /**

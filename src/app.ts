@@ -30,7 +30,7 @@ import { config } from '@/config';
 import routes from '@routes/index';
 import { errorHandler, notFoundHandler, logger, errorLogger, attachResponseHandlers, requestIdMiddleware } from '@middleware/index';
 import { metricsMiddleware } from '@middleware/metrics';
-import { connectDatabase } from '@config/sequelize/database';
+import { connectDatabase } from '@config/database';
 import { swaggerSpec, swaggerUiOptions } from './swagger';
 import redisService from '@helpers/redis.helper';
 
@@ -68,6 +68,9 @@ export const createApp = async (): Promise<Application> => {
   // Middleware
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+
+  // Serve static files from uploads directory
+  app.use('/uploads', express.static(path.resolve(__dirname, '../uploads')));
 
   // Request ID tracking - Must be before logger to include in logs
   app.use(requestIdMiddleware);

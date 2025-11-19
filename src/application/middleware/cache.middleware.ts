@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import redisService from '@helpers/redis.helper';
 import { logger } from '@config/logger';
-import { RedisTTL } from '@config/redis.config';
+import { RedisTTL } from '@config/redis';
 
 /**
  * Cache Middleware Options

@@ -14,10 +14,10 @@ export {
   getClusterNodes,
   RedisTTL,
   RedisKeys,
-} from './redis.config';
+} from './redis';
 
 // JWT configuration exports
-export { jwtConfig, TokenType, validateJwtConfig } from './jwt.config';
+export { jwtConfig, TokenType, validateJwtConfig } from './jwt';
 
 // Metrics exports
 export {
@@ -48,4 +48,4 @@ export {
   testConnection,
   closeConnection,
   syncDatabase,
-} from './sequelize';
+} from './database';

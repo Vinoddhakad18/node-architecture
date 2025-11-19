@@ -2,7 +2,7 @@ import { Op } from 'sequelize';
 import CountryMaster, { CountryMasterCreationAttributes } from '@models/country-master.model';
 import { logger } from '@config/logger';
 import redisService from '@helpers/redis.helper';
-import { RedisTTL } from '@config/redis.config';
+import { RedisTTL } from '@config/redis';
 
 /**
  * Cache key constants for country-master

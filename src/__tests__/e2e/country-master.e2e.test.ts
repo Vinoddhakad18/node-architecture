@@ -6,7 +6,7 @@
 import request from 'supertest';
 import { Application } from 'express';
 import { createApp } from '../../app';
-import { sequelize } from '../../application/config/sequelize';
+import { sequelize } from '../../application/config/database';
 import CountryMaster from '../../application/models/country-master.model';
 import UserMaster from '../../application/models/user-master.model';
 import { config } from '../../config';
