@@ -11,6 +11,7 @@ module.exports = {
     '/src/environment/',
     '/src/__tests__/helpers/',
     '/src/__tests__/mocks/',
+    '/src/__tests__/setup.ts',
     '/e2e/'
   ],
   transform: {

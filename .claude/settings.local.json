@@ -57,7 +57,8 @@
       "Bash(git push:*)",
       "Bash(npm ls:*)",
       "Bash(npm run lint)",
-      "Bash(docker compose config:*)"
+      "Bash(docker compose config:*)",
+      "Bash(docker compose ps:*)"
     ],
     "deny": [],
     "ask": []

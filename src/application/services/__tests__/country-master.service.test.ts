@@ -61,11 +61,14 @@ describe('CountryMasterService', () => {
       const result = await countryMasterService.create(createData, 1);
 
       // Assert
-      expect(CountryMaster.create).toHaveBeenCalledWith({
-        ...createData,
-        created_by: 1,
-        updated_by: 1,
-      });
+      expect(CountryMaster.create).toHaveBeenCalledWith(
+        {
+          ...createData,
+          created_by: 1,
+          updated_by: 1,
+        },
+        expect.objectContaining({ transaction: expect.anything() })
+      );
       expect(result).toEqual(mockCountry);
     });
 
@@ -79,11 +82,14 @@ describe('CountryMasterService', () => {
       await countryMasterService.create(createData);
 
       // Assert
-      expect(CountryMaster.create).toHaveBeenCalledWith({
-        ...createData,
-        created_by: null,
-        updated_by: null,
-      });
+      expect(CountryMaster.create).toHaveBeenCalledWith(
+        {
+          ...createData,
+          created_by: null,
+          updated_by: null,
+        },
+        expect.objectContaining({ transaction: expect.anything() })
+      );
     });
 
     it('should invalidate list caches after creation', async () => {
@@ -347,9 +353,11 @@ describe('CountryMasterService', () => {
 
     it('should successfully update country', async () => {
       // Arrange
-      const updatedCountry = { ...mockCountry, ...updateData };
       (CountryMaster.findByPk as jest.Mock).mockResolvedValue(mockCountry);
-      mockCountry.update.mockResolvedValue(updatedCountry);
+      mockCountry.update.mockImplementation(function(this: any, data: any) {
+        Object.assign(this, data);
+        return Promise.resolve(this);
+      });
       (redisService.del as jest.Mock).mockResolvedValue(true);
       (redisService.keys as jest.Mock).mockResolvedValue([]);
 
@@ -357,11 +365,14 @@ describe('CountryMasterService', () => {
       const result = await countryMasterService.update(1, updateData, 1);
 
       // Assert
-      expect(mockCountry.update).toHaveBeenCalledWith({
-        ...updateData,
-        updated_by: 1,
-      });
-      expect(result).toEqual(updatedCountry);
+      expect(mockCountry.update).toHaveBeenCalledWith(
+        {
+          ...updateData,
+          updated_by: 1,
+        },
+        expect.objectContaining({ transaction: expect.anything() })
+      );
+      expect(result).toEqual(expect.objectContaining(updateData));
     });
 
     it('should return null when country not found', async () => {
@@ -425,10 +436,13 @@ describe('CountryMasterService', () => {
       const result = await countryMasterService.delete(1, 1);
 
       // Assert
-      expect(mockCountry.update).toHaveBeenCalledWith({
-        status: 'inactive',
-        updated_by: 1,
-      });
+      expect(mockCountry.update).toHaveBeenCalledWith(
+        {
+          status: 'inactive',
+          updated_by: 1,
+        },
+        expect.objectContaining({ transaction: expect.anything() })
+      );
       expect(result).toBe(true);
     });
 
@@ -478,7 +492,11 @@ describe('CountryMasterService', () => {
       const result = await countryMasterService.hardDelete(1);
 
       // Assert
-      expect(CountryMaster.destroy).toHaveBeenCalledWith({ where: { id: 1 } });
+      expect(CountryMaster.destroy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 1 },
+        })
+      );
       expect(result).toBe(true);
     });
 

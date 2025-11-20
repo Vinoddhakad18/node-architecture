@@ -12,9 +12,10 @@ process.env.JWT_EXPIRES_IN = '1h';
 process.env.JWT_REFRESH_EXPIRES_IN = '7d';
 process.env.DB_HOST = 'localhost';
 process.env.DB_PORT = '3306';
-process.env.DB_NAME = 'test_db';
-process.env.DB_USER = 'test_user';
-process.env.DB_PASSWORD = 'test_password';
+process.env.DB_NAME = 'node_app_db';
+process.env.DB_USERNAME = 'root';
+process.env.DB_USER = 'root';
+process.env.DB_PASSWORD = 'rootpassword';
 
 // Increase timeout for database operations
 jest.setTimeout(10000);
