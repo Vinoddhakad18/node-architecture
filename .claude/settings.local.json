@@ -63,7 +63,8 @@
       "Bash(npm run lint:fix:*)",
       "Bash(npx eslint:*)",
       "Bash(docker rm:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(npm run format:check:*)"
     ],
     "deny": [],
     "ask": []

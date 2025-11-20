@@ -6,9 +6,7 @@ import { RedisTTL } from '../config/redis';
 import { getStorageProvider } from '../config/storage';
 import redisService from '../helpers/redis.helper';
 import { generateStorageKey, getFileCategory } from '../middleware/upload.middleware';
-import FileMetadata, {
-  FileMetadataCreationAttributes,
-} from '../models/file-metadata.model';
+import FileMetadata, { FileMetadataCreationAttributes } from '../models/file-metadata.model';
 import fileMetadataRepository from '../repositories/file-metadata.repository';
 
 // Cache key patterns

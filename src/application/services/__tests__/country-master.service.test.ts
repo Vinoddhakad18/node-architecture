@@ -179,7 +179,14 @@ describe('CountryMasterService', () => {
       await countryMasterService.findAll({ search: 'United' });
 
       // Assert
-      expect(countryRepository.findWithFilters).toHaveBeenCalledWith(1, 10, 'United', undefined, 'name', 'ASC');
+      expect(countryRepository.findWithFilters).toHaveBeenCalledWith(
+        1,
+        10,
+        'United',
+        undefined,
+        'name',
+        'ASC'
+      );
     });
 
     it('should apply status filter correctly', async () => {
@@ -192,7 +199,14 @@ describe('CountryMasterService', () => {
       await countryMasterService.findAll({ status: 'active' });
 
       // Assert
-      expect(countryRepository.findWithFilters).toHaveBeenCalledWith(1, 10, undefined, 'active', 'name', 'ASC');
+      expect(countryRepository.findWithFilters).toHaveBeenCalledWith(
+        1,
+        10,
+        undefined,
+        'active',
+        'name',
+        'ASC'
+      );
     });
 
     it('should apply pagination correctly', async () => {
@@ -205,7 +219,14 @@ describe('CountryMasterService', () => {
       await countryMasterService.findAll({ page: 2, limit: 20 });
 
       // Assert
-      expect(countryRepository.findWithFilters).toHaveBeenCalledWith(2, 20, undefined, undefined, 'name', 'ASC');
+      expect(countryRepository.findWithFilters).toHaveBeenCalledWith(
+        2,
+        20,
+        undefined,
+        undefined,
+        'name',
+        'ASC'
+      );
     });
 
     it('should apply sorting correctly', async () => {
@@ -218,13 +239,22 @@ describe('CountryMasterService', () => {
       await countryMasterService.findAll({ sortBy: 'code', sortOrder: 'DESC' });
 
       // Assert
-      expect(countryRepository.findWithFilters).toHaveBeenCalledWith(1, 10, undefined, undefined, 'code', 'DESC');
+      expect(countryRepository.findWithFilters).toHaveBeenCalledWith(
+        1,
+        10,
+        undefined,
+        undefined,
+        'code',
+        'DESC'
+      );
     });
 
     it('should throw error when database operation fails', async () => {
       // Arrange
       (redisService.get as jest.Mock).mockResolvedValue(null);
-      (countryRepository.findWithFilters as jest.Mock).mockRejectedValue(new Error('Database error'));
+      (countryRepository.findWithFilters as jest.Mock).mockRejectedValue(
+        new Error('Database error')
+      );
 
       // Act & Assert
       await expect(countryMasterService.findAll()).rejects.toThrow('Database error');
@@ -499,7 +529,10 @@ describe('CountryMasterService', () => {
       const result = await countryMasterService.hardDelete(1);
 
       // Assert
-      expect(countryRepository.delete).toHaveBeenCalledWith(1, expect.objectContaining({ transaction: expect.anything() }));
+      expect(countryRepository.delete).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ transaction: expect.anything() })
+      );
       expect(result).toBe(true);
     });
 

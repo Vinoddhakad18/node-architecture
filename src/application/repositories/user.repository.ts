@@ -52,10 +52,7 @@ export class UserRepository extends BaseRepository<
    * Update user password
    */
   async updatePassword(userId: number, hashedPassword: string): Promise<boolean> {
-    const result = await this.model.update(
-      { password: hashedPassword },
-      { where: { id: userId } }
-    );
+    const result = await this.model.update({ password: hashedPassword }, { where: { id: userId } });
     return result[0] > 0;
   }
 

@@ -1,9 +1,7 @@
 import { logger } from '@config/logger';
 import { RedisTTL } from '@config/redis';
 import redisService from '@helpers/redis.helper';
-import CountryMaster, {
-  CountryMasterCreationAttributes,
-} from '@models/country-master.model';
+import CountryMaster, { CountryMasterCreationAttributes } from '@models/country-master.model';
 import countryRepository from '@repositories/country.repository';
 import { Transaction } from 'sequelize';
 

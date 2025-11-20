@@ -57,7 +57,10 @@ export class FileMetadataRepository extends BaseRepository<
   /**
    * Find files by status
    */
-  async findByStatus(status: 'active' | 'inactive' | 'deleted', options?: FindOptions): Promise<FileMetadata[]> {
+  async findByStatus(
+    status: 'active' | 'inactive' | 'deleted',
+    options?: FindOptions
+  ): Promise<FileMetadata[]> {
     return this.findAll({
       ...options,
       where: {
