@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
-import redisService from '@helpers/redis.helper';
 import { logger } from '@config/logger';
 import { RedisTTL } from '@config/redis';
+import redisService from '@helpers/redis.helper';
+import { Request, Response, NextFunction } from 'express';
 
 /**
  * Cache Middleware Options
@@ -82,7 +82,7 @@ export const cacheMiddleware = (options: CacheOptions = {}) => {
         });
 
         // Return cached response
-        return res.json(JSON.parse(cachedData as string));
+        return res.json(JSON.parse(cachedData));
       }
 
       logger.debug(`Cache miss: ${cacheKey}`, {
@@ -138,10 +138,7 @@ export const cacheMiddleware = (options: CacheOptions = {}) => {
  * // Invalidate cache after POST/PUT/DELETE operations
  * app.post('/api/users', invalidateCacheMiddleware({ pattern: 'cache:/api/users*' }), createUserController);
  */
-export const invalidateCacheMiddleware = (options: {
-  pattern: string;
-  keyPrefix?: string;
-}) => {
+export const invalidateCacheMiddleware = (options: { pattern: string; keyPrefix?: string }) => {
   const { pattern, keyPrefix = 'cache' } = options;
 
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -209,10 +206,7 @@ export const clearCache = async (key: string, prefix = 'cache'): Promise<number>
  * Clear all cache entries matching pattern
  * Utility function to clear multiple cache entries
  */
-export const clearCachePattern = async (
-  pattern: string,
-  prefix = 'cache'
-): Promise<number> => {
+export const clearCachePattern = async (pattern: string, prefix = 'cache'): Promise<number> => {
   try {
     const fullPattern = pattern.startsWith(prefix) ? pattern : `${prefix}:${pattern}`;
     const keys = await redisService.keys(fullPattern);

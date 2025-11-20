@@ -3,10 +3,11 @@
  * Tests business logic for token blacklisting operations
  */
 
-import tokenBlacklistService from '../token-blacklist.service';
-import redisService from '@helpers/redis.helper';
 import jwtUtil from '@application/utils/jwt.util';
 import { CacheTTL } from '@constants/cache.constants';
+import redisService from '@helpers/redis.helper';
+
+import tokenBlacklistService from '../token-blacklist.service';
 
 // Mock dependencies
 jest.mock('@helpers/redis.helper');
@@ -136,9 +137,7 @@ describe('TokenBlacklistService', () => {
 
       // Assert
       expect(result).toBe(true);
-      expect(redisService.exists).toHaveBeenCalledWith(
-        expect.stringContaining('token:blacklist:')
-      );
+      expect(redisService.exists).toHaveBeenCalledWith(expect.stringContaining('token:blacklist:'));
     });
 
     it('should return false when token is not blacklisted', async () => {
@@ -193,11 +192,7 @@ describe('TokenBlacklistService', () => {
       (redisService.set as jest.Mock).mockResolvedValue(undefined);
 
       // Act
-      await tokenBlacklistService.blacklistTokenPair(
-        mockAccessToken,
-        mockRefreshToken,
-        'security'
-      );
+      await tokenBlacklistService.blacklistTokenPair(mockAccessToken, mockRefreshToken, 'security');
 
       // Assert
       expect(redisService.set).toHaveBeenCalledWith(
@@ -366,9 +361,7 @@ describe('TokenBlacklistService', () => {
       await tokenBlacklistService.removeFromBlacklist(mockToken);
 
       // Assert
-      expect(redisService.del).toHaveBeenCalledWith(
-        expect.stringContaining('token:blacklist:')
-      );
+      expect(redisService.del).toHaveBeenCalledWith(expect.stringContaining('token:blacklist:'));
     });
 
     it('should throw error when Redis fails', async () => {

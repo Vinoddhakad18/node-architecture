@@ -18,11 +18,11 @@ export const createCountrySchema = z.object({
       })
       .min(2, 'Country code must be at least 2 characters')
       .max(3, 'Country code must not exceed 3 characters')
-      .transform(val => val.toUpperCase().trim()),
+      .transform((val) => val.toUpperCase().trim()),
     currency_code: z
       .string()
       .length(3, 'Currency code must be exactly 3 characters')
-      .transform(val => val.toUpperCase().trim())
+      .transform((val) => val.toUpperCase().trim())
       .optional()
       .nullable(),
     status: z
@@ -43,8 +43,8 @@ export const updateCountrySchema = z.object({
       .string({
         error: 'Country ID is required',
       })
-      .transform(val => parseInt(val, 10))
-      .refine(val => !isNaN(val) && val > 0, {
+      .transform((val) => parseInt(val, 10))
+      .refine((val) => !isNaN(val) && val > 0, {
         message: 'Country ID must be a positive number',
       }),
   }),
@@ -59,12 +59,12 @@ export const updateCountrySchema = z.object({
       .string()
       .min(2, 'Country code must be at least 2 characters')
       .max(3, 'Country code must not exceed 3 characters')
-      .transform(val => val.toUpperCase().trim())
+      .transform((val) => val.toUpperCase().trim())
       .optional(),
     currency_code: z
       .string()
       .length(3, 'Currency code must be exactly 3 characters')
-      .transform(val => val.toUpperCase().trim())
+      .transform((val) => val.toUpperCase().trim())
       .optional()
       .nullable(),
     status: z
@@ -84,8 +84,8 @@ export const getCountryByIdSchema = z.object({
       .string({
         error: 'Country ID is required',
       })
-      .transform(val => parseInt(val, 10))
-      .refine(val => !isNaN(val) && val > 0, {
+      .transform((val) => parseInt(val, 10))
+      .refine((val) => !isNaN(val) && val > 0, {
         message: 'Country ID must be a positive number',
       }),
   }),
@@ -114,8 +114,8 @@ export const deleteCountrySchema = z.object({
       .string({
         error: 'Country ID is required',
       })
-      .transform(val => parseInt(val, 10))
-      .refine(val => !isNaN(val) && val > 0, {
+      .transform((val) => parseInt(val, 10))
+      .refine((val) => !isNaN(val) && val > 0, {
         message: 'Country ID must be a positive number',
       }),
   }),
@@ -129,15 +129,15 @@ export const listCountriesSchema = z.object({
     page: z
       .string()
       .optional()
-      .transform(val => (val ? parseInt(val, 10) : 1))
-      .refine(val => !isNaN(val) && val > 0, {
+      .transform((val) => (val ? parseInt(val, 10) : 1))
+      .refine((val) => !isNaN(val) && val > 0, {
         message: 'Page must be a positive number',
       }),
     limit: z
       .string()
       .optional()
-      .transform(val => (val ? parseInt(val, 10) : 10))
-      .refine(val => !isNaN(val) && val > 0 && val <= 100, {
+      .transform((val) => (val ? parseInt(val, 10) : 10))
+      .refine((val) => !isNaN(val) && val > 0 && val <= 100, {
         message: 'Limit must be between 1 and 100',
       }),
     search: z.string().optional(),

@@ -1,6 +1,6 @@
-import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from '@config/database';
 import bcrypt from 'bcryptjs';
+import { DataTypes, Model, Optional } from 'sequelize';
 
 /**
  * UserMaster Model Attributes Interface
@@ -24,11 +24,18 @@ export interface UserMasterAttributes {
  * UserMaster Creation Attributes Interface
  * Fields that are optional during creation
  */
-export interface UserMasterCreationAttributes
-  extends Optional<
-    UserMasterAttributes,
-    'id' | 'mobile' | 'role' | 'status' | 'last_login' | 'created_by' | 'updated_by' | 'created_at' | 'updated_at'
-  > {}
+export type UserMasterCreationAttributes = Optional<
+  UserMasterAttributes,
+  | 'id'
+  | 'mobile'
+  | 'role'
+  | 'status'
+  | 'last_login'
+  | 'created_by'
+  | 'updated_by'
+  | 'created_at'
+  | 'updated_at'
+>;
 
 /**
  * UserMaster Model Class

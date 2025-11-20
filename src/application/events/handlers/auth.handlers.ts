@@ -1,6 +1,7 @@
+import { logger } from '@config/logger';
+
 import { appEvents } from '../event-emitter';
 import { AppEvent, AuthLoginPayload, AuthLoginFailedPayload } from '../event-types';
-import { logger } from '@config/logger';
 
 /**
  * Register authentication event handlers

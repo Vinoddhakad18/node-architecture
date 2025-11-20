@@ -14,7 +14,7 @@ export default {
     username: process.env.DB_USERNAME || 'postgres',
     password: process.env.DB_PASSWORD || '',
   },
-   jwt: {
+  jwt: {
     secret: '<env:JWT_SECRET>',
     expiresIn: '15m',
     refreshSecret: '<env:JWT_REFRESH_SECRET>',

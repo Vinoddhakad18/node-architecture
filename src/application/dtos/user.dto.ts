@@ -1,5 +1,5 @@
-import { UserMasterAttributes } from '@models/user-master.model';
 import { UserRole, UserStatus } from '@application/constants';
+import { UserMasterAttributes } from '@models/user-master.model';
 
 /**
  * User Response DTO

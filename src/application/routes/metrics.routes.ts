@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+
 import { register } from '../config/metrics';
 
 const router = Router();

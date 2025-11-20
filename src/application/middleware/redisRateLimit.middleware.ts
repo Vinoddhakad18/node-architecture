@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
-import redisService from '@helpers/redis.helper';
 import { logger } from '@config/logger';
 import { RedisKeys } from '@config/redis';
+import redisService from '@helpers/redis.helper';
+import { Request, Response, NextFunction } from 'express';
 
 /**
  * Rate Limit Options
@@ -37,11 +37,7 @@ const defaultKeyGenerator = (req: Request): string => {
 /**
  * Default rate limit exceeded handler
  */
-const defaultHandler = (
-  _req: Request,
-  res: Response,
-  options: Required<RateLimitOptions>
-) => {
+const defaultHandler = (_req: Request, res: Response, options: Required<RateLimitOptions>) => {
   res.sendCustom(
     options.statusCode,
     { retryAfter: Math.ceil(options.windowMs / 1000) },

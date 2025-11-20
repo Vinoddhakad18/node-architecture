@@ -3,8 +3,9 @@
  * Tests complete API workflows with real HTTP requests
  */
 
-import request from 'supertest';
 import { Application } from 'express';
+import request from 'supertest';
+
 import { createApp } from '../../app';
 import { sequelize } from '../../application/config/database';
 import UserMaster from '../../application/models/user-master.model';
@@ -171,12 +172,10 @@ describe('Auth API E2E Tests', () => {
       const requests = Array(5)
         .fill(null)
         .map(() =>
-          request(app)
-            .post(`${config.apiPrefix}/auth/login`)
-            .send({
-              email: 'test@example.com',
-              password: 'password123',
-            })
+          request(app).post(`${config.apiPrefix}/auth/login`).send({
+            email: 'test@example.com',
+            password: 'password123',
+          })
         );
 
       const responses = await Promise.all(requests);
@@ -196,12 +195,10 @@ describe('Auth API E2E Tests', () => {
         password: 'password123',
       });
 
-      const loginResponse = await request(app)
-        .post(`${config.apiPrefix}/auth/login`)
-        .send({
-          email: 'test@example.com',
-          password: 'password123',
-        });
+      const loginResponse = await request(app).post(`${config.apiPrefix}/auth/login`).send({
+        email: 'test@example.com',
+        password: 'password123',
+      });
 
       accessToken = loginResponse.body.data.accessToken;
       refreshToken = loginResponse.body.data.refreshToken;
@@ -277,12 +274,10 @@ describe('Auth API E2E Tests', () => {
         password: 'password123',
       });
 
-      const loginResponse = await request(app)
-        .post(`${config.apiPrefix}/auth/login`)
-        .send({
-          email: 'test@example.com',
-          password: 'password123',
-        });
+      const loginResponse = await request(app).post(`${config.apiPrefix}/auth/login`).send({
+        email: 'test@example.com',
+        password: 'password123',
+      });
 
       accessToken = loginResponse.body.data.accessToken;
     });

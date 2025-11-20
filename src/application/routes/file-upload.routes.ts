@@ -1,8 +1,3 @@
-import { Router } from 'express';
-import fileUploadController from '@controllers/file-upload.controller';
-import { validateRequest } from '@middleware/validateRequest';
-import { authenticate } from '@middleware/auth.middleware';
-import { upload } from '@middleware/upload.middleware';
 import {
   uploadFileSchema,
   updateFileSchema,
@@ -13,6 +8,11 @@ import {
   fileIdParamSchema,
   statisticsSchema,
 } from '@application/validations/file-upload.schema';
+import fileUploadController from '@controllers/file-upload.controller';
+import { authenticate } from '@middleware/auth.middleware';
+import { upload } from '@middleware/upload.middleware';
+import { validateRequest } from '@middleware/validateRequest';
+import { Router } from 'express';
 
 const router = Router();
 
@@ -109,7 +109,12 @@ router.get('/', validateRequest(listFilesSchema), fileUploadController.findAll);
  *       401:
  *         description: Unauthorized
  */
-router.get('/my-files', authenticate, validateRequest(listFilesSchema), fileUploadController.findMyFiles);
+router.get(
+  '/my-files',
+  authenticate,
+  validateRequest(listFilesSchema),
+  fileUploadController.findMyFiles
+);
 
 /**
  * @swagger
@@ -132,7 +137,12 @@ router.get('/my-files', authenticate, validateRequest(listFilesSchema), fileUplo
  *       200:
  *         description: Statistics retrieved successfully
  */
-router.get('/statistics', authenticate, validateRequest(statisticsSchema), fileUploadController.getStatistics);
+router.get(
+  '/statistics',
+  authenticate,
+  validateRequest(statisticsSchema),
+  fileUploadController.getStatistics
+);
 
 /**
  * @swagger
@@ -206,7 +216,11 @@ router.get('/:id/download', validateRequest(fileIdParamSchema), fileUploadContro
  *       404:
  *         description: File not found
  */
-router.get('/:id/download-url', validateRequest(getDownloadUrlSchema), fileUploadController.getDownloadUrl);
+router.get(
+  '/:id/download-url',
+  validateRequest(getDownloadUrlSchema),
+  fileUploadController.getDownloadUrl
+);
 
 /**
  * @swagger
@@ -374,12 +388,7 @@ router.post(
  *       404:
  *         description: File not found
  */
-router.put(
-  '/:id',
-  authenticate,
-  validateRequest(updateFileSchema),
-  fileUploadController.update
-);
+router.put('/:id', authenticate, validateRequest(updateFileSchema), fileUploadController.update);
 
 /**
  * @swagger
@@ -404,12 +413,7 @@ router.put(
  *       404:
  *         description: File not found
  */
-router.delete(
-  '/:id',
-  authenticate,
-  validateRequest(deleteFileSchema),
-  fileUploadController.delete
-);
+router.delete('/:id', authenticate, validateRequest(deleteFileSchema), fileUploadController.delete);
 
 /**
  * @swagger

@@ -20,12 +20,12 @@ export const CachePrefix = {
  * Cache TTL Values (in seconds)
  */
 export enum CacheTTL {
-  VERY_SHORT = 60,        // 1 minute
-  SHORT = 300,            // 5 minutes
-  MEDIUM = 900,           // 15 minutes
-  LONG = 3600,            // 1 hour
-  VERY_LONG = 86400,      // 24 hours
-  WEEK = 604800,          // 7 days
+  VERY_SHORT = 60, // 1 minute
+  SHORT = 300, // 5 minutes
+  MEDIUM = 900, // 15 minutes
+  LONG = 3600, // 1 hour
+  VERY_LONG = 86400, // 24 hours
+  WEEK = 604800, // 7 days
 }
 
 /**

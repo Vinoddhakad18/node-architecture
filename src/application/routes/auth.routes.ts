@@ -1,7 +1,3 @@
-import { Router } from 'express';
-import authController from '@controllers/auth.controller';
-import { validateRequest } from '@middleware/validateRequest';
-import { authenticate } from '@middleware/auth.middleware';
 import {
   loginSchema,
   refreshTokenSchema,
@@ -9,6 +5,10 @@ import {
   logoutSchema,
   changePasswordSchema,
 } from '@application/validations/auth.schema';
+import authController from '@controllers/auth.controller';
+import { authenticate } from '@middleware/auth.middleware';
+import { validateRequest } from '@middleware/validateRequest';
+import { Router } from 'express';
 
 const router = Router();
 
@@ -61,7 +61,7 @@ const router = Router();
  *           format: date-time
  *           description: User last update timestamp
  *           example: 2024-01-01T12:00:00.000Z
- *     
+ *
  *     LoginRequest:
  *       type: object
  *       required:
@@ -76,9 +76,8 @@ const router = Router();
  *           type: string
  *           format: password
  *           example: SecurePassword123!
- *     
+ *
  */
-
 
 /**
  * @swagger
@@ -222,7 +221,12 @@ router.post('/refresh-token', validateRequest(refreshTokenSchema), authControlle
  *       401:
  *         description: Unauthorized - authentication required
  */
-router.post('/verify-token', authenticate, validateRequest(verifyTokenSchema), authController.verifyToken);
+router.post(
+  '/verify-token',
+  authenticate,
+  validateRequest(verifyTokenSchema),
+  authController.verifyToken
+);
 
 /**
  * @swagger
@@ -318,7 +322,12 @@ router.post('/logout', authenticate, validateRequest(logoutSchema), authControll
  *       401:
  *         description: Unauthorized - authentication required
  */
-router.post('/change-password', authenticate, validateRequest(changePasswordSchema), authController.changePassword);
+router.post(
+  '/change-password',
+  authenticate,
+  validateRequest(changePasswordSchema),
+  authController.changePassword
+);
 
 /**
  * @swagger
@@ -372,6 +381,10 @@ router.post('/change-password', authenticate, validateRequest(changePasswordSche
  *       401:
  *         description: Unauthorized - invalid or expired refresh token
  */
-router.post('/refresh-token-rotate', validateRequest(refreshTokenSchema), authController.refreshTokenWithRotation);
+router.post(
+  '/refresh-token-rotate',
+  validateRequest(refreshTokenSchema),
+  authController.refreshTokenWithRotation
+);
 
 export default router;

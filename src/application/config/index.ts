@@ -43,9 +43,4 @@ export {
 export { default as metricsRegistry } from './metrics';
 
 // Sequelize database exports
-export {
-  sequelize,
-  testConnection,
-  closeConnection,
-  syncDatabase,
-} from './database';
+export { sequelize, testConnection, closeConnection, syncDatabase } from './database';

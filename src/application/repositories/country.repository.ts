@@ -1,9 +1,10 @@
-import { Op, FindOptions, WhereOptions } from 'sequelize';
-import { BaseRepository } from './base.repository';
 import CountryMaster, {
   CountryMasterAttributes,
   CountryMasterCreationAttributes,
 } from '@models/country-master.model';
+import { Op, FindOptions, WhereOptions } from 'sequelize';
+
+import { BaseRepository } from './base.repository';
 
 /**
  * Country Repository
@@ -60,10 +61,7 @@ export class CountryRepository extends BaseRepository<
       ...options,
       where: {
         ...(options?.where as WhereOptions<CountryMasterAttributes>),
-        [Op.or]: [
-          { name: { [Op.like]: `%${query}%` } },
-          { code: { [Op.like]: `%${query}%` } },
-        ],
+        [Op.or]: [{ name: { [Op.like]: `%${query}%` } }, { code: { [Op.like]: `%${query}%` } }],
       } as WhereOptions<CountryMasterAttributes>,
     });
   }
@@ -94,8 +92,8 @@ export class CountryRepository extends BaseRepository<
    * Find with pagination
    */
   async findPaginated(
-    page: number = 1,
-    limit: number = 10,
+    page = 1,
+    limit = 10,
     options?: FindOptions
   ): Promise<{ rows: CountryMaster[]; count: number }> {
     const offset = (page - 1) * limit;
@@ -111,8 +109,8 @@ export class CountryRepository extends BaseRepository<
    */
   async findByStatus(
     status: 'active' | 'inactive',
-    page: number = 1,
-    limit: number = 10
+    page = 1,
+    limit = 10
   ): Promise<{ rows: CountryMaster[]; count: number }> {
     return this.findPaginated(page, limit, {
       where: { status },

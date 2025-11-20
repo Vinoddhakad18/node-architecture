@@ -1,7 +1,3 @@
-import { Router } from 'express';
-import countryMasterController from '@controllers/country-master.controller';
-import { validateRequest } from '@middleware/validateRequest';
-import { authenticate } from '@middleware/auth.middleware';
 import {
   createCountrySchema,
   updateCountrySchema,
@@ -10,6 +6,10 @@ import {
   deleteCountrySchema,
   listCountriesSchema,
 } from '@application/validations/country-master.schema';
+import countryMasterController from '@controllers/country-master.controller';
+import { authenticate } from '@middleware/auth.middleware';
+import { validateRequest } from '@middleware/validateRequest';
+import { Router } from 'express';
 
 const router = Router();
 
@@ -156,7 +156,11 @@ router.get('/', validateRequest(listCountriesSchema), countryMasterController.fi
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/code/:code', validateRequest(getCountryByCodeSchema), countryMasterController.findByCode);
+router.get(
+  '/code/:code',
+  validateRequest(getCountryByCodeSchema),
+  countryMasterController.findByCode
+);
 
 /**
  * @swagger
@@ -258,7 +262,12 @@ router.get('/:id', validateRequest(getCountryByIdSchema), countryMasterControlle
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.post('/', authenticate, validateRequest(createCountrySchema), countryMasterController.create);
+router.post(
+  '/',
+  authenticate,
+  validateRequest(createCountrySchema),
+  countryMasterController.create
+);
 
 /**
  * @swagger
@@ -323,7 +332,12 @@ router.post('/', authenticate, validateRequest(createCountrySchema), countryMast
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.put('/:id', authenticate, validateRequest(updateCountrySchema), countryMasterController.update);
+router.put(
+  '/:id',
+  authenticate,
+  validateRequest(updateCountrySchema),
+  countryMasterController.update
+);
 
 /**
  * @swagger
@@ -363,7 +377,12 @@ router.put('/:id', authenticate, validateRequest(updateCountrySchema), countryMa
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.delete('/:id', authenticate, validateRequest(deleteCountrySchema), countryMasterController.delete);
+router.delete(
+  '/:id',
+  authenticate,
+  validateRequest(deleteCountrySchema),
+  countryMasterController.delete
+);
 
 /**
  * @swagger
@@ -403,6 +422,11 @@ router.delete('/:id', authenticate, validateRequest(deleteCountrySchema), countr
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.delete('/:id/permanent', authenticate, validateRequest(deleteCountrySchema), countryMasterController.hardDelete);
+router.delete(
+  '/:id/permanent',
+  authenticate,
+  validateRequest(deleteCountrySchema),
+  countryMasterController.hardDelete
+);
 
 export default router;

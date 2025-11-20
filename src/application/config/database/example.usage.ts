@@ -5,8 +5,9 @@
  * Delete this file once you understand how to use the configuration.
  */
 
-import { sequelize, testConnection, syncDatabase, closeConnection } from './database';
 import { DataTypes, Model, Op, QueryTypes } from 'sequelize';
+
+import { sequelize, testConnection, syncDatabase, closeConnection } from './database';
 
 /**
  * Example 1: Test Database Connection
@@ -95,10 +96,7 @@ export const exampleDatabaseOperations = async () => {
     console.log('User found:', user?.toJSON());
 
     // Update a user
-    await User.update(
-      { email: 'john.doe@example.com' },
-      { where: { username: 'john_doe' } }
-    );
+    await User.update({ email: 'john.doe@example.com' }, { where: { username: 'john_doe' } });
 
     // Delete a user
     await User.destroy({ where: { username: 'john_doe' } });
@@ -137,12 +135,9 @@ export const exampleTransaction = async () => {
  */
 export const exampleRawQuery = async () => {
   try {
-    const [results] = await sequelize.query(
-      'SELECT * FROM users WHERE username = ?',
-      {
-        replacements: ['john_doe'],
-      }
-    );
+    const [results] = await sequelize.query('SELECT * FROM users WHERE username = ?', {
+      replacements: ['john_doe'],
+    });
     console.log('Query results:', results);
   } catch (error) {
     console.error('Query failed:', error);
@@ -220,10 +215,7 @@ export const exampleReplication = async () => {
     console.log('User created on write master:', newUser.toJSON());
 
     // Example: Update user (uses write master)
-    await User.update(
-      { email: 'alice.updated@example.com' },
-      { where: { username: 'alice' } }
-    );
+    await User.update({ email: 'alice.updated@example.com' }, { where: { username: 'alice' } });
 
     // Example: Delete user (uses write master)
     await User.destroy({ where: { username: 'alice' } });
@@ -243,14 +235,8 @@ export const exampleReplication = async () => {
       // All these queries will use the write master
       const userInTransaction = await User.findByPk(1, { transaction: t });
       console.log('User in transaction:', userInTransaction?.toJSON());
-      await User.create(
-        { username: 'bob', email: 'bob@example.com' },
-        { transaction: t }
-      );
-      await User.update(
-        { email: 'updated@example.com' },
-        { where: { id: 1 }, transaction: t }
-      );
+      await User.create({ username: 'bob', email: 'bob@example.com' }, { transaction: t });
+      await User.update({ email: 'updated@example.com' }, { where: { id: 1 }, transaction: t });
 
       await t.commit();
       console.log('Transaction committed on write master');

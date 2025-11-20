@@ -1,4 +1,5 @@
 import { QueryTypes } from 'sequelize';
+
 import { sequelize } from '../config/database';
 import { logger } from '../config/logger';
 
@@ -57,7 +58,7 @@ const getExecutedMigrations = async (): Promise<string[]> => {
       { type: QueryTypes.SELECT }
     );
 
-    return migrations.map(m => m.name);
+    return migrations.map((m) => m.name);
   } catch (error) {
     logger.error('Error fetching executed migrations:', error);
     throw error;
@@ -113,7 +114,6 @@ export const checkMigrationHealth = async (): Promise<MigrationHealthResult> => 
       result.status = 'warning';
       result.recommendations?.push('SequelizeMeta table exists but no migrations recorded');
     }
-
   } catch (error) {
     result.status = 'error';
     result.migrations.error = error instanceof Error ? error.message : 'Unknown error';

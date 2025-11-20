@@ -1,5 +1,5 @@
-import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from '@config/database';
+import { DataTypes, Model, Optional } from 'sequelize';
 
 /**
  * FileMetadata Model Attributes Interface
@@ -27,20 +27,19 @@ export interface FileMetadataAttributes {
  * FileMetadata Creation Attributes Interface
  * Fields that are optional during creation
  */
-export interface FileMetadataCreationAttributes
-  extends Optional<
-    FileMetadataAttributes,
-    | 'id'
-    | 'etag'
-    | 'category'
-    | 'description'
-    | 'metadata'
-    | 'status'
-    | 'created_by'
-    | 'updated_by'
-    | 'created_at'
-    | 'updated_at'
-  > {}
+export type FileMetadataCreationAttributes = Optional<
+  FileMetadataAttributes,
+  | 'id'
+  | 'etag'
+  | 'category'
+  | 'description'
+  | 'metadata'
+  | 'status'
+  | 'created_by'
+  | 'updated_by'
+  | 'created_at'
+  | 'updated_at'
+>;
 
 /**
  * FileMetadata Model Class

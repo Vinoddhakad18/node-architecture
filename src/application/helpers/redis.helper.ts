@@ -1,6 +1,6 @@
-import Redis, { Cluster } from 'ioredis';
-import { redisConfig, redisClusterConfig, isClusterMode, getClusterNodes } from '@config/redis';
 import { logger } from '@config/logger';
+import { redisConfig, redisClusterConfig, isClusterMode, getClusterNodes } from '@config/redis';
+import Redis, { Cluster } from 'ioredis';
 
 /**
  * Redis Service
@@ -9,9 +9,9 @@ import { logger } from '@config/logger';
  */
 class RedisService {
   private client: Redis | Cluster | null = null;
-  private isConnected: boolean = false;
-  private isEnabled: boolean = false;
-  private clusterMode: boolean = false;
+  private isConnected = false;
+  private isEnabled = false;
+  private clusterMode = false;
 
   constructor() {
     // Check if Redis is enabled via environment variable
@@ -27,7 +27,7 @@ class RedisService {
         if (logger) {
           logger.info('Redis Cluster client initialization started', {
             nodes: clusterNodes,
-            nodeCount: clusterNodes.length
+            nodeCount: clusterNodes.length,
           });
         }
       } else {
@@ -53,7 +53,9 @@ class RedisService {
    * Setup Redis event handlers for connection monitoring
    */
   private setupEventHandlers(): void {
-    if (!this.client) return;
+    if (!this.client) {
+      return;
+    }
 
     this.client.on('connect', () => {
       if (logger) {
@@ -84,7 +86,7 @@ class RedisService {
       if (logger) {
         logger.error(`Redis ${this.clusterMode ? 'cluster' : 'standalone'} client error:`, {
           error: err.message,
-          stack: err.stack
+          stack: err.stack,
         });
       }
       this.isConnected = false;
@@ -99,7 +101,9 @@ class RedisService {
 
     this.client.on('reconnecting', (delay: number) => {
       if (logger) {
-        logger.info(`Redis ${this.clusterMode ? 'cluster' : 'standalone'} client reconnecting in ${delay}ms...`);
+        logger.info(
+          `Redis ${this.clusterMode ? 'cluster' : 'standalone'} client reconnecting in ${delay}ms...`
+        );
       }
     });
 
@@ -116,7 +120,7 @@ class RedisService {
         if (logger) {
           logger.error('Redis Cluster node error:', {
             error: err.message,
-            address
+            address,
           });
         }
       });
@@ -125,7 +129,7 @@ class RedisService {
         if (logger) {
           logger.info('Redis Cluster node added:', {
             host: node.options.host,
-            port: node.options.port
+            port: node.options.port,
           });
         }
       });
@@ -134,7 +138,7 @@ class RedisService {
         if (logger) {
           logger.info('Redis Cluster node removed:', {
             host: node.options.host,
-            port: node.options.port
+            port: node.options.port,
           });
         }
       });
@@ -180,20 +184,14 @@ class RedisService {
    * @param value - Value to store (string, number, or object)
    * @param ttl - Time to live in seconds (optional)
    */
-  public async set(
-    key: string,
-    value: string | number | object,
-    ttl?: number
-  ): Promise<void> {
+  public async set(key: string, value: string | number | object, ttl?: number): Promise<void> {
     if (!this.isEnabled || !this.client) {
       logger.warn('Redis SET operation skipped - Redis is disabled');
       return;
     }
 
     try {
-      const stringValue = typeof value === 'object'
-        ? JSON.stringify(value)
-        : String(value);
+      const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
 
       if (ttl) {
         await this.client.setex(key, ttl, stringValue);

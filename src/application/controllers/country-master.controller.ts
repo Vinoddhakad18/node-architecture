@@ -1,7 +1,7 @@
-import { Response } from 'express';
-import countryMasterService from '@services/country-master.service';
 import { logger } from '@config/logger';
 import { AuthenticatedRequest, getErrorMessage } from '@interfaces/common.interface';
+import countryMasterService from '@services/country-master.service';
+import { Response } from 'express';
 
 /**
  * Country Master Controller

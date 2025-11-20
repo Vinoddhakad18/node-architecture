@@ -1,16 +1,19 @@
-import morgan from 'morgan';
-import { Request, RequestHandler } from 'express';
 import { stream, logger as winstonLogger } from '@config/logger';
+import { Request, RequestHandler } from 'express';
+import morgan from 'morgan';
+
 import { config } from '@/config';
 
 /**
  * Custom Morgan token for real IP address
  */
 morgan.token('real-ip', (req) => {
-  return req.headers['x-forwarded-for'] as string ||
-         req.headers['x-real-ip'] as string ||
-         req.socket.remoteAddress ||
-         'unknown';
+  return (
+    (req.headers['x-forwarded-for'] as string) ||
+    (req.headers['x-real-ip'] as string) ||
+    req.socket.remoteAddress ||
+    'unknown'
+  );
 });
 
 /**
@@ -21,9 +24,15 @@ morgan.token('request-body', (req) => {
   if (expressReq.body && Object.keys(expressReq.body).length > 0) {
     const sanitized = { ...expressReq.body };
     // Remove sensitive fields
-    if (sanitized.password) sanitized.password = '***';
-    if (sanitized.token) sanitized.token = '***';
-    if (sanitized.apiKey) sanitized.apiKey = '***';
+    if (sanitized.password) {
+      sanitized.password = '***';
+    }
+    if (sanitized.token) {
+      sanitized.token = '***';
+    }
+    if (sanitized.apiKey) {
+      sanitized.apiKey = '***';
+    }
     return JSON.stringify(sanitized);
   }
   return '-';
@@ -52,7 +61,8 @@ morgan.token('request-id', (req) => {
  * - Request body (sanitized)
  * - Content length, process ID, and request ID
  */
-const morganFormat = ':real-ip - :method :url :status :res[content-length] - :response-time ms - :user-agent - PID::pid - ReqID::request-id';
+const morganFormat =
+  ':real-ip - :method :url :status :res[content-length] - :response-time ms - :user-agent - PID::pid - ReqID::request-id';
 
 /**
  * Morgan middleware with conditional logging based on status code

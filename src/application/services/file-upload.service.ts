@@ -1,11 +1,15 @@
 import { WhereOptions, Transaction } from 'sequelize';
-import FileMetadata, { FileMetadataCreationAttributes, FileMetadataAttributes } from '../models/file-metadata.model';
-import { getStorageProvider } from '../config/storage';
-import { generateStorageKey, getFileCategory } from '../middleware/upload.middleware';
-import redisService from '../helpers/redis.helper';
-import { RedisTTL } from '../config/redis';
-import { logger } from '../config/logger';
+
 import { sequelize } from '../config/database/database';
+import { logger } from '../config/logger';
+import { RedisTTL } from '../config/redis';
+import { getStorageProvider } from '../config/storage';
+import redisService from '../helpers/redis.helper';
+import { generateStorageKey, getFileCategory } from '../middleware/upload.middleware';
+import FileMetadata, {
+  FileMetadataCreationAttributes,
+  FileMetadataAttributes,
+} from '../models/file-metadata.model';
 
 // Cache key patterns
 const CACHE_KEYS = {
@@ -108,10 +112,7 @@ class FileUploadService {
   /**
    * Upload multiple files atomically within a transaction
    */
-  async uploadMultiple(
-    files: FileUploadInput[],
-    userId?: number
-  ): Promise<FileMetadata[]> {
+  async uploadMultiple(files: FileUploadInput[], userId?: number): Promise<FileMetadata[]> {
     const storage = getStorageProvider();
     const uploadedKeys: string[] = [];
 
@@ -206,10 +207,18 @@ class FileUploadService {
     const offset = (page - 1) * limit;
     const where: WhereOptions<FileMetadataAttributes> = {};
 
-    if (status) (where as Record<string, unknown>).status = status;
-    if (category) (where as Record<string, unknown>).category = category;
-    if (mimeType) (where as Record<string, unknown>).mime_type = mimeType;
-    if (createdBy) (where as Record<string, unknown>).created_by = createdBy;
+    if (status) {
+      (where as Record<string, unknown>).status = status;
+    }
+    if (category) {
+      (where as Record<string, unknown>).category = category;
+    }
+    if (mimeType) {
+      (where as Record<string, unknown>).mime_type = mimeType;
+    }
+    if (createdBy) {
+      (where as Record<string, unknown>).created_by = createdBy;
+    }
 
     const { count, rows } = await FileMetadata.findAndCountAll({
       where,
@@ -410,7 +419,9 @@ class FileUploadService {
     byCategory: Record<string, { count: number; size: number }>;
   }> {
     const where: WhereOptions<FileMetadataAttributes> = { status: 'active' };
-    if (userId) (where as Record<string, unknown>).created_by = userId;
+    if (userId) {
+      (where as Record<string, unknown>).created_by = userId;
+    }
 
     const files = await FileMetadata.findAll({
       where,

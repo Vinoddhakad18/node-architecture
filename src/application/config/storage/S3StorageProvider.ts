@@ -1,3 +1,5 @@
+import { Readable } from 'stream';
+
 import {
   S3Client,
   PutObjectCommand,
@@ -9,7 +11,8 @@ import {
   CopyObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { Readable } from 'stream';
+
+import { logger } from '../../config/logger';
 import {
   StorageProvider,
   UploadOptions,
@@ -18,7 +21,6 @@ import {
   FileInfo,
   PresignedUrlOptions,
 } from '../../interfaces/StorageProvider.interface';
-import { logger } from '../../config/logger';
 
 export interface S3StorageConfig {
   region: string;
@@ -183,10 +185,7 @@ export class S3StorageProvider implements StorageProvider {
     return getSignedUrl(this.client, command, { expiresIn });
   }
 
-  async getPresignedUploadUrl(
-    key: string,
-    options?: PresignedUrlOptions
-  ): Promise<string> {
+  async getPresignedUploadUrl(key: string, options?: PresignedUrlOptions): Promise<string> {
     const command = new PutObjectCommand({
       Bucket: this.bucket,
       Key: key,

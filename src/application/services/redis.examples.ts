@@ -1,6 +1,6 @@
-import redisService from '../helpers/redis.helper';
-import { RedisTTL, RedisKeys } from '../config/redis';
 import { logger } from '../config/logger';
+import { RedisTTL, RedisKeys } from '../config/redis';
+import redisService from '../helpers/redis.helper';
 
 /**
  * Redis Usage Examples
@@ -282,11 +282,7 @@ export async function cacheInvalidationPattern() {
     const userSessionKey = RedisKeys.userSession(userId);
 
     // Invalidate all user-related cache
-    const deleted = await redisService.del([
-      userProfileKey,
-      userCacheKey,
-      userSessionKey,
-    ]);
+    const deleted = await redisService.del([userProfileKey, userCacheKey, userSessionKey]);
 
     logger.info(`Cache invalidated: ${deleted} key(s) deleted`);
   } catch (error) {
@@ -304,9 +300,7 @@ export async function batchOperations() {
     // Store multiple keys
     const promises = [];
     for (let i = 1; i <= 5; i++) {
-      promises.push(
-        redisService.set(`batch:key:${i}`, `value-${i}`, RedisTTL.SHORT)
-      );
+      promises.push(redisService.set(`batch:key:${i}`, `value-${i}`, RedisTTL.SHORT));
     }
     await Promise.all(promises);
     logger.info('5 keys stored in batch');

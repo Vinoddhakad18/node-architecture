@@ -4,7 +4,9 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
+
 import { errorHandler, notFoundHandler } from '../errorHandler';
+
 import { AppError } from '@/domain/errors/AppError';
 
 // Mock logger
@@ -43,12 +45,7 @@ describe('Error Handler Middleware', () => {
         const error = new AppError('Bad request', 400);
 
         // Act
-        errorHandler(
-          error,
-          mockRequest as Request,
-          mockResponse as Response,
-          nextFunction
-        );
+        errorHandler(error, mockRequest as Request, mockResponse as Response, nextFunction);
 
         // Assert
         expect(mockResponse.sendCustom).toHaveBeenCalledWith(
@@ -65,12 +62,7 @@ describe('Error Handler Middleware', () => {
         const error = new AppError('Unauthorized', 401);
 
         // Act
-        errorHandler(
-          error,
-          mockRequest as Request,
-          mockResponse as Response,
-          nextFunction
-        );
+        errorHandler(error, mockRequest as Request, mockResponse as Response, nextFunction);
 
         // Assert
         expect(mockResponse.sendCustom).toHaveBeenCalledWith(
@@ -87,12 +79,7 @@ describe('Error Handler Middleware', () => {
         const error = new AppError('Forbidden', 403);
 
         // Act
-        errorHandler(
-          error,
-          mockRequest as Request,
-          mockResponse as Response,
-          nextFunction
-        );
+        errorHandler(error, mockRequest as Request, mockResponse as Response, nextFunction);
 
         // Assert
         expect(mockResponse.sendCustom).toHaveBeenCalledWith(
@@ -109,12 +96,7 @@ describe('Error Handler Middleware', () => {
         const error = new AppError('Not found', 404);
 
         // Act
-        errorHandler(
-          error,
-          mockRequest as Request,
-          mockResponse as Response,
-          nextFunction
-        );
+        errorHandler(error, mockRequest as Request, mockResponse as Response, nextFunction);
 
         // Assert
         expect(mockResponse.sendCustom).toHaveBeenCalledWith(
@@ -131,12 +113,7 @@ describe('Error Handler Middleware', () => {
         const error = new AppError('Internal server error', 500);
 
         // Act
-        errorHandler(
-          error,
-          mockRequest as Request,
-          mockResponse as Response,
-          nextFunction
-        );
+        errorHandler(error, mockRequest as Request, mockResponse as Response, nextFunction);
 
         // Assert
         expect(mockResponse.sendCustom).toHaveBeenCalledWith(
@@ -162,12 +139,7 @@ describe('Error Handler Middleware', () => {
         );
 
         // Act
-        errorHandler(
-          error,
-          mockRequest as Request,
-          mockResponse as Response,
-          nextFunction
-        );
+        errorHandler(error, mockRequest as Request, mockResponse as Response, nextFunction);
 
         // Assert
         expect(mockResponse.sendCustom).toHaveBeenCalledWith(
@@ -181,20 +153,10 @@ describe('Error Handler Middleware', () => {
 
       it('should handle non-JSON details string', () => {
         // Arrange
-        const error = new AppError(
-          'Error occurred',
-          400,
-          true,
-          'Some plain text details'
-        );
+        const error = new AppError('Error occurred', 400, true, 'Some plain text details');
 
         // Act
-        errorHandler(
-          error,
-          mockRequest as Request,
-          mockResponse as Response,
-          nextFunction
-        );
+        errorHandler(error, mockRequest as Request, mockResponse as Response, nextFunction);
 
         // Assert
         expect(mockResponse.sendCustom).toHaveBeenCalledWith(
@@ -212,24 +174,14 @@ describe('Error Handler Middleware', () => {
 
         // Client error (4xx) - should not log
         const clientError = new AppError('Bad request', 400);
-        errorHandler(
-          clientError,
-          mockRequest as Request,
-          mockResponse as Response,
-          nextFunction
-        );
+        errorHandler(clientError, mockRequest as Request, mockResponse as Response, nextFunction);
         expect(logger.error).not.toHaveBeenCalled();
 
         jest.clearAllMocks();
 
         // Server error (5xx) - should log
         const serverError = new AppError('Server error', 500);
-        errorHandler(
-          serverError,
-          mockRequest as Request,
-          mockResponse as Response,
-          nextFunction
-        );
+        errorHandler(serverError, mockRequest as Request, mockResponse as Response, nextFunction);
         expect(logger.error).toHaveBeenCalledWith(
           'Server error occurred',
           expect.objectContaining({
@@ -246,12 +198,7 @@ describe('Error Handler Middleware', () => {
         const error = new Error('Something went wrong');
 
         // Act
-        errorHandler(
-          error,
-          mockRequest as Request,
-          mockResponse as Response,
-          nextFunction
-        );
+        errorHandler(error, mockRequest as Request, mockResponse as Response, nextFunction);
 
         // Assert
         expect(mockResponse.sendServiceUnavailable).toHaveBeenCalledWith(
@@ -265,12 +212,7 @@ describe('Error Handler Middleware', () => {
         const error = new Error('Unexpected error');
 
         // Act
-        errorHandler(
-          error,
-          mockRequest as Request,
-          mockResponse as Response,
-          nextFunction
-        );
+        errorHandler(error, mockRequest as Request, mockResponse as Response, nextFunction);
 
         // Assert
         expect(logger.error).toHaveBeenCalledWith(
@@ -287,12 +229,7 @@ describe('Error Handler Middleware', () => {
         const error = new TypeError('Cannot read property of undefined');
 
         // Act
-        errorHandler(
-          error,
-          mockRequest as Request,
-          mockResponse as Response,
-          nextFunction
-        );
+        errorHandler(error, mockRequest as Request, mockResponse as Response, nextFunction);
 
         // Assert
         expect(mockResponse.sendServiceUnavailable).toHaveBeenCalledWith(
@@ -305,12 +242,7 @@ describe('Error Handler Middleware', () => {
         const error = new ReferenceError('Variable is not defined');
 
         // Act
-        errorHandler(
-          error,
-          mockRequest as Request,
-          mockResponse as Response,
-          nextFunction
-        );
+        errorHandler(error, mockRequest as Request, mockResponse as Response, nextFunction);
 
         // Assert
         expect(mockResponse.sendServiceUnavailable).toHaveBeenCalled();
@@ -321,12 +253,7 @@ describe('Error Handler Middleware', () => {
         const error = new SyntaxError('Unexpected token');
 
         // Act
-        errorHandler(
-          error,
-          mockRequest as Request,
-          mockResponse as Response,
-          nextFunction
-        );
+        errorHandler(error, mockRequest as Request, mockResponse as Response, nextFunction);
 
         // Assert
         expect(mockResponse.sendServiceUnavailable).toHaveBeenCalled();
@@ -339,40 +266,19 @@ describe('Error Handler Middleware', () => {
         const error = new AppError('', 400);
 
         // Act
-        errorHandler(
-          error,
-          mockRequest as Request,
-          mockResponse as Response,
-          nextFunction
-        );
+        errorHandler(error, mockRequest as Request, mockResponse as Response, nextFunction);
 
         // Assert
-        expect(mockResponse.sendCustom).toHaveBeenCalledWith(
-          400,
-          null,
-          '',
-          false,
-          undefined
-        );
+        expect(mockResponse.sendCustom).toHaveBeenCalledWith(400, null, '', false, undefined);
       });
 
       it('should handle AppError with object details in JSON format', () => {
         // Arrange
         const errorDetails = { code: 'VALIDATION_ERROR', field: 'email' };
-        const error = new AppError(
-          'Validation error',
-          400,
-          true,
-          JSON.stringify(errorDetails)
-        );
+        const error = new AppError('Validation error', 400, true, JSON.stringify(errorDetails));
 
         // Act
-        errorHandler(
-          error,
-          mockRequest as Request,
-          mockResponse as Response,
-          nextFunction
-        );
+        errorHandler(error, mockRequest as Request, mockResponse as Response, nextFunction);
 
         // Assert
         expect(mockResponse.sendCustom).toHaveBeenCalledWith(
@@ -390,12 +296,7 @@ describe('Error Handler Middleware', () => {
         delete error.stack;
 
         // Act
-        errorHandler(
-          error,
-          mockRequest as Request,
-          mockResponse as Response,
-          nextFunction
-        );
+        errorHandler(error, mockRequest as Request, mockResponse as Response, nextFunction);
 
         // Assert
         expect(mockResponse.sendServiceUnavailable).toHaveBeenCalled();
@@ -406,11 +307,7 @@ describe('Error Handler Middleware', () => {
   describe('notFoundHandler', () => {
     it('should respond with 404 Not Found', () => {
       // Act
-      notFoundHandler(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      notFoundHandler(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendNotFound).toHaveBeenCalledWith('Resource not found');

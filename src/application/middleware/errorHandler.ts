@@ -1,7 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
-import { AppError } from '@/domain/errors/AppError';
 import { logger } from '@config/logger';
 import { ValidationError, ErrorDetail } from '@interfaces/common.interface';
+import { Request, Response, NextFunction } from 'express';
+
+import { AppError } from '@/domain/errors/AppError';
 
 /**
  * Global error handling middleware
@@ -20,7 +21,7 @@ export const errorHandler = (
         message: err.message,
         statusCode: err.statusCode,
         stack: err.stack,
-        details: err.details
+        details: err.details,
       });
     }
 
@@ -50,7 +51,7 @@ export const errorHandler = (
   logger.error('Unexpected error occurred', {
     message: err.message,
     stack: err.stack,
-    name: err.name
+    name: err.name,
   });
   res.sendServiceUnavailable('An unexpected error occurred');
 };
@@ -58,10 +59,6 @@ export const errorHandler = (
 /**
  * 404 Not Found handler
  */
-export const notFoundHandler = (
-  _req: Request,
-  res: Response,
-  _next: NextFunction
-): void => {
+export const notFoundHandler = (_req: Request, res: Response, _next: NextFunction): void => {
   res.sendNotFound('Resource not found');
 };

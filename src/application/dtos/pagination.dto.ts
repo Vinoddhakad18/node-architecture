@@ -36,12 +36,7 @@ export class PaginatedResponseDTO<T> {
   data: T[];
   pagination: PaginationMetaDTO;
 
-  constructor(
-    data: T[],
-    total: number,
-    page: number,
-    limit: number
-  ) {
+  constructor(data: T[], total: number, page: number, limit: number) {
     this.data = data;
     const totalPages = Math.ceil(total / limit);
     this.pagination = {
@@ -57,12 +52,7 @@ export class PaginatedResponseDTO<T> {
   /**
    * Create paginated response
    */
-  static create<T>(
-    data: T[],
-    total: number,
-    page: number,
-    limit: number
-  ): PaginatedResponseDTO<T> {
+  static create<T>(data: T[], total: number, page: number, limit: number): PaginatedResponseDTO<T> {
     return new PaginatedResponseDTO(data, total, page, limit);
   }
 }

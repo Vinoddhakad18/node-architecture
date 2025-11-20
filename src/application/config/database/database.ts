@@ -1,7 +1,8 @@
-import { Sequelize, Options } from 'sequelize';
-import { config } from '@/config';
 import { logger } from '@config/logger';
 import redisService from '@helpers/redis.helper';
+import { Sequelize, Options } from 'sequelize';
+
+import { config } from '@/config';
 
 /**
  * Sequelize Database Configuration - MySQL Only
@@ -100,19 +101,22 @@ export const testConnection = async (): Promise<void> => {
 /**
  * Connect to database with retry logic
  */
-export const connectDatabase = async (
-  attempt: number = 1
-): Promise<void> => {
+export const connectDatabase = async (attempt = 1): Promise<void> => {
   try {
-    logger.info(`Attempting to connect to database (attempt ${attempt}/${DB_CONNECTION_RETRY_ATTEMPTS})...`);
+    logger.info(
+      `Attempting to connect to database (attempt ${attempt}/${DB_CONNECTION_RETRY_ATTEMPTS})...`
+    );
     await testConnection();
     logger.info('✓ Database connection established successfully');
   } catch (error) {
-    logger.error(`✗ Database connection failed (attempt ${attempt}/${DB_CONNECTION_RETRY_ATTEMPTS}):`, error);
+    logger.error(
+      `✗ Database connection failed (attempt ${attempt}/${DB_CONNECTION_RETRY_ATTEMPTS}):`,
+      error
+    );
 
     if (attempt < DB_CONNECTION_RETRY_ATTEMPTS) {
       logger.info(`Retrying in ${DB_CONNECTION_RETRY_DELAY / 1000} seconds...`);
-      await new Promise(resolve => setTimeout(resolve, DB_CONNECTION_RETRY_DELAY));
+      await new Promise((resolve) => setTimeout(resolve, DB_CONNECTION_RETRY_DELAY));
       return connectDatabase(attempt + 1);
     } else {
       logger.error('✗ Failed to connect to database after maximum retry attempts');
@@ -159,7 +163,10 @@ export const gracefulShutdown = async (signal: string): Promise<void> => {
 /**
  * Sync database models (use with caution in production)
  */
-export const syncDatabase = async (options?: { force?: boolean; alter?: boolean }): Promise<void> => {
+export const syncDatabase = async (options?: {
+  force?: boolean;
+  alter?: boolean;
+}): Promise<void> => {
   try {
     if (config.env === 'production' && options?.force) {
       throw new Error('Force sync is not allowed in production environment');

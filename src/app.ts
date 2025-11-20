@@ -3,8 +3,9 @@
  * New Relic must be the first module loaded if enabled
  * Load environment variables first to check if New Relic should be enabled
  */
-import dotenv from 'dotenv';
 import path from 'path';
+
+import dotenv from 'dotenv';
 
 // Load environment variables from .env file
 // dotenv handles missing files gracefully, no need for existence check
@@ -22,16 +23,26 @@ if (process.env.NEW_RELIC_ENABLED === 'true') {
 }
 
 import express, { Application } from 'express';
+import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import cors from 'cors';
-import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
+
+import { swaggerSpec, swaggerUiOptions } from './swagger';
+
 import { config } from '@/config';
+
 import routes from '@routes/index';
-import { errorHandler, notFoundHandler, logger, errorLogger, attachResponseHandlers, requestIdMiddleware } from '@middleware/index';
+import {
+  errorHandler,
+  notFoundHandler,
+  logger,
+  errorLogger,
+  attachResponseHandlers,
+  requestIdMiddleware,
+} from '@middleware/index';
 import { metricsMiddleware } from '@middleware/metrics';
 import { connectDatabase } from '@config/database';
-import { swaggerSpec, swaggerUiOptions } from './swagger';
 import redisService from '@helpers/redis.helper';
 
 /**
@@ -57,10 +68,12 @@ export const createApp = async (): Promise<Application> => {
   app.use(helmet());
 
   // CORS configuration
-  app.use(cors({
-    origin: config.cors.origin,
-    credentials: true,
-  }));
+  app.use(
+    cors({
+      origin: config.cors.origin,
+      credentials: true,
+    })
+  );
 
   // Rate limiting
   app.use(limiter);
@@ -115,30 +128,36 @@ export const createApp = async (): Promise<Application> => {
       }
     }
 
-    res.sendSuccess({
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      serverStartTime: uptimeInfo.startTime,
-      uptime: {
-        seconds: uptimeInfo.uptimeSeconds,
-        formatted: uptimeInfo.uptimeFormatted,
+    res.sendSuccess(
+      {
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        serverStartTime: uptimeInfo.startTime,
+        uptime: {
+          seconds: uptimeInfo.uptimeSeconds,
+          formatted: uptimeInfo.uptimeFormatted,
+        },
+        environment: config.env,
+        services: {
+          database: 'connected',
+          redis: redisStatus,
+        },
+        process: {
+          pid: process.pid,
+          memoryUsage: process.memoryUsage(),
+          cpuUsage: process.cpuUsage(),
+        },
       },
-      environment: config.env,
-      services: {
-        database: 'connected',
-        redis: redisStatus,
-      },
-      process: {
-        pid: process.pid,
-        memoryUsage: process.memoryUsage(),
-        cpuUsage: process.cpuUsage(),
-      },
-    }, 'Health check successful');
+      'Health check successful'
+    );
   });
 
   // Migration health check endpoint
   app.get('/health/migrations', async (_req, res) => {
-    const { checkMigrationHealth, getMigrationStats } = require('./application/utils/migrationHealth');
+    const {
+      checkMigrationHealth,
+      getMigrationStats,
+    } = require('./application/utils/migrationHealth');
 
     try {
       const [healthResult, stats] = await Promise.all([

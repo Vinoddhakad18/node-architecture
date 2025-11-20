@@ -14,15 +14,9 @@ export const fileIdParamSchema = z.object({
  */
 export const uploadFileSchema = z.object({
   body: z.object({
-    description: z
-      .string()
-      .max(500, 'Description must be at most 500 characters')
-      .optional(),
+    description: z.string().max(500, 'Description must be at most 500 characters').optional(),
     metadata: z.string().optional(), // JSON string
-    prefix: z
-      .string()
-      .max(100, 'Prefix must be at most 100 characters')
-      .optional(),
+    prefix: z.string().max(100, 'Prefix must be at most 100 characters').optional(),
   }),
 });
 
@@ -34,15 +28,9 @@ export const updateFileSchema = z.object({
     id: z.string().regex(/^\d+$/, 'Invalid file ID'),
   }),
   body: z.object({
-    description: z
-      .string()
-      .max(500, 'Description must be at most 500 characters')
-      .optional(),
+    description: z.string().max(500, 'Description must be at most 500 characters').optional(),
     metadata: z.record(z.string(), z.any()).optional(),
-    category: z
-      .string()
-      .max(50, 'Category must be at most 50 characters')
-      .optional(),
+    category: z.string().max(50, 'Category must be at most 50 characters').optional(),
     status: z.enum(['active', 'inactive']).optional(),
   }),
 });
@@ -52,22 +40,12 @@ export const updateFileSchema = z.object({
  */
 export const listFilesSchema = z.object({
   query: z.object({
-    page: z
-      .string()
-      .regex(/^\d+$/, 'Page must be a number')
-      .optional(),
-    limit: z
-      .string()
-      .regex(/^\d+$/, 'Limit must be a number')
-      .optional(),
-    category: z
-      .enum(['images', 'documents', 'videos', 'audio', 'archives', 'other'])
-      .optional(),
+    page: z.string().regex(/^\d+$/, 'Page must be a number').optional(),
+    limit: z.string().regex(/^\d+$/, 'Limit must be a number').optional(),
+    category: z.enum(['images', 'documents', 'videos', 'audio', 'archives', 'other']).optional(),
     mimeType: z.string().optional(),
     status: z.enum(['active', 'inactive', 'deleted']).optional(),
-    sortBy: z
-      .enum(['created_at', 'updated_at', 'size', 'original_name'])
-      .optional(),
+    sortBy: z.enum(['created_at', 'updated_at', 'size', 'original_name']).optional(),
     sortOrder: z.enum(['ASC', 'DESC']).optional(),
   }),
 });
@@ -80,10 +58,7 @@ export const getDownloadUrlSchema = z.object({
     id: z.string().regex(/^\d+$/, 'Invalid file ID'),
   }),
   query: z.object({
-    expiresIn: z
-      .string()
-      .regex(/^\d+$/, 'ExpiresIn must be a number')
-      .optional(),
+    expiresIn: z.string().regex(/^\d+$/, 'ExpiresIn must be a number').optional(),
   }),
 });
 

@@ -1,8 +1,8 @@
-import { Request, Response } from 'express';
-import authService from '@services/auth.service';
 import { logger } from '@config/logger';
-import { trackAuthAttempt } from '@middleware/metrics';
 import { getErrorMessage } from '@interfaces/common.interface';
+import { trackAuthAttempt } from '@middleware/metrics';
+import authService from '@services/auth.service';
+import { Request, Response } from 'express';
 
 /**
  * Authentication Controller
@@ -63,10 +63,7 @@ class AuthController {
 
       const isValid = await authService.verifyToken(token);
 
-      res.sendSuccess(
-        { valid: isValid },
-        isValid ? 'Token is valid' : 'Token is invalid'
-      );
+      res.sendSuccess({ valid: isValid }, isValid ? 'Token is valid' : 'Token is invalid');
     } catch (error: unknown) {
       logger.error('Error in verify token controller:', error);
       res.sendBadRequest(getErrorMessage(error) || 'Token verification failed');
@@ -117,7 +114,10 @@ class AuthController {
 
       await authService.changePassword(userId, currentPassword, newPassword);
 
-      res.sendSuccess(null, 'Password changed successfully. Please login again with your new password.');
+      res.sendSuccess(
+        null,
+        'Password changed successfully. Please login again with your new password.'
+      );
     } catch (error: unknown) {
       logger.error('Error in change password controller:', error);
       res.sendBadRequest(getErrorMessage(error) || 'Password change failed');

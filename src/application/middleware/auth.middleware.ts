@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
 import jwtUtil from '@application/utils/jwt.util';
 import { logger } from '@config/logger';
 import tokenBlacklistService from '@services/token-blacklist.service';
+import { Request, Response, NextFunction } from 'express';
 
 /**
  * Authentication Middleware
@@ -155,7 +155,7 @@ export const authorize = (...allowedRoles: string[]) => {
  * Check Token Ownership Middleware
  * Verifies that the authenticated user matches the requested userId
  */
-export const checkOwnership = (userIdParam: string = 'userId') => {
+export const checkOwnership = (userIdParam = 'userId') => {
   return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
       res.sendUnauthorized('Authentication required');

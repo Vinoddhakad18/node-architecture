@@ -4,9 +4,10 @@
  */
 
 import { Request, Response } from 'express';
-import countryMasterController from '../country-master.controller';
-import countryMasterService from '../../services/country-master.service';
+
 import { mockRequest } from '../../../__tests__/helpers/test-helpers';
+import countryMasterService from '../../services/country-master.service';
+import countryMasterController from '../country-master.controller';
 
 // Mock dependencies
 jest.mock('../../services/country-master.service');
@@ -170,7 +171,10 @@ describe('CountryMasterController', () => {
         sortBy: 'name',
         sortOrder: 'ASC',
       });
-      expect(res.sendSuccess).toHaveBeenCalledWith(mockPaginatedResult, 'Countries retrieved successfully');
+      expect(res.sendSuccess).toHaveBeenCalledWith(
+        mockPaginatedResult,
+        'Countries retrieved successfully'
+      );
     });
 
     it('should apply filters correctly', async () => {
@@ -549,14 +553,19 @@ describe('CountryMasterController', () => {
 
       // Assert
       expect(countryMasterService.findAllActive).toHaveBeenCalled();
-      expect(res.sendSuccess).toHaveBeenCalledWith(activeCountries, 'Active countries retrieved successfully');
+      expect(res.sendSuccess).toHaveBeenCalledWith(
+        activeCountries,
+        'Active countries retrieved successfully'
+      );
     });
 
     it('should handle service errors gracefully', async () => {
       // Arrange
       req = mockRequest({});
 
-      (countryMasterService.findAllActive as jest.Mock).mockRejectedValue(new Error('Database error'));
+      (countryMasterService.findAllActive as jest.Mock).mockRejectedValue(
+        new Error('Database error')
+      );
 
       // Act
       await countryMasterController.findAllActive(req as Request, res as Response);

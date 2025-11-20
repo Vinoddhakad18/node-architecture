@@ -1,7 +1,7 @@
-import redisService from '@helpers/redis.helper';
-import { CacheKeys, CacheTTL } from '@constants/cache.constants';
-import { logger } from '@config/logger';
 import jwtUtil from '@application/utils/jwt.util';
+import { logger } from '@config/logger';
+import { CacheKeys, CacheTTL } from '@constants/cache.constants';
+import redisService from '@helpers/redis.helper';
 
 /**
  * Token Blacklist Service
@@ -13,7 +13,7 @@ class TokenBlacklistService {
    * @param token - The JWT token to blacklist
    * @param reason - Reason for blacklisting (logout, password_change, security)
    */
-  async addToBlacklist(token: string, reason: string = 'logout'): Promise<void> {
+  async addToBlacklist(token: string, reason = 'logout'): Promise<void> {
     try {
       // Get token expiration time
       const decoded = jwtUtil.decodeToken(token);
@@ -29,12 +29,16 @@ class TokenBlacklistService {
       // Only blacklist if token hasn't expired yet
       if (ttl > 0) {
         const blacklistKey = CacheKeys.tokenBlacklist(token);
-        await redisService.set(blacklistKey, {
-          reason,
-          blacklistedAt: new Date().toISOString(),
-          userId: decoded.userId,
-          email: decoded.email,
-        }, ttl);
+        await redisService.set(
+          blacklistKey,
+          {
+            reason,
+            blacklistedAt: new Date().toISOString(),
+            userId: decoded.userId,
+            email: decoded.email,
+          },
+          ttl
+        );
 
         logger.info(`Token blacklisted: ${reason}`, {
           userId: decoded.userId,
@@ -73,7 +77,7 @@ class TokenBlacklistService {
   async blacklistTokenPair(
     accessToken: string,
     refreshToken: string,
-    reason: string = 'logout'
+    reason = 'logout'
   ): Promise<void> {
     await Promise.all([
       this.addToBlacklist(accessToken, reason),
@@ -86,7 +90,7 @@ class TokenBlacklistService {
    * Used when password is changed or account is compromised
    * This stores a timestamp; tokens issued before this time are considered invalid
    */
-  async invalidateAllUserTokens(userId: number, reason: string = 'password_change'): Promise<void> {
+  async invalidateAllUserTokens(userId: number, reason = 'password_change'): Promise<void> {
     try {
       const userInvalidationKey = `${CacheKeys.tokenBlacklist('user')}:${userId}`;
       const invalidationData = {

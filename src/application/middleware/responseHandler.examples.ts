@@ -13,7 +13,10 @@ import { Request, Response } from 'express';
  * Example: Send 200 OK response
  */
 export const getUsers = async (_req: Request, res: Response) => {
-  const users = [{ id: 1, name: 'John' }, { id: 2, name: 'Jane' }];
+  const users = [
+    { id: 1, name: 'John' },
+    { id: 2, name: 'Jane' },
+  ];
 
   // Method 1: With data and custom message
   res.sendSuccess(users, 'Users retrieved successfully');
@@ -67,7 +70,7 @@ export const invalidRequest = async (_req: Request, res: Response) => {
   // Method 2: With custom message and error details
   res.sendBadRequest('Invalid input', {
     field: 'email',
-    issue: 'Email format is invalid'
+    issue: 'Email format is invalid',
   });
 
   // Method 3: With default message
@@ -114,7 +117,7 @@ export const conflict = async (_req: Request, res: Response) => {
   res.sendConflict('Resource conflict detected', {
     field: 'email',
     value: 'john@example.com',
-    message: 'Email already in use'
+    message: 'Email already in use',
   });
 };
 
@@ -124,7 +127,7 @@ export const conflict = async (_req: Request, res: Response) => {
 export const validationError = async (_req: Request, res: Response) => {
   const errors = [
     { field: 'email', message: 'Email is required' },
-    { field: 'password', message: 'Password must be at least 8 characters' }
+    { field: 'password', message: 'Password must be at least 8 characters' },
   ];
 
   // Method 1: With custom message
@@ -183,11 +186,11 @@ export const serviceUnavailable = async (_req: Request, res: Response) => {
  */
 export const customResponse = async (_req: Request, res: Response) => {
   res.sendCustom(
-    418,                           // status code
-    { message: 'I am a teapot' },  // data
-    'Teapot response',             // message
-    true,                          // success flag
-    undefined                      // errors (optional)
+    418, // status code
+    { message: 'I am a teapot' }, // data
+    'Teapot response', // message
+    true, // success flag
+    undefined // errors (optional)
   );
 };
 
@@ -303,11 +306,27 @@ export class UserController {
 }
 
 // Mock database functions (replace with actual implementations)
-async function getUsersFromDB(): Promise<any[]> { return []; }
-async function getUserById(_id: string): Promise<any> { return null; }
-async function getUserByEmail(_email: string): Promise<any> { return null; }
-async function createUserInDB(data: any): Promise<any> { return data; }
-async function updateUserInDB(_id: string, _data: any): Promise<any> { return null; }
-async function deleteUserFromDB(_id: string): Promise<boolean> { return false; }
-async function authenticateUser(_email: string, _password: string): Promise<any> { return null; }
-async function checkUserPermission(_userId: string): Promise<boolean> { return false; }
+async function getUsersFromDB(): Promise<any[]> {
+  return [];
+}
+async function getUserById(_id: string): Promise<any> {
+  return null;
+}
+async function getUserByEmail(_email: string): Promise<any> {
+  return null;
+}
+async function createUserInDB(data: any): Promise<any> {
+  return data;
+}
+async function updateUserInDB(_id: string, _data: any): Promise<any> {
+  return null;
+}
+async function deleteUserFromDB(_id: string): Promise<boolean> {
+  return false;
+}
+async function authenticateUser(_email: string, _password: string): Promise<any> {
+  return null;
+}
+async function checkUserPermission(_userId: string): Promise<boolean> {
+  return false;
+}

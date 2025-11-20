@@ -1,7 +1,7 @@
-import UserMaster from '@models/user-master.model';
-import { logger } from '@config/logger';
 import jwtUtil from '@application/utils/jwt.util';
+import { logger } from '@config/logger';
 import { TokenPair } from '@interfaces/jwt.interface';
+import UserMaster from '@models/user-master.model';
 import tokenBlacklistService from '@services/token-blacklist.service';
 import bcrypt from 'bcryptjs';
 
@@ -10,7 +10,6 @@ import bcrypt from 'bcryptjs';
  * Handles business logic for authentication operations
  */
 class AuthService {
-
   /**
    * Login user and generate JWT tokens
    */
@@ -46,7 +45,7 @@ class AuthService {
       // Update last login
       user.last_login = new Date();
       await user.save();
-    logger.info(`User logged in: ${user.getDataValue('email')}`);
+      logger.info(`User logged in: ${user.getDataValue('email')}`);
       // Generate JWT tokens
       const tokens = jwtUtil.generateTokenPair({
         userId: user.getDataValue('id'),

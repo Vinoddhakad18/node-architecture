@@ -5,6 +5,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
+
 import { validateRequest } from '../validateRequest';
 
 describe('validateRequest Middleware', () => {
@@ -46,11 +47,7 @@ describe('validateRequest Middleware', () => {
       const middleware = validateRequest(schema);
 
       // Act
-      await middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(nextFunction).toHaveBeenCalled();
@@ -67,11 +64,7 @@ describe('validateRequest Middleware', () => {
       const middleware = validateRequest(schema);
 
       // Act
-      await middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendBadRequest).toHaveBeenCalledWith(
@@ -96,11 +89,7 @@ describe('validateRequest Middleware', () => {
       const middleware = validateRequest(schema);
 
       // Act
-      await middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendBadRequest).toHaveBeenCalledWith(
@@ -124,11 +113,7 @@ describe('validateRequest Middleware', () => {
       const middleware = validateRequest(schema);
 
       // Act
-      await middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendBadRequest).toHaveBeenCalledWith(
@@ -147,11 +132,7 @@ describe('validateRequest Middleware', () => {
       const middleware = validateRequest(schema);
 
       // Act
-      await middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendBadRequest).toHaveBeenCalledWith(
@@ -181,11 +162,7 @@ describe('validateRequest Middleware', () => {
       const middleware = validateRequest(schema);
 
       // Act
-      await middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(nextFunction).toHaveBeenCalled();
@@ -201,11 +178,7 @@ describe('validateRequest Middleware', () => {
       const middleware = validateRequest(schema);
 
       // Act
-      await middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendBadRequest).toHaveBeenCalledWith(
@@ -236,11 +209,7 @@ describe('validateRequest Middleware', () => {
       const middleware = validateRequest(schema);
 
       // Act
-      await middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(nextFunction).toHaveBeenCalled();
@@ -253,11 +222,7 @@ describe('validateRequest Middleware', () => {
       const middleware = validateRequest(schema);
 
       // Act
-      await middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendBadRequest).toHaveBeenCalledWith(
@@ -294,11 +259,7 @@ describe('validateRequest Middleware', () => {
       const middleware = validateRequest(schema);
 
       // Act
-      await middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(nextFunction).toHaveBeenCalled();
@@ -313,11 +274,7 @@ describe('validateRequest Middleware', () => {
       const middleware = validateRequest(schema);
 
       // Act
-      await middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendBadRequest).toHaveBeenCalledWith(
@@ -338,11 +295,7 @@ describe('validateRequest Middleware', () => {
       const middleware = validateRequest(throwingSchema as any);
 
       // Act
-      await middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(nextFunction).toHaveBeenCalledWith(expect.any(Error));
@@ -367,11 +320,7 @@ describe('validateRequest Middleware', () => {
       const middleware = validateRequest(schema);
 
       // Act
-      await middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(nextFunction).toHaveBeenCalled();
@@ -384,11 +333,7 @@ describe('validateRequest Middleware', () => {
       const middleware = validateRequest(schema);
 
       // Act
-      await middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendBadRequest).toHaveBeenCalled();
@@ -423,11 +368,7 @@ describe('validateRequest Middleware', () => {
       const middleware = validateRequest(schema);
 
       // Act
-      await middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(nextFunction).toHaveBeenCalled();
@@ -447,11 +388,7 @@ describe('validateRequest Middleware', () => {
       const middleware = validateRequest(schema);
 
       // Act
-      await middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendBadRequest).toHaveBeenCalledWith(
@@ -481,11 +418,7 @@ describe('validateRequest Middleware', () => {
       const middleware = validateRequest(schema);
 
       // Act
-      await middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(nextFunction).toHaveBeenCalled();
@@ -498,11 +431,7 @@ describe('validateRequest Middleware', () => {
       const middleware = validateRequest(schema);
 
       // Act
-      await middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendBadRequest).toHaveBeenCalled();

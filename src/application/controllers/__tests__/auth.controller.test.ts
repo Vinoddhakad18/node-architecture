@@ -4,9 +4,10 @@
  */
 
 import { Request, Response } from 'express';
-import authController from '../auth.controller';
-import authService from '../../services/auth.service';
+
 import { mockRequest, mockResponse } from '../../../__tests__/helpers/test-helpers';
+import authService from '../../services/auth.service';
+import authController from '../auth.controller';
 
 // Mock dependencies
 jest.mock('../../services/auth.service');
@@ -71,9 +72,7 @@ describe('AuthController', () => {
         body: { email: mockEmail, password: mockPassword },
       });
 
-      (authService.login as jest.Mock).mockRejectedValue(
-        new Error('Invalid email or password')
-      );
+      (authService.login as jest.Mock).mockRejectedValue(new Error('Invalid email or password'));
 
       // Act
       await authController.login(req as Request, res as Response);
@@ -114,9 +113,7 @@ describe('AuthController', () => {
         body: { email: mockEmail, password: mockPassword },
       });
 
-      (authService.login as jest.Mock).mockRejectedValue(
-        new Error('Database connection failed')
-      );
+      (authService.login as jest.Mock).mockRejectedValue(new Error('Database connection failed'));
 
       // Act
       await authController.login(req as Request, res as Response);
@@ -196,9 +193,7 @@ describe('AuthController', () => {
         body: { refreshToken: mockRefreshToken },
       });
 
-      (authService.refreshToken as jest.Mock).mockRejectedValue(
-        new Error('Invalid refresh token')
-      );
+      (authService.refreshToken as jest.Mock).mockRejectedValue(new Error('Invalid refresh token'));
 
       // Act
       await authController.refreshToken(req as Request, res as Response);

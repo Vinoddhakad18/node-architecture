@@ -185,10 +185,12 @@ export interface DatabaseConfig {
     idle: number;
   };
   dialectOptions?: {
-    ssl?: boolean | {
-      require?: boolean;
-      rejectUnauthorized?: boolean;
-    };
+    ssl?:
+      | boolean
+      | {
+          require?: boolean;
+          rejectUnauthorized?: boolean;
+        };
   };
 }
 

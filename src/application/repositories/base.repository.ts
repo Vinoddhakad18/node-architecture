@@ -1,4 +1,14 @@
-import { Model, ModelStatic, FindOptions, CreateOptions, UpdateOptions, DestroyOptions, Transaction, CreationAttributes, WhereOptions } from 'sequelize';
+import {
+  Model,
+  ModelStatic,
+  FindOptions,
+  CreateOptions,
+  UpdateOptions,
+  DestroyOptions,
+  Transaction,
+  CreationAttributes,
+  WhereOptions,
+} from 'sequelize';
 
 /**
  * Base Repository Interface
@@ -18,11 +28,9 @@ export interface IBaseRepository<T, CreateDTO, UpdateDTO> {
  * Base Repository
  * Abstract class implementing common database operations
  */
-export abstract class BaseRepository<
-  TModel extends Model,
-  TAttributes,
-  TCreationAttributes
-> implements IBaseRepository<TModel, TCreationAttributes, Partial<TAttributes>> {
+export abstract class BaseRepository<TModel extends Model, TAttributes, TCreationAttributes>
+  implements IBaseRepository<TModel, TCreationAttributes, Partial<TAttributes>>
+{
   protected model: ModelStatic<TModel>;
 
   constructor(model: ModelStatic<TModel>) {
@@ -101,10 +109,7 @@ export abstract class BaseRepository<
   /**
    * Bulk create records
    */
-  async bulkCreate(
-    data: TCreationAttributes[],
-    options?: CreateOptions
-  ): Promise<TModel[]> {
+  async bulkCreate(data: TCreationAttributes[], options?: CreateOptions): Promise<TModel[]> {
     return this.model.bulkCreate(data as CreationAttributes<TModel>[], options);
   }
 

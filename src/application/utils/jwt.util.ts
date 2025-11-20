@@ -1,7 +1,8 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
+
 import { jwtConfig } from '../config/jwt';
-import { JwtPayload, TokenPair, DecodedToken, JwtVerifyOptions } from '../interfaces/jwt.interface';
 import { logger } from '../config/logger';
+import { JwtPayload, TokenPair, DecodedToken, JwtVerifyOptions } from '../interfaces/jwt.interface';
 
 /**
  * JWT Utility Class
@@ -64,7 +65,7 @@ class JwtUtil {
 
     // Extract expiration timestamp
     const decoded = jwt.decode(accessToken) as DecodedToken;
-    const expiresAt = decoded.exp!; // Unix timestamp when token expires
+    const expiresAt = decoded.exp; // Unix timestamp when token expires
 
     return {
       accessToken,

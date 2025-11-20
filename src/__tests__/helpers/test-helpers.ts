@@ -3,8 +3,9 @@
  * Shared utilities for testing
  */
 
-import UserMaster from '../../application/models/user-master.model';
 import bcrypt from 'bcryptjs';
+
+import UserMaster from '../../application/models/user-master.model';
 
 /**
  * Create a test user in the database
@@ -85,23 +86,23 @@ export function mockResponse() {
   res.setHeader = jest.fn().mockReturnValue(res);
 
   // Mock response helpers that call through to status + json
-  res.sendSuccess = jest.fn((data?: any, message: string = 'Request successful') => {
+  res.sendSuccess = jest.fn((data?: any, message = 'Request successful') => {
     return res.status(200).json({ success: true, message, data });
   });
 
-  res.sendCreated = jest.fn((data?: any, message: string = 'Resource created successfully') => {
+  res.sendCreated = jest.fn((data?: any, message = 'Resource created successfully') => {
     return res.status(201).json({ success: true, message, data });
   });
 
-  res.sendError = jest.fn((message: string = 'Internal server error') => {
+  res.sendError = jest.fn((message = 'Internal server error') => {
     return res.status(500).json({ success: false, message });
   });
 
-  res.sendServerError = jest.fn((message: string = 'Internal server error') => {
+  res.sendServerError = jest.fn((message = 'Internal server error') => {
     return res.status(500).json({ success: false, message });
   });
 
-  res.sendBadRequest = jest.fn((message: string = 'Bad request', errors?: any) => {
+  res.sendBadRequest = jest.fn((message = 'Bad request', errors?: any) => {
     const response: any = { success: false, message };
     if (errors) {
       response.errors = errors;
@@ -109,19 +110,19 @@ export function mockResponse() {
     return res.status(400).json(response);
   });
 
-  res.sendUnauthorized = jest.fn((message: string = 'Unauthorized access') => {
+  res.sendUnauthorized = jest.fn((message = 'Unauthorized access') => {
     return res.status(401).json({ success: false, message });
   });
 
-  res.sendForbidden = jest.fn((message: string = 'Forbidden') => {
+  res.sendForbidden = jest.fn((message = 'Forbidden') => {
     return res.status(403).json({ success: false, message });
   });
 
-  res.sendNotFound = jest.fn((message: string = 'Resource not found') => {
+  res.sendNotFound = jest.fn((message = 'Resource not found') => {
     return res.status(404).json({ success: false, message });
   });
 
-  res.sendConflict = jest.fn((message: string = 'Conflict', errors?: any) => {
+  res.sendConflict = jest.fn((message = 'Conflict', errors?: any) => {
     const response: any = { success: false, message };
     if (errors) {
       response.errors = errors;

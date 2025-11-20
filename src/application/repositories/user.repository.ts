@@ -1,10 +1,11 @@
-import { Op, FindOptions, WhereOptions } from 'sequelize';
-import { BaseRepository } from './base.repository';
+import { UserStatus } from '@application/constants';
 import UserMaster, {
   UserMasterAttributes,
   UserMasterCreationAttributes,
 } from '@models/user-master.model';
-import { UserStatus } from '@application/constants';
+import { Op, FindOptions, WhereOptions } from 'sequelize';
+
+import { BaseRepository } from './base.repository';
 
 /**
  * User Repository
@@ -99,10 +100,7 @@ export class UserRepository extends BaseRepository<
    * Update last login timestamp
    */
   async updateLastLogin(userId: number): Promise<void> {
-    await this.model.update(
-      { last_login: new Date() },
-      { where: { id: userId } }
-    );
+    await this.model.update({ last_login: new Date() }, { where: { id: userId } });
   }
 
   /**
@@ -146,10 +144,7 @@ export class UserRepository extends BaseRepository<
       ...options,
       where: {
         ...(options?.where as WhereOptions<UserMasterAttributes>),
-        [Op.or]: [
-          { name: { [Op.like]: `%${query}%` } },
-          { email: { [Op.like]: `%${query}%` } },
-        ],
+        [Op.or]: [{ name: { [Op.like]: `%${query}%` } }, { email: { [Op.like]: `%${query}%` } }],
       } as WhereOptions<UserMasterAttributes>,
     });
   }

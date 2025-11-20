@@ -1,5 +1,6 @@
-import client from 'prom-client';
 import { Request, Response } from 'express';
+import client from 'prom-client';
+
 import { config } from '@/config';
 
 // Create a Registry which registers the metrics

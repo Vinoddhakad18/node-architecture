@@ -3,8 +3,9 @@
  * Tests complete API workflows with real HTTP requests
  */
 
-import request from 'supertest';
 import { Application } from 'express';
+import request from 'supertest';
+
 import { createApp } from '../../app';
 import { sequelize } from '../../application/config/database';
 import CountryMaster from '../../application/models/country-master.model';
@@ -48,12 +49,10 @@ describe('Country Master API E2E Tests', () => {
       status: 'active',
     });
 
-    const loginResponse = await request(app)
-      .post(`${config.apiPrefix}/auth/login`)
-      .send({
-        email: 'admin@example.com',
-        password: 'password123',
-      });
+    const loginResponse = await request(app).post(`${config.apiPrefix}/auth/login`).send({
+      email: 'admin@example.com',
+      password: 'password123',
+    });
 
     accessToken = loginResponse.body.data.accessToken;
   });
@@ -168,13 +167,16 @@ describe('Country Master API E2E Tests', () => {
       // Create test countries
       await createTestCountry({ name: 'United States', code: 'US', currency_code: 'USD' });
       await createTestCountry({ name: 'Canada', code: 'CA', currency_code: 'CAD' });
-      await createTestCountry({ name: 'Mexico', code: 'MX', currency_code: 'MXN', status: 'inactive' });
+      await createTestCountry({
+        name: 'Mexico',
+        code: 'MX',
+        currency_code: 'MXN',
+        status: 'inactive',
+      });
     });
 
     it('should return paginated list of countries', async () => {
-      const response = await request(app)
-        .get(`${config.apiPrefix}/countries`)
-        .expect(200);
+      const response = await request(app).get(`${config.apiPrefix}/countries`).expect(200);
 
       expect(response.body).toHaveProperty('success', true);
       expect(response.body).toHaveProperty('message', 'Countries retrieved successfully');
@@ -289,18 +291,14 @@ describe('Country Master API E2E Tests', () => {
     });
 
     it('should return 404 when country not found', async () => {
-      const response = await request(app)
-        .get(`${config.apiPrefix}/countries/99999`)
-        .expect(404);
+      const response = await request(app).get(`${config.apiPrefix}/countries/99999`).expect(404);
 
       expect(response.body).toHaveProperty('success', false);
       expect(response.body.message).toContain('not found');
     });
 
     it('should return 400 with invalid id format', async () => {
-      const response = await request(app)
-        .get(`${config.apiPrefix}/countries/invalid`)
-        .expect(400);
+      const response = await request(app).get(`${config.apiPrefix}/countries/invalid`).expect(400);
 
       expect(response.body).toHaveProperty('success', false);
     });
@@ -312,9 +310,7 @@ describe('Country Master API E2E Tests', () => {
     });
 
     it('should return country by code', async () => {
-      const response = await request(app)
-        .get(`${config.apiPrefix}/countries/code/US`)
-        .expect(200);
+      const response = await request(app).get(`${config.apiPrefix}/countries/code/US`).expect(200);
 
       expect(response.body).toHaveProperty('success', true);
       expect(response.body).toHaveProperty('message', 'Country retrieved successfully');
@@ -323,17 +319,13 @@ describe('Country Master API E2E Tests', () => {
     });
 
     it('should handle case-insensitive code search', async () => {
-      const response = await request(app)
-        .get(`${config.apiPrefix}/countries/code/us`)
-        .expect(200);
+      const response = await request(app).get(`${config.apiPrefix}/countries/code/us`).expect(200);
 
       expect(response.body.data).toHaveProperty('code', 'US');
     });
 
     it('should return 404 when country code not found', async () => {
-      const response = await request(app)
-        .get(`${config.apiPrefix}/countries/code/XX`)
-        .expect(404);
+      const response = await request(app).get(`${config.apiPrefix}/countries/code/XX`).expect(404);
 
       expect(response.body).toHaveProperty('success', false);
       expect(response.body.message).toContain("Country with code 'XX' not found");

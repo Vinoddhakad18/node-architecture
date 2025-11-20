@@ -1,8 +1,9 @@
-import { StorageProvider } from '../../interfaces/StorageProvider.interface';
-import { S3StorageProvider, S3StorageConfig } from './S3StorageProvider';
-import { LocalStorageProvider, LocalStorageConfig } from './LocalStorageProvider';
 import { config } from '../../../config';
 import { logger } from '../../config/logger';
+import { StorageProvider } from '../../interfaces/StorageProvider.interface';
+
+import { LocalStorageProvider, LocalStorageConfig } from './LocalStorageProvider';
+import { S3StorageProvider, S3StorageConfig } from './S3StorageProvider';
 
 export type StorageType = 's3' | 'local';
 

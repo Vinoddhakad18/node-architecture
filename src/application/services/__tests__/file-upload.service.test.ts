@@ -3,10 +3,10 @@
  * Tests business logic for file upload operations
  */
 
-import fileUploadService from '../file-upload.service';
-import FileMetadata from '../../models/file-metadata.model';
 import { getStorageProvider } from '../../config/storage';
 import redisService from '../../helpers/redis.helper';
+import FileMetadata from '../../models/file-metadata.model';
+import fileUploadService from '../file-upload.service';
 
 // Mock dependencies - must be before imports are evaluated
 jest.mock('../../models/file-metadata.model', () => {
@@ -56,13 +56,19 @@ jest.mock('../../config/logger', () => ({
   },
 }));
 jest.mock('../../middleware/upload.middleware', () => ({
-  generateStorageKey: jest.fn((filename: string, prefix?: string) =>
-    `${prefix || 'uploads'}/${Date.now()}-${filename}`
+  generateStorageKey: jest.fn(
+    (filename: string, prefix?: string) => `${prefix || 'uploads'}/${Date.now()}-${filename}`
   ),
   getFileCategory: jest.fn((mimeType: string) => {
-    if (mimeType.startsWith('image/')) return 'image';
-    if (mimeType.startsWith('video/')) return 'video';
-    if (mimeType === 'application/pdf') return 'document';
+    if (mimeType.startsWith('image/')) {
+      return 'image';
+    }
+    if (mimeType.startsWith('video/')) {
+      return 'video';
+    }
+    if (mimeType === 'application/pdf') {
+      return 'document';
+    }
     return 'other';
   }),
 }));
@@ -482,7 +488,10 @@ describe('FileUploadService', () => {
       const result = await fileUploadService.getDownloadUrl(1, 3600);
 
       // Assert
-      expect(mockStorageProvider.getPresignedDownloadUrl).toHaveBeenCalledWith('uploads/test.jpg', 3600);
+      expect(mockStorageProvider.getPresignedDownloadUrl).toHaveBeenCalledWith(
+        'uploads/test.jpg',
+        3600
+      );
       expect(result).toBe('https://presigned-download-url');
     });
 
@@ -565,9 +574,7 @@ describe('FileUploadService', () => {
   describe('findByUser', () => {
     it('should find files by user ID', async () => {
       // Arrange
-      const mockFiles = [
-        { id: 1, original_name: 'file1.jpg', created_by: 1 },
-      ];
+      const mockFiles = [{ id: 1, original_name: 'file1.jpg', created_by: 1 }];
       (FileMetadata.findAndCountAll as jest.Mock).mockResolvedValue({
         count: 1,
         rows: mockFiles,

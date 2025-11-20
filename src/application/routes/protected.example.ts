@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+
 import { authenticate, authorize, checkOwnership } from '../middleware/auth.middleware';
 
 const router = Router();
@@ -7,10 +8,7 @@ const router = Router();
  * Example: Public route (no authentication required)
  */
 router.get('/public', (_req: Request, res: Response) => {
-  res.sendSuccess(
-    { info: 'Anyone can access this endpoint' },
-    'This is a public endpoint'
-  );
+  res.sendSuccess({ info: 'Anyone can access this endpoint' }, 'This is a public endpoint');
 });
 
 /**

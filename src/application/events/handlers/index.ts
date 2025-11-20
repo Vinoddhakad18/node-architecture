@@ -6,9 +6,10 @@
 export * from './auth.handlers';
 export * from './user.handlers';
 
+import { logger } from '@config/logger';
+
 import { registerAuthHandlers } from './auth.handlers';
 import { registerUserHandlers } from './user.handlers';
-import { logger } from '@config/logger';
 
 /**
  * Initialize all event handlers

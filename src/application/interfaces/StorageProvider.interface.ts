@@ -77,10 +77,7 @@ export interface StorageProvider {
   /**
    * Generate a presigned URL for uploading
    */
-  getPresignedUploadUrl(
-    key: string,
-    options?: PresignedUrlOptions
-  ): Promise<string>;
+  getPresignedUploadUrl(key: string, options?: PresignedUrlOptions): Promise<string>;
 
   /**
    * List files with optional prefix

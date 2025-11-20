@@ -13,8 +13,9 @@ export const isClusterMode = (): boolean => {
  * Format: host1:port1,host2:port2,host3:port3
  */
 const parseClusterNodes = (): ClusterNode[] => {
-  const nodesStr = process.env.REDIS_CLUSTER_NODES || 'localhost:6379,localhost:6380,localhost:6381';
-  return nodesStr.split(',').map(node => {
+  const nodesStr =
+    process.env.REDIS_CLUSTER_NODES || 'localhost:6379,localhost:6380,localhost:6381';
+  return nodesStr.split(',').map((node) => {
     const [host, port] = node.trim().split(':');
     return {
       host: host || 'localhost',
@@ -57,7 +58,7 @@ const commonRedisOptions = {
   reconnectOnError(err: Error): boolean | 1 | 2 {
     const targetErrors = ['READONLY', 'ETIMEDOUT', 'ECONNRESET'];
 
-    if (targetErrors.some(errMsg => err.message.includes(errMsg))) {
+    if (targetErrors.some((errMsg) => err.message.includes(errMsg))) {
       return true; // Reconnect
     }
 
@@ -102,21 +103,25 @@ export const redisClusterConfig: ClusterOptions = {
   enableReadyCheck: true,
 
   // Scale reads configuration
-  scaleReads: process.env.REDIS_CLUSTER_SCALE_READS as 'master' | 'slave' | 'all' || 'slave',
+  scaleReads: (process.env.REDIS_CLUSTER_SCALE_READS as 'master' | 'slave' | 'all') || 'slave',
 
   // NAT mapping (useful for Docker/Kubernetes)
-  natMap: process.env.REDIS_CLUSTER_NAT_MAP ?
-    JSON.parse(process.env.REDIS_CLUSTER_NAT_MAP) : undefined,
+  natMap: process.env.REDIS_CLUSTER_NAT_MAP
+    ? JSON.parse(process.env.REDIS_CLUSTER_NAT_MAP)
+    : undefined,
 
   // Slots refresh configuration
   slotsRefreshTimeout: parseInt(process.env.REDIS_CLUSTER_SLOTS_REFRESH_TIMEOUT || '1000', 10),
 
   // TLS/SSL support - applied to each node connection
-  redisOptions: process.env.REDIS_TLS_ENABLED === 'true' ? {
-    tls: {
-      rejectUnauthorized: process.env.REDIS_TLS_REJECT_UNAUTHORIZED !== 'false',
-    },
-  } : undefined,
+  redisOptions:
+    process.env.REDIS_TLS_ENABLED === 'true'
+      ? {
+          tls: {
+            rejectUnauthorized: process.env.REDIS_TLS_REJECT_UNAUTHORIZED !== 'false',
+          },
+        }
+      : undefined,
 };
 
 /**
@@ -130,12 +135,12 @@ export const getClusterNodes = (): ClusterNode[] => {
  * Redis TTL Constants (in seconds)
  */
 export const RedisTTL = {
-  SHORT: 60,           // 1 minute
-  MEDIUM: 300,         // 5 minutes
-  LONG: 3600,          // 1 hour
-  VERY_LONG: 7200,     // 2 hours
-  DAY: 86400,          // 24 hours
-  WEEK: 604800,        // 7 days
+  SHORT: 60, // 1 minute
+  MEDIUM: 300, // 5 minutes
+  LONG: 3600, // 1 hour
+  VERY_LONG: 7200, // 2 hours
+  DAY: 86400, // 24 hours
+  WEEK: 604800, // 7 days
 } as const;
 
 /**

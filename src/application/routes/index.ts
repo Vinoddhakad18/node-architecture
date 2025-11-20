@@ -1,8 +1,10 @@
 import { Router, Request, Response } from 'express';
+
 import authRoutes from './auth.routes';
-import metricsRoutes from './metrics.routes';
 import countryMasterRoutes from './country-master.routes';
 import fileUploadRoutes from './file-upload.routes';
+import metricsRoutes from './metrics.routes';
+
 import { config } from '@/config';
 
 const router = Router();

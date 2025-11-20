@@ -3,9 +3,9 @@
  * Tests business logic for country master operations
  */
 
-import countryMasterService from '../country-master.service';
-import CountryMaster from '../../models/country-master.model';
 import redisService from '../../helpers/redis.helper';
+import CountryMaster from '../../models/country-master.model';
+import countryMasterService from '../country-master.service';
 
 // Mock dependencies
 jest.mock('../../models/country-master.model');
@@ -354,7 +354,7 @@ describe('CountryMasterService', () => {
     it('should successfully update country', async () => {
       // Arrange
       (CountryMaster.findByPk as jest.Mock).mockResolvedValue(mockCountry);
-      mockCountry.update.mockImplementation(function(this: any, data: any) {
+      mockCountry.update.mockImplementation(function (this: any, data: any) {
         Object.assign(this, data);
         return Promise.resolve(this);
       });

@@ -1,5 +1,5 @@
-import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from '@config/database';
+import { DataTypes, Model, Optional } from 'sequelize';
 
 /**
  * CountryMaster Model Attributes Interface
@@ -20,11 +20,10 @@ export interface CountryMasterAttributes {
  * CountryMaster Creation Attributes Interface
  * Fields that are optional during creation
  */
-export interface CountryMasterCreationAttributes
-  extends Optional<
-    CountryMasterAttributes,
-    'id' | 'currency_code' | 'status' | 'created_by' | 'updated_by' | 'created_at' | 'updated_at'
-  > {}
+export type CountryMasterCreationAttributes = Optional<
+  CountryMasterAttributes,
+  'id' | 'currency_code' | 'status' | 'created_by' | 'updated_by' | 'created_at' | 'updated_at'
+>;
 
 /**
  * CountryMaster Model Class

@@ -1,8 +1,10 @@
-import { createApp } from './app';
-import { config } from '@/config';
-import { logger } from '@config/logger';
-import { gracefulShutdown } from '@config/database';
 import { initializeServerStartTime, getFormattedServerUptime } from '@application/utils/uptime';
+import { gracefulShutdown } from '@config/database';
+import { logger } from '@config/logger';
+
+import { createApp } from './app';
+
+import { config } from '@/config';
 
 /**
  * Start the Express server
@@ -42,7 +44,6 @@ const startServer = async (): Promise<void> => {
     // Step 6: Setup graceful shutdown handlers
     process.on('SIGTERM', () => void gracefulShutdown('SIGTERM'));
     process.on('SIGINT', () => void gracefulShutdown('SIGINT'));
-
   } catch (error) {
     logger.error('=================================');
     logger.error('✗ Failed to start server:', error);
@@ -52,4 +53,4 @@ const startServer = async (): Promise<void> => {
 };
 
 // Start the server
-startServer();
+void startServer();

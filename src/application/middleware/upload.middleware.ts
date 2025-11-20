@@ -1,7 +1,9 @@
-import multer, { FileFilterCallback, StorageEngine } from 'multer';
-import { Request } from 'express';
-import * as path from 'path';
 import * as crypto from 'crypto';
+import * as path from 'path';
+
+import { Request } from 'express';
+import multer, { FileFilterCallback, StorageEngine } from 'multer';
+
 import { config } from '../../config';
 
 // Allowed MIME types by category
@@ -71,11 +73,21 @@ export function generateStorageKey(originalName: string, prefix?: string): strin
  * Get file category based on MIME type
  */
 export function getFileCategory(mimeType: string): string {
-  if (ALLOWED_MIME_TYPES.images.includes(mimeType)) return 'images';
-  if (ALLOWED_MIME_TYPES.documents.includes(mimeType)) return 'documents';
-  if (ALLOWED_MIME_TYPES.videos.includes(mimeType)) return 'videos';
-  if (ALLOWED_MIME_TYPES.audio.includes(mimeType)) return 'audio';
-  if (ALLOWED_MIME_TYPES.archives.includes(mimeType)) return 'archives';
+  if (ALLOWED_MIME_TYPES.images.includes(mimeType)) {
+    return 'images';
+  }
+  if (ALLOWED_MIME_TYPES.documents.includes(mimeType)) {
+    return 'documents';
+  }
+  if (ALLOWED_MIME_TYPES.videos.includes(mimeType)) {
+    return 'videos';
+  }
+  if (ALLOWED_MIME_TYPES.audio.includes(mimeType)) {
+    return 'audio';
+  }
+  if (ALLOWED_MIME_TYPES.archives.includes(mimeType)) {
+    return 'archives';
+  }
   return 'other';
 }
 
@@ -83,20 +95,14 @@ export function getFileCategory(mimeType: string): string {
  * Create a file filter function for multer
  */
 function createFileFilter(allowedTypes?: string[]) {
-  return (
-    _req: Request,
-    file: Express.Multer.File,
-    callback: FileFilterCallback
-  ): void => {
+  return (_req: Request, file: Express.Multer.File, callback: FileFilterCallback): void => {
     const typesToCheck = allowedTypes || ALL_ALLOWED_MIME_TYPES;
 
     if (typesToCheck.includes(file.mimetype)) {
       callback(null, true);
     } else {
       callback(
-        new Error(
-          `Invalid file type: ${file.mimetype}. Allowed types: ${typesToCheck.join(', ')}`
-        )
+        new Error(`Invalid file type: ${file.mimetype}. Allowed types: ${typesToCheck.join(', ')}`)
       );
     }
   };
@@ -134,11 +140,7 @@ export function uploadSingle(fieldName: string, options?: UploadConfig) {
 /**
  * Create a multiple file upload middleware
  */
-export function uploadMultiple(
-  fieldName: string,
-  maxCount: number,
-  options?: UploadConfig
-) {
+export function uploadMultiple(fieldName: string, maxCount: number, options?: UploadConfig) {
   const maxFileSize =
     options?.maxFileSize || config.storage?.maxFileSize || FILE_SIZE_LIMITS.default;
 
@@ -155,10 +157,7 @@ export function uploadMultiple(
 /**
  * Create a field-specific upload middleware
  */
-export function uploadFields(
-  fields: { name: string; maxCount: number }[],
-  options?: UploadConfig
-) {
+export function uploadFields(fields: { name: string; maxCount: number }[], options?: UploadConfig) {
   const maxFileSize =
     options?.maxFileSize || config.storage?.maxFileSize || FILE_SIZE_LIMITS.default;
 
@@ -211,8 +210,7 @@ export const upload = {
     }),
 
   // Custom configuration
-  custom: (fieldName: string, options: UploadConfig) =>
-    uploadSingle(fieldName, options),
+  custom: (fieldName: string, options: UploadConfig) => uploadSingle(fieldName, options),
 };
 
 export default upload;

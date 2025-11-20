@@ -3,10 +3,11 @@
  * Tests HTTP request handling for file upload operations
  */
 
-import { NextFunction } from 'express';
-import fileUploadController from '../file-upload.controller';
 import fileUploadService from '@services/file-upload.service';
+import { NextFunction } from 'express';
+
 import { mockRequest, mockResponse } from '../../../__tests__/helpers/test-helpers';
+import fileUploadController from '../file-upload.controller';
 
 // Mock dependencies
 jest.mock('@services/file-upload.service');
@@ -497,11 +498,7 @@ describe('FileUploadController', () => {
       await fileUploadController.update(req, res, next);
 
       // Assert
-      expect(fileUploadService.update).toHaveBeenCalledWith(
-        1,
-        req.body,
-        1
-      );
+      expect(fileUploadService.update).toHaveBeenCalledWith(1, req.body, 1);
       expect(res.sendSuccess).toHaveBeenCalledWith(mockFile, 'File updated successfully');
     });
 

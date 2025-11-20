@@ -3,10 +3,11 @@
  * Tests business logic for authentication operations
  */
 
-import authService from '../auth.service';
+import _bcrypt from 'bcryptjs';
+
 import UserMaster from '../../models/user-master.model';
 import jwtUtil from '../../utils/jwt.util';
-import _bcrypt from 'bcryptjs';
+import authService from '../auth.service';
 
 // Mock dependencies
 jest.mock('../../models/user-master.model');
@@ -99,16 +100,16 @@ describe('AuthService', () => {
       const userWithoutPassword = {
         ...mockUser,
         getDataValue: jest.fn((key: string) => {
-          if (key === 'password') return null;
+          if (key === 'password') {
+            return null;
+          }
           return mockUser.getDataValue(key);
         }),
       };
       (UserMaster.findOne as jest.Mock).mockResolvedValue(userWithoutPassword);
 
       // Act & Assert
-      await expect(authService.login(mockEmail, mockPassword)).rejects.toThrow(
-        'Invalid password'
-      );
+      await expect(authService.login(mockEmail, mockPassword)).rejects.toThrow('Invalid password');
     });
 
     it('should throw error when user is not active', async () => {

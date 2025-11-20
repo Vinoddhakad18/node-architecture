@@ -1,5 +1,7 @@
 import { EventEmitter } from 'events';
+
 import { logger } from '@config/logger';
+
 import { AppEvent, EventPayloadMap } from './event-types';
 
 /**
@@ -29,10 +31,7 @@ class AppEventEmitter {
   /**
    * Emit an event
    */
-  public emit<K extends AppEvent>(
-    event: K,
-    payload: EventPayloadMap[K]
-  ): boolean {
+  public emit<K extends AppEvent>(event: K, payload: EventPayloadMap[K]): boolean {
     logger.debug(`Event emitted: ${event}`, { event, payload });
     return this.emitter.emit(event, payload);
   }
@@ -73,10 +72,7 @@ class AppEventEmitter {
   /**
    * Unsubscribe from an event
    */
-  public off<K extends AppEvent>(
-    event: K,
-    handler: (payload: EventPayloadMap[K]) => void
-  ): void {
+  public off<K extends AppEvent>(event: K, handler: (payload: EventPayloadMap[K]) => void): void {
     this.emitter.off(event, handler);
   }
 

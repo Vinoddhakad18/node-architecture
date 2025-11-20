@@ -1,7 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { Readable } from 'stream';
+
 import * as mime from 'mime-types';
+
+import { logger } from '../../config/logger';
 import {
   StorageProvider,
   UploadOptions,
@@ -10,7 +13,6 @@ import {
   FileInfo,
   PresignedUrlOptions,
 } from '../../interfaces/StorageProvider.interface';
-import { logger } from '../../config/logger';
 
 export interface LocalStorageConfig {
   basePath: string;
@@ -182,10 +184,7 @@ export class LocalStorageProvider implements StorageProvider {
     return `${this.baseUrl}/${key}?expires=${expires}`;
   }
 
-  async getPresignedUploadUrl(
-    key: string,
-    options?: PresignedUrlOptions
-  ): Promise<string> {
+  async getPresignedUploadUrl(key: string, options?: PresignedUrlOptions): Promise<string> {
     // For local storage, return the upload endpoint
     const expires = Date.now() + (options?.expiresIn || 3600) * 1000;
     return `${this.baseUrl}/upload/${key}?expires=${expires}`;
@@ -193,9 +192,7 @@ export class LocalStorageProvider implements StorageProvider {
 
   async list(prefix?: string, maxKeys = 1000): Promise<FileInfo[]> {
     const results: FileInfo[] = [];
-    const searchPath = prefix
-      ? path.join(this.basePath, prefix)
-      : this.basePath;
+    const searchPath = prefix ? path.join(this.basePath, prefix) : this.basePath;
 
     if (!fs.existsSync(searchPath)) {
       return results;

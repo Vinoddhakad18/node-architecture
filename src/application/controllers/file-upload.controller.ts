@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
 import fileUploadService, { FileUploadInput, FileListOptions } from '@services/file-upload.service';
+import { Request, Response, NextFunction } from 'express';
 
 /**
  * File Upload Controller
@@ -177,7 +177,7 @@ class FileUploadController {
         return;
       }
 
-      const inputs: FileUploadInput[] = files.map(file => ({
+      const inputs: FileUploadInput[] = files.map((file) => ({
         buffer: file.buffer,
         originalName: file.originalname,
         mimeType: file.mimetype,

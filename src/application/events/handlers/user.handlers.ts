@@ -1,3 +1,5 @@
+import { logger } from '@config/logger';
+
 import { appEvents } from '../event-emitter';
 import {
   AppEvent,
@@ -5,7 +7,6 @@ import {
   UserUpdatedPayload,
   UserDeletedPayload,
 } from '../event-types';
-import { logger } from '@config/logger';
 
 /**
  * Register user event handlers

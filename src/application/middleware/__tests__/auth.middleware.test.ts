@@ -3,10 +3,11 @@
  * Tests JWT validation and authorization logic
  */
 
-import { Request, Response, NextFunction } from 'express';
-import { authenticate, optionalAuthenticate, authorize, checkOwnership } from '../auth.middleware';
 import jwtUtil from '@application/utils/jwt.util';
 import tokenBlacklistService from '@services/token-blacklist.service';
+import { Request, Response, NextFunction } from 'express';
+
+import { authenticate, optionalAuthenticate, authorize, checkOwnership } from '../auth.middleware';
 
 // Mock dependencies
 jest.mock('@application/utils/jwt.util');
@@ -62,11 +63,7 @@ describe('Authentication Middleware', () => {
       (tokenBlacklistService.isTokenInvalidatedByUser as jest.Mock).mockResolvedValue(false);
 
       // Act
-      await authenticate(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await authenticate(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(jwtUtil.verifyAccessToken).toHaveBeenCalledWith(validToken);
@@ -80,11 +77,7 @@ describe('Authentication Middleware', () => {
       mockRequest.headers = {};
 
       // Act
-      await authenticate(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await authenticate(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendUnauthorized).toHaveBeenCalledWith('Authorization header missing');
@@ -98,11 +91,7 @@ describe('Authentication Middleware', () => {
       };
 
       // Act
-      await authenticate(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await authenticate(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendUnauthorized).toHaveBeenCalledWith(
@@ -118,11 +107,7 @@ describe('Authentication Middleware', () => {
       };
 
       // Act
-      await authenticate(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await authenticate(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendUnauthorized).toHaveBeenCalledWith('Token not provided');
@@ -144,11 +129,7 @@ describe('Authentication Middleware', () => {
       (tokenBlacklistService.isBlacklisted as jest.Mock).mockResolvedValue(true);
 
       // Act
-      await authenticate(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await authenticate(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendUnauthorized).toHaveBeenCalledWith('Token has been revoked');
@@ -171,11 +152,7 @@ describe('Authentication Middleware', () => {
       (tokenBlacklistService.isTokenInvalidatedByUser as jest.Mock).mockResolvedValue(true);
 
       // Act
-      await authenticate(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await authenticate(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendUnauthorized).toHaveBeenCalledWith(
@@ -195,11 +172,7 @@ describe('Authentication Middleware', () => {
       });
 
       // Act
-      await authenticate(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await authenticate(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendUnauthorized).toHaveBeenCalledWith('Token expired');
@@ -217,11 +190,7 @@ describe('Authentication Middleware', () => {
       });
 
       // Act
-      await authenticate(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await authenticate(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendUnauthorized).toHaveBeenCalledWith('Invalid token');
@@ -239,11 +208,7 @@ describe('Authentication Middleware', () => {
       });
 
       // Act
-      await authenticate(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await authenticate(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendUnauthorized).toHaveBeenCalledWith('Authentication failed');
@@ -270,11 +235,7 @@ describe('Authentication Middleware', () => {
       (tokenBlacklistService.isTokenInvalidatedByUser as jest.Mock).mockResolvedValue(false);
 
       // Act
-      await optionalAuthenticate(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await optionalAuthenticate(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockRequest.user).toEqual(decodedPayload);
@@ -287,11 +248,7 @@ describe('Authentication Middleware', () => {
       mockRequest.headers = {};
 
       // Act
-      await optionalAuthenticate(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await optionalAuthenticate(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockRequest.user).toBeUndefined();
@@ -305,11 +262,7 @@ describe('Authentication Middleware', () => {
       };
 
       // Act
-      await optionalAuthenticate(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await optionalAuthenticate(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockRequest.user).toBeUndefined();
@@ -331,11 +284,7 @@ describe('Authentication Middleware', () => {
       (tokenBlacklistService.isTokenInvalidatedByUser as jest.Mock).mockResolvedValue(false);
 
       // Act
-      await optionalAuthenticate(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await optionalAuthenticate(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockRequest.user).toBeUndefined();
@@ -353,11 +302,7 @@ describe('Authentication Middleware', () => {
       });
 
       // Act
-      await optionalAuthenticate(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      await optionalAuthenticate(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockRequest.user).toBeUndefined();
@@ -377,11 +322,7 @@ describe('Authentication Middleware', () => {
       const middleware = authorize('admin', 'superadmin');
 
       // Act
-      middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(nextFunction).toHaveBeenCalled();
@@ -394,11 +335,7 @@ describe('Authentication Middleware', () => {
       const middleware = authorize('admin');
 
       // Act
-      middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendUnauthorized).toHaveBeenCalledWith('Authentication required');
@@ -416,11 +353,7 @@ describe('Authentication Middleware', () => {
       const middleware = authorize('admin', 'superadmin');
 
       // Act
-      middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendForbidden).toHaveBeenCalledWith('Insufficient permissions');
@@ -438,11 +371,7 @@ describe('Authentication Middleware', () => {
       const middleware = authorize('admin');
 
       // Act
-      middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendForbidden).toHaveBeenCalledWith('Insufficient permissions');
@@ -460,11 +389,7 @@ describe('Authentication Middleware', () => {
       const middleware = authorize('admin', 'moderator', 'superadmin');
 
       // Act
-      middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(nextFunction).toHaveBeenCalled();
@@ -484,11 +409,7 @@ describe('Authentication Middleware', () => {
       const middleware = checkOwnership('userId');
 
       // Act
-      middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(nextFunction).toHaveBeenCalled();
@@ -502,11 +423,7 @@ describe('Authentication Middleware', () => {
       const middleware = checkOwnership('userId');
 
       // Act
-      middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendUnauthorized).toHaveBeenCalledWith('Authentication required');
@@ -525,11 +442,7 @@ describe('Authentication Middleware', () => {
       const middleware = checkOwnership('userId');
 
       // Act
-      middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(mockResponse.sendForbidden).toHaveBeenCalledWith(
@@ -550,11 +463,7 @@ describe('Authentication Middleware', () => {
       const middleware = checkOwnership();
 
       // Act
-      middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(nextFunction).toHaveBeenCalled();
@@ -572,11 +481,7 @@ describe('Authentication Middleware', () => {
       const middleware = checkOwnership('id');
 
       // Act
-      middleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        nextFunction
-      );
+      middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
       // Assert
       expect(nextFunction).toHaveBeenCalled();

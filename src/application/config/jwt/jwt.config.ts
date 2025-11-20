@@ -22,7 +22,7 @@ export const jwtConfig = {
   audience: config.JWT_AUDIENCE || 'node-architecture-users',
 
   // Algorithm
-  algorithm: 'HS256' as 'HS256',
+  algorithm: 'HS256' as const,
 };
 
 /**
@@ -39,10 +39,17 @@ export enum TokenType {
  */
 export const validateJwtConfig = (): void => {
   if (!jwtConfig.secret || jwtConfig.secret === 'your-super-secret-jwt-key-change-in-production') {
-    console.warn('⚠️  WARNING: Using default JWT secret. Please set JWT_SECRET in environment variables for production!');
+    console.warn(
+      '⚠️  WARNING: Using default JWT secret. Please set JWT_SECRET in environment variables for production!'
+    );
   }
 
-  if (!jwtConfig.refreshSecret || jwtConfig.refreshSecret === 'your-super-secret-refresh-key-change-in-production') {
-    console.warn('⚠️  WARNING: Using default JWT refresh secret. Please set JWT_REFRESH_SECRET in environment variables for production!');
+  if (
+    !jwtConfig.refreshSecret ||
+    jwtConfig.refreshSecret === 'your-super-secret-refresh-key-change-in-production'
+  ) {
+    console.warn(
+      '⚠️  WARNING: Using default JWT refresh secret. Please set JWT_REFRESH_SECRET in environment variables for production!'
+    );
   }
 };

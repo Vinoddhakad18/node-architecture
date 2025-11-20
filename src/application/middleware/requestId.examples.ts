@@ -5,6 +5,7 @@
  */
 
 import { Request, Response } from 'express';
+
 import { getLoggerWithRequestId } from '../config/logger';
 
 /**
@@ -106,6 +107,9 @@ export const exampleRoute5 = async (req: Request, res: Response) => {
 
     // Return request ID in error response for support purposes
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    res.sendServerError('Internal server error - Please provide this request ID to support', errorMessage);
+    res.sendServerError(
+      'Internal server error - Please provide this request ID to support',
+      errorMessage
+    );
   }
 };

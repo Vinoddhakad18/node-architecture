@@ -1,9 +1,12 @@
-import { Op, WhereOptions, Transaction } from 'sequelize';
-import CountryMaster, { CountryMasterCreationAttributes, CountryMasterAttributes } from '@models/country-master.model';
-import { logger } from '@config/logger';
-import redisService from '@helpers/redis.helper';
-import { RedisTTL } from '@config/redis';
 import { sequelize } from '@config/database/database';
+import { logger } from '@config/logger';
+import { RedisTTL } from '@config/redis';
+import redisService from '@helpers/redis.helper';
+import CountryMaster, {
+  CountryMasterCreationAttributes,
+  CountryMasterAttributes,
+} from '@models/country-master.model';
+import { Op, WhereOptions, Transaction } from 'sequelize';
 
 /**
  * Cache key constants for country-master
@@ -51,11 +54,14 @@ class CountryMasterService {
   async create(data: CountryMasterCreationAttributes, userId?: number): Promise<CountryMaster> {
     try {
       const country = await sequelize.transaction(async (transaction: Transaction) => {
-        const newCountry = await CountryMaster.create({
-          ...data,
-          created_by: userId || null,
-          updated_by: userId || null,
-        }, { transaction });
+        const newCountry = await CountryMaster.create(
+          {
+            ...data,
+            created_by: userId || null,
+            updated_by: userId || null,
+          },
+          { transaction }
+        );
 
         return newCountry;
       });
@@ -76,14 +82,7 @@ class CountryMasterService {
    */
   async findAll(options: CountryQueryOptions = {}): Promise<PaginatedResult<CountryMaster>> {
     try {
-      const {
-        page = 1,
-        limit = 10,
-        search,
-        status,
-        sortBy = 'name',
-        sortOrder = 'ASC',
-      } = options;
+      const { page = 1, limit = 10, search, status, sortBy = 'name', sortOrder = 'ASC' } = options;
 
       // Generate cache key based on query options
       const cacheKey = CACHE_KEYS.COUNTRIES_LIST(
@@ -103,10 +102,7 @@ class CountryMasterService {
       // Apply search filter
       if (search) {
         Object.assign(where, {
-          [Op.or]: [
-            { name: { [Op.like]: `%${search}%` } },
-            { code: { [Op.like]: `%${search}%` } },
-          ],
+          [Op.or]: [{ name: { [Op.like]: `%${search}%` } }, { code: { [Op.like]: `%${search}%` } }],
         });
       }
 
@@ -221,10 +217,13 @@ class CountryMasterService {
       const oldCode = country.code;
 
       await sequelize.transaction(async (transaction: Transaction) => {
-        await country.update({
-          ...data,
-          updated_by: userId || country.updated_by,
-        }, { transaction });
+        await country.update(
+          {
+            ...data,
+            updated_by: userId || country.updated_by,
+          },
+          { transaction }
+        );
       });
 
       // Invalidate caches after transaction commits
@@ -257,10 +256,13 @@ class CountryMasterService {
       const code = country.code;
 
       await sequelize.transaction(async (transaction: Transaction) => {
-        await country.update({
-          status: 'inactive',
-          updated_by: userId || country.updated_by,
-        }, { transaction });
+        await country.update(
+          {
+            status: 'inactive',
+            updated_by: userId || country.updated_by,
+          },
+          { transaction }
+        );
       });
 
       // Invalidate caches after transaction commits
@@ -327,7 +329,11 @@ class CountryMasterService {
       });
 
       // Cache the result - use LONG TTL as active countries rarely change
-      await redisService.set(cacheKey, countries.map(c => c.toJSON()), RedisTTL.LONG);
+      await redisService.set(
+        cacheKey,
+        countries.map((c) => c.toJSON()),
+        RedisTTL.LONG
+      );
       logger.debug('Cache set for active countries');
 
       return countries;
