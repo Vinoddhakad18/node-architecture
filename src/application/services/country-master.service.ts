@@ -1,8 +1,9 @@
-import { Op, WhereOptions } from 'sequelize';
+import { Op, WhereOptions, Transaction } from 'sequelize';
 import CountryMaster, { CountryMasterCreationAttributes, CountryMasterAttributes } from '@models/country-master.model';
 import { logger } from '@config/logger';
 import redisService from '@helpers/redis.helper';
 import { RedisTTL } from '@config/redis';
+import { sequelize } from '@config/database/database';
 
 /**
  * Cache key constants for country-master
@@ -49,13 +50,17 @@ class CountryMasterService {
    */
   async create(data: CountryMasterCreationAttributes, userId?: number): Promise<CountryMaster> {
     try {
-      const country = await CountryMaster.create({
-        ...data,
-        created_by: userId || null,
-        updated_by: userId || null,
+      const country = await sequelize.transaction(async (transaction: Transaction) => {
+        const newCountry = await CountryMaster.create({
+          ...data,
+          created_by: userId || null,
+          updated_by: userId || null,
+        }, { transaction });
+
+        return newCountry;
       });
 
-      // Invalidate list caches
+      // Invalidate list caches after transaction commits
       await this.invalidateListCaches();
 
       logger.info(`Country created: ${country.name} (${country.code})`);
@@ -215,12 +220,14 @@ class CountryMasterService {
 
       const oldCode = country.code;
 
-      await country.update({
-        ...data,
-        updated_by: userId || country.updated_by,
+      await sequelize.transaction(async (transaction: Transaction) => {
+        await country.update({
+          ...data,
+          updated_by: userId || country.updated_by,
+        }, { transaction });
       });
 
-      // Invalidate caches
+      // Invalidate caches after transaction commits
       await this.invalidateCountryCache(id, oldCode);
       // If code was updated, also invalidate the new code cache
       if (data.code && data.code !== oldCode) {
@@ -249,12 +256,14 @@ class CountryMasterService {
 
       const code = country.code;
 
-      await country.update({
-        status: 'inactive',
-        updated_by: userId || country.updated_by,
+      await sequelize.transaction(async (transaction: Transaction) => {
+        await country.update({
+          status: 'inactive',
+          updated_by: userId || country.updated_by,
+        }, { transaction });
       });
 
-      // Invalidate caches
+      // Invalidate caches after transaction commits
       await this.invalidateCountryCache(id, code);
       await this.invalidateListCaches();
 
@@ -275,12 +284,15 @@ class CountryMasterService {
       const country = await CountryMaster.findByPk(id);
       const code = country?.code;
 
-      const result = await CountryMaster.destroy({
-        where: { id },
+      const result = await sequelize.transaction(async (transaction: Transaction) => {
+        return CountryMaster.destroy({
+          where: { id },
+          transaction,
+        });
       });
 
       if (result > 0) {
-        // Invalidate caches
+        // Invalidate caches after transaction commits
         await this.invalidateCountryCache(id, code);
         await this.invalidateListCaches();
 

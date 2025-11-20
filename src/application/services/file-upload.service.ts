@@ -1,10 +1,11 @@
-import { WhereOptions } from 'sequelize';
+import { WhereOptions, Transaction } from 'sequelize';
 import FileMetadata, { FileMetadataCreationAttributes, FileMetadataAttributes } from '../models/file-metadata.model';
 import { getStorageProvider } from '../config/storage';
 import { generateStorageKey, getFileCategory } from '../middleware/upload.middleware';
 import redisService from '../helpers/redis.helper';
 import { RedisTTL } from '../config/redis';
 import { logger } from '../config/logger';
+import { sequelize } from '../config/database/database';
 
 // Cache key patterns
 const CACHE_KEYS = {
@@ -49,20 +50,21 @@ class FileUploadService {
    */
   async upload(
     input: FileUploadInput,
-    userId?: number
+    userId?: number,
+    transaction?: Transaction
   ): Promise<FileMetadata> {
     const storage = getStorageProvider();
     const storageKey = generateStorageKey(input.originalName, input.prefix);
     const category = getFileCategory(input.mimeType);
 
-    try {
-      // Upload to storage
-      const uploadResult = await storage.upload(storageKey, input.buffer, {
-        contentType: input.mimeType,
-        metadata: input.metadata as Record<string, string>,
-      });
+    // Upload to storage first
+    const uploadResult = await storage.upload(storageKey, input.buffer, {
+      contentType: input.mimeType,
+      metadata: input.metadata as Record<string, string>,
+    });
 
-      // Save metadata to database
+    try {
+      // Save metadata to database within transaction
       const fileData: FileMetadataCreationAttributes = {
         original_name: input.originalName,
         storage_key: storageKey,
@@ -77,10 +79,12 @@ class FileUploadService {
         created_by: userId || null,
       };
 
-      const file = await FileMetadata.create(fileData);
+      const file = await FileMetadata.create(fileData, { transaction });
 
-      // Invalidate cache
-      await this.invalidateCache(userId);
+      // Invalidate cache (only if not in a parent transaction, to avoid premature invalidation)
+      if (!transaction) {
+        await this.invalidateCache(userId);
+      }
 
       logger.info('File uploaded successfully', {
         fileId: file.id,
@@ -93,6 +97,7 @@ class FileUploadService {
       // Clean up storage if database save fails
       try {
         await storage.delete(storageKey);
+        logger.info('Cleaned up storage after database failure', { storageKey });
       } catch (cleanupError) {
         logger.error('Failed to clean up storage after upload failure:', cleanupError);
       }
@@ -101,20 +106,42 @@ class FileUploadService {
   }
 
   /**
-   * Upload multiple files
+   * Upload multiple files atomically within a transaction
    */
   async uploadMultiple(
     files: FileUploadInput[],
     userId?: number
   ): Promise<FileMetadata[]> {
-    const results: FileMetadata[] = [];
+    const storage = getStorageProvider();
+    const uploadedKeys: string[] = [];
 
-    for (const file of files) {
-      const result = await this.upload(file, userId);
-      results.push(result);
-    }
+    return sequelize.transaction(async (transaction) => {
+      const results: FileMetadata[] = [];
 
-    return results;
+      try {
+        for (const file of files) {
+          const result = await this.upload(file, userId, transaction);
+          uploadedKeys.push(result.storage_key);
+          results.push(result);
+        }
+
+        // Invalidate cache after all uploads succeed
+        await this.invalidateCache(userId);
+
+        return results;
+      } catch (error) {
+        // Clean up all uploaded files from storage on failure
+        for (const key of uploadedKeys) {
+          try {
+            await storage.delete(key);
+            logger.info('Cleaned up storage during rollback', { storageKey: key });
+          } catch (cleanupError) {
+            logger.error('Failed to clean up storage during rollback:', cleanupError);
+          }
+        }
+        throw error;
+      }
+    });
   }
 
   /**
@@ -253,6 +280,7 @@ class FileUploadService {
 
   /**
    * Hard delete file (remove from storage and database)
+   * Uses transaction to ensure database deletion is atomic
    */
   async hardDelete(id: number): Promise<boolean> {
     const file = await FileMetadata.findByPk(id);
@@ -262,25 +290,38 @@ class FileUploadService {
     }
 
     const storage = getStorageProvider();
+    const storageKey = file.storage_key;
+    const createdBy = file.created_by;
 
+    // Use transaction for database operation
+    await sequelize.transaction(async (transaction) => {
+      // Delete from database first (can be rolled back)
+      await file.destroy({ transaction });
+
+      logger.info('File record deleted from database', { fileId: id, storageKey });
+    });
+
+    // Delete from storage after database transaction commits
+    // This is outside the transaction because storage operations can't be rolled back
     try {
-      // Delete from storage
-      await storage.delete(file.storage_key);
-
-      // Delete from database
-      await file.destroy();
-
-      // Invalidate cache
-      await this.invalidateSingleFileCache(id, file.storage_key);
-      await this.invalidateCache(file.created_by || undefined);
-
-      logger.info('File hard deleted', { fileId: id, storageKey: file.storage_key });
-
-      return true;
-    } catch (error) {
-      logger.error('Failed to hard delete file:', error);
-      throw error;
+      await storage.delete(storageKey);
+      logger.info('File deleted from storage', { storageKey });
+    } catch (storageError) {
+      // Log error but don't throw - database record is already deleted
+      // This may leave orphaned files in storage that need manual cleanup
+      logger.error('Failed to delete file from storage after database deletion:', {
+        storageKey,
+        error: storageError,
+      });
     }
+
+    // Invalidate cache
+    await this.invalidateSingleFileCache(id, storageKey);
+    await this.invalidateCache(createdBy || undefined);
+
+    logger.info('File hard deleted successfully', { fileId: id, storageKey });
+
+    return true;
   }
 
   /**
