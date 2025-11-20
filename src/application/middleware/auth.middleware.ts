@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwtUtil from '@application/utils/jwt.util';
 import { logger } from '@config/logger';
+import tokenBlacklistService from '@services/token-blacklist.service';
 
 /**
  * Authentication Middleware
@@ -37,12 +38,31 @@ export const authenticate = async (
     // Verify token
     const decoded = jwtUtil.verifyAccessToken(token);
 
+    // Check if token is blacklisted
+    const isBlacklisted = await tokenBlacklistService.isBlacklisted(token);
+    if (isBlacklisted) {
+      logger.warn(`Blacklisted token used by user: ${decoded.email}`);
+      res.sendUnauthorized('Token has been revoked');
+      return;
+    }
+
+    // Check if user's tokens have been invalidated (e.g., password change)
+    const isUserInvalidated = await tokenBlacklistService.isTokenInvalidatedByUser(token);
+    if (isUserInvalidated) {
+      logger.warn(`Invalidated token used by user: ${decoded.email}`);
+      res.sendUnauthorized('Token has been invalidated. Please login again.');
+      return;
+    }
+
     // Attach user information to request
     req.user = {
       userId: decoded.userId,
       email: decoded.email,
       role: decoded.role,
     };
+
+    // Store token in request for potential logout
+    req.token = token;
 
     logger.info(`Authenticated user: ${decoded.email}`);
     next();
@@ -87,11 +107,19 @@ export const optionalAuthenticate = async (
 
     if (token) {
       const decoded = jwtUtil.verifyAccessToken(token);
-      req.user = {
-        userId: decoded.userId,
-        email: decoded.email,
-        role: decoded.role,
-      };
+
+      // Check blacklist for optional auth as well
+      const isBlacklisted = await tokenBlacklistService.isBlacklisted(token);
+      const isUserInvalidated = await tokenBlacklistService.isTokenInvalidatedByUser(token);
+
+      if (!isBlacklisted && !isUserInvalidated) {
+        req.user = {
+          userId: decoded.userId,
+          email: decoded.email,
+          role: decoded.role,
+        };
+        req.token = token;
+      }
     }
 
     next();

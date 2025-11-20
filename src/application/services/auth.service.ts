@@ -2,6 +2,8 @@ import UserMaster from '@models/user-master.model';
 import { logger } from '@config/logger';
 import jwtUtil from '@application/utils/jwt.util';
 import { TokenPair } from '@interfaces/jwt.interface';
+import tokenBlacklistService from '@services/token-blacklist.service';
+import bcrypt from 'bcryptjs';
 
 /**
  * Authentication Service
@@ -78,6 +80,13 @@ class AuthService {
   async verifyToken(token: string): Promise<boolean> {
     try {
       jwtUtil.verifyAccessToken(token);
+
+      // Also check if token is blacklisted
+      const isBlacklisted = await tokenBlacklistService.isBlacklisted(token);
+      if (isBlacklisted) {
+        return false;
+      }
+
       return true;
     } catch (error) {
       logger.error('Token verification failed:', error);
@@ -85,6 +94,105 @@ class AuthService {
     }
   }
 
+  /**
+   * Logout user and blacklist the token
+   */
+  async logout(accessToken: string, refreshToken?: string): Promise<void> {
+    try {
+      // Blacklist the access token
+      await tokenBlacklistService.addToBlacklist(accessToken, 'logout');
+
+      // If refresh token provided, blacklist it too
+      if (refreshToken) {
+        await tokenBlacklistService.addToBlacklist(refreshToken, 'logout');
+      }
+
+      const decoded = jwtUtil.decodeToken(accessToken);
+      logger.info(`User logged out: ${decoded?.email}`);
+    } catch (error) {
+      logger.error('Error in logout service:', error);
+      throw new Error('Failed to logout');
+    }
+  }
+
+  /**
+   * Change user password and invalidate all existing tokens
+   */
+  async changePassword(
+    userId: number,
+    currentPassword: string,
+    newPassword: string
+  ): Promise<void> {
+    try {
+      // Find user with password
+      const user = await UserMaster.findByPk(userId, {
+        attributes: { include: ['password'] },
+      });
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      // Verify current password
+      const isPasswordValid = await user.comparePassword(currentPassword);
+      if (!isPasswordValid) {
+        throw new Error('Current password is incorrect');
+      }
+
+      // Hash new password
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+      // Update password
+      await user.update({ password: hashedPassword });
+
+      // Invalidate all existing tokens for this user
+      await tokenBlacklistService.invalidateAllUserTokens(userId, 'password_change');
+
+      logger.info(`Password changed for user ${userId}`);
+    } catch (error) {
+      logger.error('Error changing password:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Refresh tokens with rotation (invalidates old refresh token)
+   */
+  async refreshTokenWithRotation(refreshToken: string): Promise<TokenPair> {
+    try {
+      // Verify refresh token
+      const decoded = jwtUtil.verifyRefreshToken(refreshToken);
+
+      // Check if refresh token is blacklisted
+      const isBlacklisted = await tokenBlacklistService.isBlacklisted(refreshToken);
+      if (isBlacklisted) {
+        throw new Error('Refresh token has been revoked');
+      }
+
+      // Check if user's tokens have been invalidated
+      const isUserInvalidated = await tokenBlacklistService.isTokenInvalidatedByUser(refreshToken);
+      if (isUserInvalidated) {
+        throw new Error('Session has been invalidated. Please login again.');
+      }
+
+      // Generate new token pair
+      const newTokens = jwtUtil.generateTokenPair({
+        userId: decoded.userId,
+        email: decoded.email,
+        role: decoded.role,
+      });
+
+      // Blacklist old refresh token (rotation)
+      await tokenBlacklistService.addToBlacklist(refreshToken, 'token_rotation');
+
+      logger.info(`Tokens refreshed with rotation for user: ${decoded.email}`);
+      return newTokens;
+    } catch (error) {
+      logger.error('Error refreshing token with rotation:', error);
+      throw error;
+    }
+  }
 }
 
 export default new AuthService();

@@ -20,6 +20,12 @@ declare global {
        * Authenticated user information (if using authentication middleware)
        */
       user?: AuthenticatedUser;
+
+      /**
+       * The JWT access token from the Authorization header
+       * Stored for logout functionality
+       */
+      token?: string;
     }
   }
 }
