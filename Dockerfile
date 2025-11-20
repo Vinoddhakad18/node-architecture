@@ -78,6 +78,12 @@ COPY jest.config.js ./
 # Copy source code and tests
 COPY src ./src
 
+# Copy linting configuration
+COPY .eslintrc.js .prettierrc ./
+
+# Run linting and formatting checks
+RUN npm run validate
+
 # Run tests
 RUN npm run test:ci
 

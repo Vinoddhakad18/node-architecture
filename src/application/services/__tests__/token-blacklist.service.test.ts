@@ -6,7 +6,7 @@
 import tokenBlacklistService from '../token-blacklist.service';
 import redisService from '@helpers/redis.helper';
 import jwtUtil from '@application/utils/jwt.util';
-import { CacheKeys, CacheTTL } from '@constants/cache.constants';
+import { CacheTTL } from '@constants/cache.constants';
 
 // Mock dependencies
 jest.mock('@helpers/redis.helper');

@@ -7,14 +7,33 @@ import fileUploadService from '../file-upload.service';
 import FileMetadata from '../../models/file-metadata.model';
 import { getStorageProvider } from '../../config/storage';
 import redisService from '../../helpers/redis.helper';
-import { sequelize } from '../../config/database/database';
 
-// Mock dependencies
-jest.mock('../../models/file-metadata.model');
+// Mock dependencies - must be before imports are evaluated
+jest.mock('../../models/file-metadata.model', () => {
+  // Create a mock class
+  class MockFileMetadata {
+    constructor(data: any) {
+      Object.assign(this, data);
+    }
+    static create = jest.fn();
+    static findByPk = jest.fn();
+    static findOne = jest.fn();
+    static findAll = jest.fn();
+    static findAndCountAll = jest.fn();
+    static update = jest.fn();
+    static destroy = jest.fn();
+  }
+
+  return {
+    __esModule: true,
+    default: MockFileMetadata,
+    FileMetadata: MockFileMetadata,
+  };
+});
 jest.mock('../../config/storage');
 jest.mock('../../helpers/redis.helper');
-jest.mock('../../config/database/database', () => ({
-  sequelize: {
+jest.mock('../../config/database/database', () => {
+  const mockSequelize = {
     transaction: jest.fn((callback: any) => {
       const t = {
         commit: jest.fn().mockResolvedValue(undefined),
@@ -22,8 +41,12 @@ jest.mock('../../config/database/database', () => ({
       };
       return callback(t);
     }),
-  },
-}));
+  };
+  return {
+    sequelize: mockSequelize,
+    default: mockSequelize,
+  };
+});
 jest.mock('../../config/logger', () => ({
   logger: {
     info: jest.fn(),

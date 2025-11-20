@@ -230,5 +230,5 @@ export function getErrorMessage(error: unknown): string {
   if (typeof error === 'string') {
     return error;
   }
-  return 'An unknown error occurred';
+  return '';
 }

@@ -102,7 +102,7 @@ services:
     env_file:
       - .env
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=${NODE_ENV:-local}
       - NODE_OPTIONS=--disable-warning=DEP0176
       - DOCKER_CONTAINER=true
       - NOENV=true

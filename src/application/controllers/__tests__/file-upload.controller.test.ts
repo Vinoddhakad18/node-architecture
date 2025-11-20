@@ -3,7 +3,7 @@
  * Tests HTTP request handling for file upload operations
  */
 
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction } from 'express';
 import fileUploadController from '../file-upload.controller';
 import fileUploadService from '@services/file-upload.service';
 import { mockRequest, mockResponse } from '../../../__tests__/helpers/test-helpers';

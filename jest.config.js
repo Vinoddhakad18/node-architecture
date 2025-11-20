@@ -6,6 +6,13 @@ module.exports = {
     '**/__tests__/**/*.+(ts|tsx|js)',
     '**/?(*.)+(spec|test).+(ts|tsx|js)'
   ],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/src/environment/',
+    '/src/__tests__/helpers/',
+    '/src/__tests__/mocks/',
+    '/e2e/'
+  ],
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
       tsconfig: {

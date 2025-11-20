@@ -82,9 +82,53 @@ export function mockResponse() {
   res.status = jest.fn().mockReturnValue(res);
   res.json = jest.fn().mockReturnValue(res);
   res.send = jest.fn().mockReturnValue(res);
-  res.sendSuccess = jest.fn().mockReturnValue(res);
-  res.sendError = jest.fn().mockReturnValue(res);
-  res.sendUnauthorized = jest.fn().mockReturnValue(res);
+  res.setHeader = jest.fn().mockReturnValue(res);
+
+  // Mock response helpers that call through to status + json
+  res.sendSuccess = jest.fn((data?: any, message: string = 'Request successful') => {
+    return res.status(200).json({ success: true, message, data });
+  });
+
+  res.sendCreated = jest.fn((data?: any, message: string = 'Resource created successfully') => {
+    return res.status(201).json({ success: true, message, data });
+  });
+
+  res.sendError = jest.fn((message: string = 'Internal server error') => {
+    return res.status(500).json({ success: false, message });
+  });
+
+  res.sendServerError = jest.fn((message: string = 'Internal server error') => {
+    return res.status(500).json({ success: false, message });
+  });
+
+  res.sendBadRequest = jest.fn((message: string = 'Bad request', errors?: any) => {
+    const response: any = { success: false, message };
+    if (errors) {
+      response.errors = errors;
+    }
+    return res.status(400).json(response);
+  });
+
+  res.sendUnauthorized = jest.fn((message: string = 'Unauthorized access') => {
+    return res.status(401).json({ success: false, message });
+  });
+
+  res.sendForbidden = jest.fn((message: string = 'Forbidden') => {
+    return res.status(403).json({ success: false, message });
+  });
+
+  res.sendNotFound = jest.fn((message: string = 'Resource not found') => {
+    return res.status(404).json({ success: false, message });
+  });
+
+  res.sendConflict = jest.fn((message: string = 'Conflict', errors?: any) => {
+    const response: any = { success: false, message };
+    if (errors) {
+      response.errors = errors;
+    }
+    return res.status(409).json(response);
+  });
+
   return res;
 }
 

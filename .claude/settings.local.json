@@ -51,7 +51,13 @@
       "Bash(rmdir:*)",
       "Bash(timeout:*)",
       "Bash(nul)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(npx husky init)",
+      "Bash(npm test:*)",
+      "Bash(git push:*)",
+      "Bash(npm ls:*)",
+      "Bash(npm run lint)",
+      "Bash(docker compose config:*)"
     ],
     "deny": [],
     "ask": []
