@@ -61,7 +61,9 @@
       "Bash(docker compose ps:*)",
       "Bash(npm run validate:*)",
       "Bash(npm run lint:fix:*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(docker rm:*)",
+      "Bash(git config:*)"
     ],
     "deny": [],
     "ask": []
