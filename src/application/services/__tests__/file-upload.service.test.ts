@@ -10,6 +10,17 @@ import fileUploadService from '../file-upload.service';
 
 // Mock dependencies - must be before imports are evaluated
 jest.mock('../../models/file-metadata.model', () => {
+  // Create mockSequelize inside the mock
+  const mockSequelize = {
+    transaction: jest.fn((callback: any) => {
+      const t = {
+        commit: jest.fn().mockResolvedValue(undefined),
+        rollback: jest.fn().mockResolvedValue(undefined),
+      };
+      return callback(t);
+    }),
+  };
+
   // Create a mock class
   class MockFileMetadata {
     constructor(data: any) {
@@ -22,6 +33,7 @@ jest.mock('../../models/file-metadata.model', () => {
     static findAndCountAll = jest.fn();
     static update = jest.fn();
     static destroy = jest.fn();
+    static sequelize = mockSequelize;
   }
 
   return {
@@ -387,10 +399,13 @@ describe('FileUploadService', () => {
       const result = await fileUploadService.update(1, updateData, 1);
 
       // Assert
-      expect(mockFile.update).toHaveBeenCalledWith({
-        ...updateData,
-        updated_by: 1,
-      });
+      expect(mockFile.update).toHaveBeenCalledWith(
+        {
+          ...updateData,
+          updated_by: 1,
+        },
+        undefined
+      );
       expect(result).toEqual(mockFile);
     });
 
@@ -421,10 +436,13 @@ describe('FileUploadService', () => {
       const result = await fileUploadService.delete(1, 1);
 
       // Assert
-      expect(mockFile.update).toHaveBeenCalledWith({
-        status: 'deleted',
-        updated_by: 1,
-      });
+      expect(mockFile.update).toHaveBeenCalledWith(
+        {
+          status: 'deleted',
+          updated_by: 1,
+        },
+        undefined
+      );
       expect(result).toBe(true);
     });
 
@@ -447,15 +465,19 @@ describe('FileUploadService', () => {
         id: 1,
         storage_key: 'uploads/test.jpg',
         created_by: 1,
-        destroy: jest.fn().mockResolvedValue(true),
       };
       (FileMetadata.findByPk as jest.Mock).mockResolvedValue(mockFile);
+      (FileMetadata.destroy as jest.Mock).mockResolvedValue(1);
 
       // Act
       const result = await fileUploadService.hardDelete(1);
 
       // Assert
-      expect(mockFile.destroy).toHaveBeenCalled();
+      expect(FileMetadata.destroy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 1 },
+        })
+      );
       expect(mockStorageProvider.delete).toHaveBeenCalledWith('uploads/test.jpg');
       expect(result).toBe(true);
     });

@@ -2,6 +2,7 @@ import jwtUtil from '@application/utils/jwt.util';
 import { logger } from '@config/logger';
 import { TokenPair } from '@interfaces/jwt.interface';
 import UserMaster from '@models/user-master.model';
+import userRepository from '@repositories/user.repository';
 import tokenBlacklistService from '@services/token-blacklist.service';
 import bcrypt from 'bcryptjs';
 
@@ -16,10 +17,7 @@ class AuthService {
   async login(email: string, password: string): Promise<{ user: UserMaster; tokens: TokenPair }> {
     try {
       // Find user by email - explicitly include password for authentication
-      const user = await UserMaster.findOne({
-        where: { email },
-        attributes: { include: ['password'] },
-      });
+      const user = await userRepository.findByEmailWithPassword(email);
 
       if (!user) {
         throw new Error('Invalid email or password');
@@ -42,10 +40,10 @@ class AuthService {
         throw new Error('Invalid email or password');
       }
 
-      // Update last login
-      user.last_login = new Date();
-      await user.save();
+      // Update last login using repository
+      await userRepository.updateLastLogin(user.getDataValue('id'));
       logger.info(`User logged in: ${user.getDataValue('email')}`);
+
       // Generate JWT tokens
       const tokens = jwtUtil.generateTokenPair({
         userId: user.getDataValue('id'),
@@ -123,10 +121,8 @@ class AuthService {
     newPassword: string
   ): Promise<void> {
     try {
-      // Find user with password
-      const user = await UserMaster.findByPk(userId, {
-        attributes: { include: ['password'] },
-      });
+      // Find user with password using repository
+      const user = await userRepository.findByIdWithPassword(userId);
 
       if (!user) {
         throw new Error('User not found');
@@ -142,8 +138,8 @@ class AuthService {
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
-      // Update password
-      await user.update({ password: hashedPassword });
+      // Update password using repository
+      await userRepository.updatePassword(userId, hashedPassword);
 
       // Invalidate all existing tokens for this user
       await tokenBlacklistService.invalidateAllUserTokens(userId, 'password_change');

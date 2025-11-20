@@ -1,12 +1,11 @@
-import { sequelize } from '@config/database/database';
 import { logger } from '@config/logger';
 import { RedisTTL } from '@config/redis';
 import redisService from '@helpers/redis.helper';
 import CountryMaster, {
   CountryMasterCreationAttributes,
-  CountryMasterAttributes,
 } from '@models/country-master.model';
-import { Op, WhereOptions, Transaction } from 'sequelize';
+import countryRepository from '@repositories/country.repository';
+import { Transaction } from 'sequelize';
 
 /**
  * Cache key constants for country-master
@@ -53,8 +52,8 @@ class CountryMasterService {
    */
   async create(data: CountryMasterCreationAttributes, userId?: number): Promise<CountryMaster> {
     try {
-      const country = await sequelize.transaction(async (transaction: Transaction) => {
-        const newCountry = await CountryMaster.create(
+      const country = await countryRepository.withTransaction(async (transaction: Transaction) => {
+        const newCountry = await countryRepository.create(
           {
             ...data,
             created_by: userId || null,
@@ -96,27 +95,15 @@ class CountryMasterService {
         return cached;
       }
 
-      const offset = (page - 1) * limit;
-      const where: WhereOptions<CountryMasterAttributes> = {};
-
-      // Apply search filter
-      if (search) {
-        Object.assign(where, {
-          [Op.or]: [{ name: { [Op.like]: `%${search}%` } }, { code: { [Op.like]: `%${search}%` } }],
-        });
-      }
-
-      // Apply status filter
-      if (status) {
-        Object.assign(where, { status });
-      }
-
-      const { rows, count } = await CountryMaster.findAndCountAll({
-        where,
+      // Use repository method with filters
+      const { rows, count } = await countryRepository.findWithFilters(
+        page,
         limit,
-        offset,
-        order: [[sortBy, sortOrder]],
-      });
+        search,
+        status,
+        sortBy,
+        sortOrder
+      );
 
       const result = {
         data: rows,
@@ -153,7 +140,7 @@ class CountryMasterService {
         return cached;
       }
 
-      const country = await CountryMaster.findByPk(id);
+      const country = await countryRepository.findById(id);
 
       if (country) {
         // Cache the result
@@ -182,9 +169,7 @@ class CountryMasterService {
         return cached;
       }
 
-      const country = await CountryMaster.findOne({
-        where: { code: code.toUpperCase() },
-      });
+      const country = await countryRepository.findByCode(code);
 
       if (country) {
         // Cache the result
@@ -208,7 +193,7 @@ class CountryMasterService {
     userId?: number
   ): Promise<CountryMaster | null> {
     try {
-      const country = await CountryMaster.findByPk(id);
+      const country = await countryRepository.findById(id);
 
       if (!country) {
         return null;
@@ -216,15 +201,23 @@ class CountryMasterService {
 
       const oldCode = country.code;
 
-      await sequelize.transaction(async (transaction: Transaction) => {
-        await country.update(
-          {
-            ...data,
-            updated_by: userId || country.updated_by,
-          },
-          { transaction }
-        );
-      });
+      const updatedCountry = await countryRepository.withTransaction(
+        async (transaction: Transaction) => {
+          // Update within transaction
+          await country.update(
+            {
+              ...data,
+              updated_by: userId || country.updated_by,
+            },
+            { transaction }
+          );
+          return country;
+        }
+      );
+
+      if (!updatedCountry) {
+        return null;
+      }
 
       // Invalidate caches after transaction commits
       await this.invalidateCountryCache(id, oldCode);
@@ -234,8 +227,8 @@ class CountryMasterService {
       }
       await this.invalidateListCaches();
 
-      logger.info(`Country updated: ${country.name} (${country.code})`);
-      return country;
+      logger.info(`Country updated: ${updatedCountry.name} (${updatedCountry.code})`);
+      return updatedCountry;
     } catch (error) {
       logger.error(`Error updating country with id ${id}:`, error);
       throw error;
@@ -247,7 +240,7 @@ class CountryMasterService {
    */
   async delete(id: number, userId?: number): Promise<boolean> {
     try {
-      const country = await CountryMaster.findByPk(id);
+      const country = await countryRepository.findById(id);
 
       if (!country) {
         return false;
@@ -255,22 +248,17 @@ class CountryMasterService {
 
       const code = country.code;
 
-      await sequelize.transaction(async (transaction: Transaction) => {
-        await country.update(
-          {
-            status: 'inactive',
-            updated_by: userId || country.updated_by,
-          },
-          { transaction }
-        );
-      });
+      const result = await countryRepository.softDelete(id, userId);
 
-      // Invalidate caches after transaction commits
-      await this.invalidateCountryCache(id, code);
-      await this.invalidateListCaches();
+      if (result) {
+        // Invalidate caches after transaction commits
+        await this.invalidateCountryCache(id, code);
+        await this.invalidateListCaches();
 
-      logger.info(`Country deleted (soft): ${country.name} (${country.code})`);
-      return true;
+        logger.info(`Country deleted (soft): ${country.name} (${country.code})`);
+      }
+
+      return result;
     } catch (error) {
       logger.error(`Error deleting country with id ${id}:`, error);
       throw error;
@@ -283,26 +271,22 @@ class CountryMasterService {
   async hardDelete(id: number): Promise<boolean> {
     try {
       // Get country data before deletion for cache invalidation
-      const country = await CountryMaster.findByPk(id);
+      const country = await countryRepository.findById(id);
       const code = country?.code;
 
-      const result = await sequelize.transaction(async (transaction: Transaction) => {
-        return CountryMaster.destroy({
-          where: { id },
-          transaction,
-        });
+      const result = await countryRepository.withTransaction(async (transaction: Transaction) => {
+        return countryRepository.delete(id, { transaction });
       });
 
-      if (result > 0) {
+      if (result) {
         // Invalidate caches after transaction commits
         await this.invalidateCountryCache(id, code);
         await this.invalidateListCaches();
 
         logger.info(`Country hard deleted: id ${id}`);
-        return true;
       }
 
-      return false;
+      return result;
     } catch (error) {
       logger.error(`Error hard deleting country with id ${id}:`, error);
       throw error;
@@ -323,10 +307,7 @@ class CountryMasterService {
         return cached;
       }
 
-      const countries = await CountryMaster.findAll({
-        where: { status: 'active' },
-        order: [['name', 'ASC']],
-      });
+      const countries = await countryRepository.findAllActive();
 
       // Cache the result - use LONG TTL as active countries rarely change
       await redisService.set(
@@ -348,13 +329,7 @@ class CountryMasterService {
    */
   async isCodeExists(code: string, excludeId?: number): Promise<boolean> {
     try {
-      const where: WhereOptions<CountryMasterAttributes> = { code: code.toUpperCase() };
-      if (excludeId) {
-        (where as Record<string, unknown>).id = { [Op.ne]: excludeId };
-      }
-
-      const country = await CountryMaster.findOne({ where });
-      return !!country;
+      return countryRepository.isCodeExists(code, excludeId);
     } catch (error) {
       logger.error(`Error checking country code ${code}:`, error);
       throw error;

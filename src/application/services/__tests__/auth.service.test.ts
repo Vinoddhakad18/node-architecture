@@ -5,13 +5,16 @@
 
 import _bcrypt from 'bcryptjs';
 
-import UserMaster from '../../models/user-master.model';
+import userRepository from '../../repositories/user.repository';
 import jwtUtil from '../../utils/jwt.util';
+import tokenBlacklistService from '../token-blacklist.service';
 import authService from '../auth.service';
 
 // Mock dependencies
 jest.mock('../../models/user-master.model');
+jest.mock('../../repositories/user.repository');
 jest.mock('../../utils/jwt.util');
+jest.mock('../token-blacklist.service');
 jest.mock('../../config/logger', () => ({
   logger: {
     info: jest.fn(),
@@ -56,20 +59,18 @@ describe('AuthService', () => {
         expiresAt: 1234567890,
       };
 
-      (UserMaster.findOne as jest.Mock).mockResolvedValue(mockUser);
+      (userRepository.findByEmailWithPassword as jest.Mock).mockResolvedValue(mockUser);
       mockUser.comparePassword.mockResolvedValue(true);
+      (userRepository.updateLastLogin as jest.Mock).mockResolvedValue(true);
       (jwtUtil.generateTokenPair as jest.Mock).mockReturnValue(mockTokens);
 
       // Act
       const result = await authService.login(mockEmail, mockPassword);
 
       // Assert
-      expect(UserMaster.findOne).toHaveBeenCalledWith({
-        where: { email: mockEmail },
-        attributes: { include: ['password'] },
-      });
+      expect(userRepository.findByEmailWithPassword).toHaveBeenCalledWith(mockEmail);
       expect(mockUser.comparePassword).toHaveBeenCalledWith(mockPassword);
-      expect(mockUser.save).toHaveBeenCalled();
+      expect(userRepository.updateLastLogin).toHaveBeenCalledWith(1);
       expect(jwtUtil.generateTokenPair).toHaveBeenCalledWith({
         userId: 1,
         email: mockEmail,
@@ -83,16 +84,13 @@ describe('AuthService', () => {
 
     it('should throw error when user is not found', async () => {
       // Arrange
-      (UserMaster.findOne as jest.Mock).mockResolvedValue(null);
+      (userRepository.findByEmailWithPassword as jest.Mock).mockResolvedValue(null);
 
       // Act & Assert
       await expect(authService.login(mockEmail, mockPassword)).rejects.toThrow(
         'Invalid email or password'
       );
-      expect(UserMaster.findOne).toHaveBeenCalledWith({
-        where: { email: mockEmail },
-        attributes: { include: ['password'] },
-      });
+      expect(userRepository.findByEmailWithPassword).toHaveBeenCalledWith(mockEmail);
     });
 
     it('should throw error when password is missing from user record', async () => {
@@ -106,7 +104,7 @@ describe('AuthService', () => {
           return mockUser.getDataValue(key);
         }),
       };
-      (UserMaster.findOne as jest.Mock).mockResolvedValue(userWithoutPassword);
+      (userRepository.findByEmailWithPassword as jest.Mock).mockResolvedValue(userWithoutPassword);
 
       // Act & Assert
       await expect(authService.login(mockEmail, mockPassword)).rejects.toThrow('Invalid password');
@@ -118,7 +116,7 @@ describe('AuthService', () => {
         ...mockUser,
         isActive: false,
       };
-      (UserMaster.findOne as jest.Mock).mockResolvedValue(inactiveUser);
+      (userRepository.findByEmailWithPassword as jest.Mock).mockResolvedValue(inactiveUser);
 
       // Act & Assert
       await expect(authService.login(mockEmail, mockPassword)).rejects.toThrow(
@@ -128,7 +126,7 @@ describe('AuthService', () => {
 
     it('should throw error when password is invalid', async () => {
       // Arrange
-      (UserMaster.findOne as jest.Mock).mockResolvedValue(mockUser);
+      (userRepository.findByEmailWithPassword as jest.Mock).mockResolvedValue(mockUser);
       mockUser.comparePassword.mockResolvedValue(false);
 
       // Act & Assert
@@ -146,22 +144,22 @@ describe('AuthService', () => {
         expiresAt: 1234567890,
       };
 
-      (UserMaster.findOne as jest.Mock).mockResolvedValue(mockUser);
+      (userRepository.findByEmailWithPassword as jest.Mock).mockResolvedValue(mockUser);
       mockUser.comparePassword.mockResolvedValue(true);
+      (userRepository.updateLastLogin as jest.Mock).mockResolvedValue(true);
       (jwtUtil.generateTokenPair as jest.Mock).mockReturnValue(mockTokens);
 
       // Act
       await authService.login(mockEmail, mockPassword);
 
       // Assert
-      expect(mockUser.last_login).toBeInstanceOf(Date);
-      expect(mockUser.save).toHaveBeenCalled();
+      expect(userRepository.updateLastLogin).toHaveBeenCalledWith(1);
     });
 
     it('should handle database errors gracefully', async () => {
       // Arrange
       const dbError = new Error('Database connection failed');
-      (UserMaster.findOne as jest.Mock).mockRejectedValue(dbError);
+      (userRepository.findByEmailWithPassword as jest.Mock).mockRejectedValue(dbError);
 
       // Act & Assert
       await expect(authService.login(mockEmail, mockPassword)).rejects.toThrow(
@@ -222,12 +220,14 @@ describe('AuthService', () => {
         email: 'test@example.com',
         role: 'user',
       });
+      (tokenBlacklistService.isBlacklisted as jest.Mock).mockResolvedValue(false);
 
       // Act
       const result = await authService.verifyToken(mockToken);
 
       // Assert
       expect(jwtUtil.verifyAccessToken).toHaveBeenCalledWith(mockToken);
+      expect(tokenBlacklistService.isBlacklisted).toHaveBeenCalledWith(mockToken);
       expect(result).toBe(true);
     });
 

@@ -89,7 +89,7 @@ export class CountryRepository extends BaseRepository<
   }
 
   /**
-   * Find with pagination
+   * Find with pagination and advanced filtering
    */
   async findPaginated(
     page = 1,
@@ -101,6 +101,40 @@ export class CountryRepository extends BaseRepository<
       ...options,
       limit,
       offset,
+    });
+  }
+
+  /**
+   * Find with search, status filter, and sorting
+   */
+  async findWithFilters(
+    page = 1,
+    limit = 10,
+    search?: string,
+    status?: 'active' | 'inactive',
+    sortBy = 'name',
+    sortOrder: 'ASC' | 'DESC' = 'ASC'
+  ): Promise<{ rows: CountryMaster[]; count: number }> {
+    const offset = (page - 1) * limit;
+    const where: WhereOptions<CountryMasterAttributes> = {};
+
+    // Apply search filter
+    if (search) {
+      Object.assign(where, {
+        [Op.or]: [{ name: { [Op.like]: `%${search}%` } }, { code: { [Op.like]: `%${search}%` } }],
+      });
+    }
+
+    // Apply status filter
+    if (status) {
+      Object.assign(where, { status });
+    }
+
+    return this.findAndCountAll({
+      where,
+      limit,
+      offset,
+      order: [[sortBy, sortOrder]],
     });
   }
 

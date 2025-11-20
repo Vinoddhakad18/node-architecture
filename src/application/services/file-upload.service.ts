@@ -1,4 +1,4 @@
-import { WhereOptions, Transaction } from 'sequelize';
+import { Transaction } from 'sequelize';
 
 import { sequelize } from '../config/database/database';
 import { logger } from '../config/logger';
@@ -8,8 +8,8 @@ import redisService from '../helpers/redis.helper';
 import { generateStorageKey, getFileCategory } from '../middleware/upload.middleware';
 import FileMetadata, {
   FileMetadataCreationAttributes,
-  FileMetadataAttributes,
 } from '../models/file-metadata.model';
+import fileMetadataRepository from '../repositories/file-metadata.repository';
 
 // Cache key patterns
 const CACHE_KEYS = {
@@ -83,7 +83,7 @@ class FileUploadService {
         created_by: userId || null,
       };
 
-      const file = await FileMetadata.create(fileData, { transaction });
+      const file = await fileMetadataRepository.create(fileData, { transaction });
 
       // Invalidate cache (only if not in a parent transaction, to avoid premature invalidation)
       if (!transaction) {
@@ -157,7 +157,7 @@ class FileUploadService {
       return new FileMetadata(cached);
     }
 
-    const file = await FileMetadata.findByPk(id);
+    const file = await fileMetadataRepository.findById(id);
 
     if (file) {
       await redisService.set(cacheKey, file.toJSON(), RedisTTL.MEDIUM);
@@ -178,9 +178,7 @@ class FileUploadService {
       return new FileMetadata(cached);
     }
 
-    const file = await FileMetadata.findOne({
-      where: { storage_key: storageKey },
-    });
+    const file = await fileMetadataRepository.findByStorageKey(storageKey);
 
     if (file) {
       await redisService.set(cacheKey, file.toJSON(), RedisTTL.MEDIUM);
@@ -204,28 +202,18 @@ class FileUploadService {
       sortOrder = 'DESC',
     } = options;
 
-    const offset = (page - 1) * limit;
-    const where: WhereOptions<FileMetadataAttributes> = {};
-
-    if (status) {
-      (where as Record<string, unknown>).status = status;
-    }
-    if (category) {
-      (where as Record<string, unknown>).category = category;
-    }
-    if (mimeType) {
-      (where as Record<string, unknown>).mime_type = mimeType;
-    }
-    if (createdBy) {
-      (where as Record<string, unknown>).created_by = createdBy;
-    }
-
-    const { count, rows } = await FileMetadata.findAndCountAll({
-      where,
+    const { count, rows } = await fileMetadataRepository.findWithFilters(
+      page,
       limit,
-      offset,
-      order: [[sortBy, sortOrder]],
-    });
+      {
+        category,
+        mimeType,
+        status,
+        createdBy,
+      },
+      sortBy,
+      sortOrder
+    );
 
     return {
       data: rows,
@@ -244,47 +232,47 @@ class FileUploadService {
     data: Partial<Pick<FileMetadata, 'description' | 'metadata' | 'category' | 'status'>>,
     userId?: number
   ): Promise<FileMetadata | null> {
-    const file = await FileMetadata.findByPk(id);
+    const file = await fileMetadataRepository.findById(id);
 
     if (!file) {
       return null;
     }
 
-    await file.update({
+    const updatedFile = await fileMetadataRepository.update(id, {
       ...data,
       updated_by: userId || null,
     });
 
-    // Invalidate cache
-    await this.invalidateSingleFileCache(id, file.storage_key);
+    if (updatedFile) {
+      // Invalidate cache
+      await this.invalidateSingleFileCache(id, updatedFile.storage_key);
+      logger.info('File metadata updated', { fileId: id });
+    }
 
-    logger.info('File metadata updated', { fileId: id });
-
-    return file;
+    return updatedFile;
   }
 
   /**
    * Delete file (soft delete)
    */
   async delete(id: number, userId?: number): Promise<boolean> {
-    const file = await FileMetadata.findByPk(id);
+    const file = await fileMetadataRepository.findById(id);
 
     if (!file) {
       return false;
     }
 
-    await file.update({
-      status: 'deleted',
-      updated_by: userId || null,
-    });
+    const result = await fileMetadataRepository.softDelete(id, userId);
 
-    // Invalidate cache
-    await this.invalidateSingleFileCache(id, file.storage_key);
-    await this.invalidateCache(file.created_by || undefined);
+    if (result) {
+      // Invalidate cache
+      await this.invalidateSingleFileCache(id, file.storage_key);
+      await this.invalidateCache(file.created_by || undefined);
 
-    logger.info('File soft deleted', { fileId: id });
+      logger.info('File soft deleted', { fileId: id });
+    }
 
-    return true;
+    return result;
   }
 
   /**
@@ -292,7 +280,7 @@ class FileUploadService {
    * Uses transaction to ensure database deletion is atomic
    */
   async hardDelete(id: number): Promise<boolean> {
-    const file = await FileMetadata.findByPk(id);
+    const file = await fileMetadataRepository.findById(id);
 
     if (!file) {
       return false;
@@ -303,12 +291,20 @@ class FileUploadService {
     const createdBy = file.created_by;
 
     // Use transaction for database operation
-    await sequelize.transaction(async (transaction) => {
+    const result = await fileMetadataRepository.withTransaction(async (transaction) => {
       // Delete from database first (can be rolled back)
-      await file.destroy({ transaction });
+      const deleted = await fileMetadataRepository.delete(id, { transaction });
 
-      logger.info('File record deleted from database', { fileId: id, storageKey });
+      if (deleted) {
+        logger.info('File record deleted from database', { fileId: id, storageKey });
+      }
+
+      return deleted;
     });
+
+    if (!result) {
+      return false;
+    }
 
     // Delete from storage after database transaction commits
     // This is outside the transaction because storage operations can't be rolled back
@@ -404,9 +400,7 @@ class FileUploadService {
    * Check if file exists
    */
   async exists(id: number): Promise<boolean> {
-    const file = await FileMetadata.findByPk(id, {
-      attributes: ['id'],
-    });
+    const file = await fileMetadataRepository.findByIdMinimal(id);
     return !!file;
   }
 
@@ -418,15 +412,7 @@ class FileUploadService {
     totalSize: number;
     byCategory: Record<string, { count: number; size: number }>;
   }> {
-    const where: WhereOptions<FileMetadataAttributes> = { status: 'active' };
-    if (userId) {
-      (where as Record<string, unknown>).created_by = userId;
-    }
-
-    const files = await FileMetadata.findAll({
-      where,
-      attributes: ['category', 'size'],
-    });
+    const files = await fileMetadataRepository.getStatistics(userId);
 
     const byCategory: Record<string, { count: number; size: number }> = {};
     let totalSize = 0;

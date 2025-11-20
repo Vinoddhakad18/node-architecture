@@ -40,6 +40,26 @@ export class UserRepository extends BaseRepository<
   }
 
   /**
+   * Find user by ID with password (for authentication)
+   */
+  async findByIdWithPassword(id: number): Promise<UserMaster | null> {
+    return this.model.findByPk(id, {
+      attributes: { include: ['password'] },
+    });
+  }
+
+  /**
+   * Update user password
+   */
+  async updatePassword(userId: number, hashedPassword: string): Promise<boolean> {
+    const result = await this.model.update(
+      { password: hashedPassword },
+      { where: { id: userId } }
+    );
+    return result[0] > 0;
+  }
+
+  /**
    * Find user by mobile
    */
   async findByMobile(mobile: string): Promise<UserMaster | null> {
