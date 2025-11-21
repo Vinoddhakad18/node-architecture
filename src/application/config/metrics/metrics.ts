@@ -95,8 +95,6 @@ export const errorCounter = new client.Counter({
   registers: [register],
 });
 
-
-
 // Business Metrics - Example: User Operations
 export const userOperations = new client.Counter({
   name: 'user_operations_total',
