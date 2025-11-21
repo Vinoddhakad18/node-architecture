@@ -19,7 +19,6 @@ class AuthController {
       res.sendSuccess(tokens, 'Login successful');
     } catch (error: unknown) {
       logger.error('Error in login controller:', error);
-   
       res.sendUnauthorized(getErrorMessage(error) || 'Login failed');
     }
   }
