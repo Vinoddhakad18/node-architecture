@@ -94,20 +94,6 @@ export const trackDbQuery = (operation: string, model: string) => {
 };
 
 /**
- * Authentication metrics helper
- * Use this to track login attempts
- *
- * Example usage:
- * trackAuthAttempt('success');
- * trackAuthAttempt('failure');
- */
-import { authAttempts } from '@config/metrics';
-
-export const trackAuthAttempt = (status: 'success' | 'failure') => {
-  authAttempts.inc({ status });
-};
-
-/**
  * User operation metrics helper
  * Use this to track business-specific user operations
  *

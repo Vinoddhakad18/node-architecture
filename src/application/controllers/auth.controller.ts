@@ -1,6 +1,5 @@
 import { logger } from '@config/logger';
 import { getErrorMessage } from '@interfaces/common.interface';
-import { trackAuthAttempt } from '@middleware/metrics';
 import authService from '@services/auth.service';
 import { Request, Response } from 'express';
 
@@ -17,11 +16,10 @@ class AuthController {
     try {
       const { email, password } = req.body;
       const { tokens } = await authService.login(email, password);
-      trackAuthAttempt('success');
       res.sendSuccess(tokens, 'Login successful');
     } catch (error: unknown) {
       logger.error('Error in login controller:', error);
-      trackAuthAttempt('failure');
+   
       res.sendUnauthorized(getErrorMessage(error) || 'Login failed');
     }
   }

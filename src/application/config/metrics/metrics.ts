@@ -95,13 +95,7 @@ export const errorCounter = new client.Counter({
   registers: [register],
 });
 
-// Authentication Metrics
-export const authAttempts = new client.Counter({
-  name: 'auth_attempts_total',
-  help: 'Total number of authentication attempts',
-  labelNames: ['status'],
-  registers: [register],
-});
+
 
 // Business Metrics - Example: User Operations
 export const userOperations = new client.Counter({
