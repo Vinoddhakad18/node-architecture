@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 
 import { authenticate, authorize, checkOwnership } from '../middleware/auth.middleware';
+import { apiKeyAuth } from '../middleware/apiKey.middleware';
 
 const router = Router();
 
@@ -102,5 +103,57 @@ router.put('/users/:userId/settings', authenticate, (req: Request, res: Response
     'Settings updated'
   );
 });
+
+/**
+ * Example: API Key authentication only
+ * Useful for service-to-service communication or webhook endpoints
+ * Client must provide X-API-Key header with a valid API key
+ */
+router.post('/api/webhooks', apiKeyAuth, (req: Request, res: Response) => {
+  res.sendSuccess(
+    {
+      data: req.body,
+      info: 'Valid API key required via X-API-Key header',
+    },
+    'Webhook processed successfully'
+  );
+});
+
+/**
+ * Example: API Key with JWT authentication
+ * Both API key and valid JWT token required
+ * Useful for external services accessing user-specific data
+ */
+router.get('/api/external/user-data', apiKeyAuth, authenticate, (req: Request, res: Response) => {
+  res.sendSuccess(
+    {
+      user: req.user,
+      info: 'Requires both X-API-Key header and Bearer token',
+    },
+    'User data retrieved for external service'
+  );
+});
+
+/**
+ * Example: API Key with role-based authorization
+ * API key required + user must have admin role
+ * Useful for admin APIs accessible to external services
+ */
+router.post(
+  '/api/admin/bulk-operations',
+  apiKeyAuth,
+  authenticate,
+  authorize('admin'),
+  (req: Request, res: Response) => {
+    res.sendSuccess(
+      {
+        user: req.user,
+        operation: req.body,
+        info: 'Requires API key, authentication, and admin role',
+      },
+      'Bulk operation initiated'
+    );
+  }
+);
 
 export default router;

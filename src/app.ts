@@ -40,6 +40,7 @@ import {
   errorLogger,
   attachResponseHandlers,
   requestIdMiddleware,
+  apiKeyAuth,
 } from '@middleware/index';
 import { metricsMiddleware } from '@middleware/metrics';
 import { connectDatabase } from '@config/database';
@@ -183,6 +184,10 @@ export const createApp = async (): Promise<Application> => {
       res.sendServiceUnavailable('Migration health check failed');
     }
   });
+
+  // Global API Key Authentication
+  // Applied to all API routes (but not health checks or docs)
+  app.use(config.apiPrefix, apiKeyAuth);
 
   // Routes
   app.use(config.apiPrefix, routes);
