@@ -19,7 +19,7 @@ const consoleFormat = winston.format.combine(
   winston.format.printf(({ timestamp, level, message, requestId, ...meta }) => {
     let msg = `${timestamp} [${level}]`;
     if (requestId) {
-      msg += ` [ReqID: ${requestId}]`;
+      msg += ` [ReqID: ${String(requestId)}]`;
     }
     msg += `: ${message}`;
     if (Object.keys(meta).length > 0) {

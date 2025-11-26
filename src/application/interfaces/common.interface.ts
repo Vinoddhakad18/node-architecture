@@ -42,7 +42,7 @@ export interface IdWhereClause {
  * Status-based where clause
  */
 export interface StatusWhereClause {
-  status?: 'active' | 'inactive' | string;
+  status?: string;
 }
 
 /**
