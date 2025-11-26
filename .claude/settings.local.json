@@ -64,7 +64,11 @@
       "Bash(npx eslint:*)",
       "Bash(docker rm:*)",
       "Bash(git config:*)",
-      "Bash(npm run format:check:*)"
+      "Bash(npm run format:check:*)",
+      "Bash(del \"\\?\\d:\\Project\\bitbucket\\node-at\\node-architecture\\nul\")",
+      "Bash(powershell -Command \"Remove-Item -LiteralPath ''\\?\\d:\\Project\\bitbucket\\node-at\\node-architecture\\nul'' -Force\")",
+      "Bash(powershell:*)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []

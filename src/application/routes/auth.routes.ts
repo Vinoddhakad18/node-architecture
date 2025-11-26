@@ -87,6 +87,8 @@ const router = Router();
  *     description: Authenticate user and return user data
  *     tags:
  *       - Authentication
+ *     security:
+ *       - apiKey: []
  *     requestBody:
  *       required: true
  *       content:
@@ -133,6 +135,8 @@ router.post('/login', validateRequest(loginSchema), authController.login);
  *     description: Generate a new access token using a valid refresh token
  *     tags:
  *       - Authentication
+ *     security:
+ *       - apiKey: []
  *     requestBody:
  *       required: true
  *       content:
@@ -182,6 +186,7 @@ router.post('/refresh-token', validateRequest(refreshTokenSchema), authControlle
  *     tags:
  *       - Authentication
  *     security:
+ *       - apiKey: []
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
@@ -237,6 +242,7 @@ router.post(
  *     tags:
  *       - Authentication
  *     security:
+ *       - apiKey: []
  *       - bearerAuth: []
  *     requestBody:
  *       content:
@@ -276,6 +282,7 @@ router.post('/logout', authenticate, validateRequest(logoutSchema), authControll
  *     tags:
  *       - Authentication
  *     security:
+ *       - apiKey: []
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
@@ -337,6 +344,8 @@ router.post(
  *     description: Generate new access and refresh tokens, invalidating the old refresh token
  *     tags:
  *       - Authentication
+ *     security:
+ *       - apiKey: []
  *     requestBody:
  *       required: true
  *       content:

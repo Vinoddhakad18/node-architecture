@@ -24,6 +24,8 @@ const router = Router();
  *     description: Retrieve files with pagination and filtering
  *     tags:
  *       - Files
+ *     security:
+ *       - apiKey: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -79,6 +81,7 @@ router.get('/', validateRequest(listFilesSchema), fileUploadController.findAll);
  *     tags:
  *       - Files
  *     security:
+ *       - apiKey: []
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
@@ -125,6 +128,7 @@ router.get(
  *     tags:
  *       - Files
  *     security:
+ *       - apiKey: []
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
@@ -152,6 +156,8 @@ router.get(
  *     description: Retrieve file metadata by ID
  *     tags:
  *       - Files
+ *     security:
+ *       - apiKey: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -175,6 +181,8 @@ router.get('/:id', validateRequest(fileIdParamSchema), fileUploadController.find
  *     description: Download file content directly
  *     tags:
  *       - Files
+ *     security:
+ *       - apiKey: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -198,6 +206,8 @@ router.get('/:id/download', validateRequest(fileIdParamSchema), fileUploadContro
  *     description: Get a temporary presigned URL for downloading
  *     tags:
  *       - Files
+ *     security:
+ *       - apiKey: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -231,6 +241,7 @@ router.get(
  *     tags:
  *       - Files
  *     security:
+ *       - apiKey: []
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
@@ -277,6 +288,7 @@ router.post(
  *     tags:
  *       - Files
  *     security:
+ *       - apiKey: []
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
@@ -318,6 +330,7 @@ router.post(
  *     tags:
  *       - Files
  *     security:
+ *       - apiKey: []
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
@@ -358,6 +371,7 @@ router.post(
  *     tags:
  *       - Files
  *     security:
+ *       - apiKey: []
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
@@ -399,6 +413,7 @@ router.put('/:id', authenticate, validateRequest(updateFileSchema), fileUploadCo
  *     tags:
  *       - Files
  *     security:
+ *       - apiKey: []
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
@@ -424,6 +439,7 @@ router.delete('/:id', authenticate, validateRequest(deleteFileSchema), fileUploa
  *     tags:
  *       - Files
  *     security:
+ *       - apiKey: []
  *       - bearerAuth: []
  *     parameters:
  *       - in: path

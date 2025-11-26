@@ -21,6 +21,8 @@ const router = Router();
  *     description: Retrieve all active countries for dropdowns
  *     tags:
  *       - Countries
+ *     security:
+ *       - apiKey: []
  *     responses:
  *       200:
  *         description: Active countries retrieved successfully
@@ -52,6 +54,8 @@ router.get('/active/list', countryMasterController.findAllActive);
  *     description: Retrieve all countries with pagination and filtering
  *     tags:
  *       - Countries
+ *     security:
+ *       - apiKey: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -128,6 +132,8 @@ router.get('/', validateRequest(listCountriesSchema), countryMasterController.fi
  *     description: Retrieve a country by its ISO code
  *     tags:
  *       - Countries
+ *     security:
+ *       - apiKey: []
  *     parameters:
  *       - in: path
  *         name: code
@@ -170,6 +176,8 @@ router.get(
  *     description: Retrieve a country by its ID
  *     tags:
  *       - Countries
+ *     security:
+ *       - apiKey: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -209,6 +217,7 @@ router.get('/:id', validateRequest(getCountryByIdSchema), countryMasterControlle
  *     tags:
  *       - Countries
  *     security:
+ *       - apiKey: []
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
@@ -278,6 +287,7 @@ router.post(
  *     tags:
  *       - Countries
  *     security:
+ *       - apiKey: []
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
@@ -348,6 +358,7 @@ router.put(
  *     tags:
  *       - Countries
  *     security:
+ *       - apiKey: []
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
@@ -393,6 +404,7 @@ router.delete(
  *     tags:
  *       - Countries
  *     security:
+ *       - apiKey: []
  *       - bearerAuth: []
  *     parameters:
  *       - in: path

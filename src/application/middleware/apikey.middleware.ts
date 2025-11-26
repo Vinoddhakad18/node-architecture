@@ -49,7 +49,8 @@ const secureCompare = (a: string, b: string): boolean => {
  * router.get('/protected', apiKeyAuth, handler);
  */
 export const apiKeyAuth = (req: Request, res: Response, next: NextFunction): void => {
-  const incomingKey = req.header('X-API-Key');
+  // Support both X-API-Key header and Authorization Bearer token for compatibility with monitoring tools
+  let incomingKey = req.header('X-API-Key');
 
   if (!incomingKey) {
     logger.warn(API_KEY_AUTH.LOG_MISSING_KEY);
@@ -59,13 +60,11 @@ export const apiKeyAuth = (req: Request, res: Response, next: NextFunction): voi
 
   // Use constant-time comparison to prevent timing attacks
   const isValid = Array.from(validKeys).some((key) => secureCompare(incomingKey, key));
-
   if (!isValid) {
     logger.warn(API_KEY_AUTH.LOG_INVALID_KEY);
     res.sendForbidden(API_KEY_AUTH.RESPONSE_INVALID_KEY);
     return;
   }
-
   logger.info(API_KEY_AUTH.LOG_SUCCESS);
   next();
 };

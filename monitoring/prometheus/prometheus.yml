@@ -31,6 +31,9 @@ scrape_configs:
     scrape_interval: 10s # Scrape more frequently for application metrics
     scrape_timeout: 5s
     metrics_path: '/api/v1/metrics'
+    # API Key authentication for metrics endpoint
+    authorization:
+      credentials: key
     static_configs:
       - targets: ['app:3000'] # Docker service name:port
         labels:

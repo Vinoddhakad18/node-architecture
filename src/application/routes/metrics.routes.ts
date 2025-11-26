@@ -12,6 +12,8 @@ const router = Router();
  *     description: Returns metrics in Prometheus format for scraping
  *     tags:
  *       - Monitoring
+ *     security:
+ *       - apiKey: []
  *     responses:
  *       200:
  *         description: Metrics in Prometheus format
