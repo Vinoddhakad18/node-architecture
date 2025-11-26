@@ -50,7 +50,7 @@ const secureCompare = (a: string, b: string): boolean => {
  */
 export const apiKeyAuth = (req: Request, res: Response, next: NextFunction): void => {
   // Support both X-API-Key header and Authorization Bearer token for compatibility with monitoring tools
-  let incomingKey = req.header('X-API-Key');
+  const incomingKey = req.header('X-API-Key');
 
   if (!incomingKey) {
     logger.warn(API_KEY_AUTH.LOG_MISSING_KEY);
