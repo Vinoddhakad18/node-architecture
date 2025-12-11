@@ -196,6 +196,80 @@ const swaggerOptions: swaggerJsdoc.Options = {
             },
           },
         },
+        Menu: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer',
+              example: 1,
+            },
+            name: {
+              type: 'string',
+              example: 'Dashboard',
+            },
+            route: {
+              type: 'string',
+              example: '/dashboard',
+            },
+            parent_id: {
+              type: 'integer',
+              nullable: true,
+              example: null,
+            },
+            sort_order: {
+              type: 'integer',
+              example: 0,
+            },
+            is_active: {
+              type: 'boolean',
+              example: true,
+            },
+            created_at: {
+              type: 'string',
+              format: 'date-time',
+            },
+            updated_at: {
+              type: 'string',
+              format: 'date-time',
+            },
+          },
+        },
+        MenuTree: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer',
+              example: 1,
+            },
+            name: {
+              type: 'string',
+              example: 'Dashboard',
+            },
+            route: {
+              type: 'string',
+              example: '/dashboard',
+            },
+            parent_id: {
+              type: 'integer',
+              nullable: true,
+              example: null,
+            },
+            sort_order: {
+              type: 'integer',
+              example: 0,
+            },
+            is_active: {
+              type: 'boolean',
+              example: true,
+            },
+            children: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/MenuTree',
+              },
+            },
+          },
+        },
       },
       responses: {
         UnauthorizedError: {
@@ -352,6 +426,10 @@ const swaggerOptions: swaggerJsdoc.Options = {
       {
         name: 'Monitoring',
         description: 'Application monitoring and metrics',
+      },
+      {
+        name: 'Menus',
+        description: 'Menu management endpoints',
       },
     ],
   },

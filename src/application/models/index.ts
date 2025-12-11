@@ -13,3 +13,4 @@ export {
   CountryMasterAttributes,
   CountryMasterCreationAttributes,
 } from './country-master.model';
+export { Menu, MenuAttributes, MenuCreationAttributes } from './menu.model';
