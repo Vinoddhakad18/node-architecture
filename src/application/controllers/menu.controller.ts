@@ -52,6 +52,7 @@ class MenuController {
         parent_id,
         sortBy = 'sort_order',
         sortOrder = 'ASC',
+        refresh = 'false', // Query parameter to force refresh (bypass cache)
       } = req.query;
 
       const result = await menuService.findAll({
@@ -62,6 +63,7 @@ class MenuController {
         parentId: parent_id as number | null | undefined,
         sortBy: sortBy as string,
         sortOrder: sortOrder as 'ASC' | 'DESC',
+        skipCache: refresh === 'true' || refresh === '1', // Bypass cache if refresh=true
       });
 
       res.sendSuccess(result, 'Menus retrieved successfully');
