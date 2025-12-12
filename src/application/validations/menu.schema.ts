@@ -146,16 +146,24 @@ export const listMenusSchema = z.object({
       .string()
       .optional()
       .transform((val) => {
-        if (val === 'true') return true;
-        if (val === 'false') return false;
+        if (val === 'true') {
+          return true;
+        }
+        if (val === 'false') {
+          return false;
+        }
         return undefined;
       }),
     parent_id: z
       .string()
       .optional()
       .transform((val) => {
-        if (val === 'null' || val === '') return null;
-        if (val) return parseInt(val, 10);
+        if (val === 'null' || val === '') {
+          return null;
+        }
+        if (val) {
+          return parseInt(val, 10);
+        }
         return undefined;
       }),
     sortBy: z

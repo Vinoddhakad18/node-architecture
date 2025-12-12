@@ -52,7 +52,9 @@ class RedisService {
    * Setup Redis event handlers for connection monitoring
    */
   private setupEventHandlers(): void {
-    if (!this.client) return;
+    if (!this.client) {
+      return;
+    }
 
     // CONNECT/READY/ERROR/CLOSE/END/RECONNECTING
     this.client.on('connect', () => {
@@ -175,7 +177,9 @@ class RedisService {
   }
 
   public isReady(): boolean {
-    if (!this.isEnabled || !this.client) return false;
+    if (!this.isEnabled || !this.client) {
+      return false;
+    }
     try {
       // Both Redis and Cluster have status property in ioredis
       // but guard access just in case
@@ -192,7 +196,9 @@ class RedisService {
    */
   private safeStringify(value: unknown): string {
     try {
-      if (typeof value === 'string') return value;
+      if (typeof value === 'string') {
+        return value;
+      }
       return JSON.stringify(value);
     } catch (err) {
       logger?.warn('Failed to stringify value for redis; falling back to String()', { err });
@@ -268,14 +274,18 @@ class RedisService {
 
     try {
       const keys = Array.isArray(key) ? key.filter(Boolean) : [key];
-      if (!keys.length) return 0;
+      if (!keys.length) {
+        return 0;
+      }
 
       // ioredis accepts multiple keys; for cluster mode this will route calls appropriately
       const result = await (this.client as Redis).del(...keys);
       logger?.debug(`Redis DEL: ${keys.join(', ')} (deleted ${result} key(s))`);
       return result;
     } catch (error) {
-      logger?.error(`Redis DEL error for key(s) ${Array.isArray(key) ? key.join(',') : key}:`, { error });
+      logger?.error(`Redis DEL error for key(s) ${Array.isArray(key) ? key.join(',') : key}:`, {
+        error,
+      });
       throw error;
     }
   }
@@ -447,7 +457,9 @@ class RedisService {
     }
 
     try {
-      if (!field.length) return 0;
+      if (!field.length) {
+        return 0;
+      }
       const result = await (this.client as Redis).hdel(key, ...field);
       logger?.debug(`Redis HDEL: ${key} (deleted ${result} field(s))`);
       return result;
@@ -498,7 +510,9 @@ class RedisService {
           do {
             const res = await node.scan(cursor, 'MATCH', pattern, 'COUNT', String(count));
             cursor = res[0];
-            if (Array.isArray(res[1]) && res[1].length) keys.push(...res[1]);
+            if (Array.isArray(res[1]) && res[1].length) {
+              keys.push(...res[1]);
+            }
           } while (cursor !== '0');
         }
       } else {
@@ -507,12 +521,16 @@ class RedisService {
         do {
           const res = await client.scan(cursor, 'MATCH', pattern, 'COUNT', String(count));
           cursor = res[0];
-          if (Array.isArray(res[1]) && res[1].length) keys.push(...res[1]);
+          if (Array.isArray(res[1]) && res[1].length) {
+            keys.push(...res[1]);
+          }
         } while (cursor !== '0');
       }
 
       const unique = [...new Set(keys)];
-      logger?.debug(`Redis SCAN${this.clusterMode ? ' (cluster)' : ''}: ${pattern} (found ${unique.length} unique key(s))`);
+      logger?.debug(
+        `Redis SCAN${this.clusterMode ? ' (cluster)' : ''}: ${pattern} (found ${unique.length} unique key(s))`
+      );
       return unique;
     } catch (error) {
       logger?.error(`Redis SCAN error for pattern ${pattern}:`, { error });
@@ -584,7 +602,9 @@ class RedisService {
     }
 
     try {
-      const result = section ? await (this.client as Redis).info(section) : await (this.client as Redis).info();
+      const result = section
+        ? await (this.client as Redis).info(section)
+        : await (this.client as Redis).info();
       logger?.debug(`Redis INFO: ${section || 'all'}`);
       return result;
     } catch (error) {

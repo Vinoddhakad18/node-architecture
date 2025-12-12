@@ -33,7 +33,6 @@ interface PaginatedResult<T> {
  * Handles business logic for menu operations
  */
 class MenuService {
-
   /**
    * Create a new menu
    */
@@ -74,7 +73,15 @@ class MenuService {
       } = options;
 
       // Use repository method with filters to get data from database
-      const { rows, count } = await menuRepository.findWithFilters(page, limit, search, isActive, parentId, sortBy, sortOrder);
+      const { rows, count } = await menuRepository.findWithFilters(
+        page,
+        limit,
+        search,
+        isActive,
+        parentId,
+        sortBy,
+        sortOrder
+      );
 
       const result: PaginatedResult<Menu> = {
         data: rows,
@@ -150,7 +157,9 @@ class MenuService {
   async update(id: number, data: Partial<MenuCreationAttributes>): Promise<Menu | null> {
     try {
       const menu = await menuRepository.findById(id);
-      if (!menu) return null;
+      if (!menu) {
+        return null;
+      }
 
       // Validate parent exists if provided
       if (data.parent_id) {
@@ -174,7 +183,9 @@ class MenuService {
 
       // Reload menu to return the fresh state
       const updatedMenu = await menuRepository.findById(id);
-      if (!updatedMenu) return null;
+      if (!updatedMenu) {
+        return null;
+      }
 
       logger.info(`Menu updated: ${updatedMenu.name} (${updatedMenu.route})`);
       return updatedMenu;
@@ -206,7 +217,9 @@ class MenuService {
   async delete(id: number): Promise<boolean> {
     try {
       const menu = await menuRepository.findById(id);
-      if (!menu) return false;
+      if (!menu) {
+        return false;
+      }
 
       // Soft delete
       const result = await menuRepository.softDelete(id);
@@ -229,7 +242,9 @@ class MenuService {
     try {
       const children = await menuRepository.findChildren(id);
       if (children.length > 0) {
-        throw new Error('Cannot delete menu with children. Delete children first or reassign them.');
+        throw new Error(
+          'Cannot delete menu with children. Delete children first or reassign them.'
+        );
       }
 
       const result = await menuRepository.delete(id);
@@ -299,7 +314,6 @@ class MenuService {
       throw error;
     }
   }
-
 }
 
 export default new MenuService();

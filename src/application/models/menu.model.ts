@@ -28,10 +28,7 @@ export type MenuCreationAttributes = Optional<
  * Menu Model Class
  * Represents navigation menu items with hierarchical structure
  */
-export class Menu
-  extends Model<MenuAttributes, MenuCreationAttributes>
-  implements MenuAttributes
-{
+export class Menu extends Model<MenuAttributes, MenuCreationAttributes> implements MenuAttributes {
   public id!: number;
   public name!: string;
   public route!: string;
