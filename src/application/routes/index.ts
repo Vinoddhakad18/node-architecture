@@ -5,6 +5,7 @@ import countryMasterRoutes from './country-master.routes';
 import fileUploadRoutes from './file-upload.routes';
 import menuRoutes from './menu.routes';
 import metricsRoutes from './metrics.routes';
+import roleRoutes from './role.routes';
 
 import { config } from '@/config';
 
@@ -22,6 +23,7 @@ router.get('/', (_req: Request, res: Response) => {
         countries: '/countries',
         files: '/files',
         menus: '/menus',
+        roles: '/roles',
       },
     },
     'Welcome to MVC API'
@@ -47,6 +49,11 @@ router.use('/files', fileUploadRoutes);
  * Menu routes
  */
 router.use('/menus', menuRoutes);
+
+/**
+ * Role routes
+ */
+router.use('/roles', roleRoutes);
 
 /**
  * Metrics route (Prometheus endpoint)
