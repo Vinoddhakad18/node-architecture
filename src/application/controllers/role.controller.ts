@@ -24,10 +24,7 @@ class RoleController {
         return;
       }
 
-      const role = await roleService.create(
-        { name, description, status },
-        userId
-      );
+      const role = await roleService.create({ name, description, status }, userId);
 
       res.sendCreated(role, 'Role created successfully');
     } catch (error: unknown) {
@@ -170,4 +167,3 @@ class RoleController {
 }
 
 export default new RoleController();
-

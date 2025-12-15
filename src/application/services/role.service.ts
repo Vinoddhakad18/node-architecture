@@ -135,19 +135,17 @@ class RoleService {
         return null;
       }
 
-      const updatedRole = await roleRepository.withTransaction(
-        async (transaction: Transaction) => {
-          // Update within transaction
-          await role.update(
-            {
-              ...data,
-              updated_by: userId || role.updated_by,
-            },
-            { transaction }
-          );
-          return role;
-        }
-      );
+      const updatedRole = await roleRepository.withTransaction(async (transaction: Transaction) => {
+        // Update within transaction
+        await role.update(
+          {
+            ...data,
+            updated_by: userId || role.updated_by,
+          },
+          { transaction }
+        );
+        return role;
+      });
 
       if (!updatedRole) {
         return null;
@@ -212,4 +210,3 @@ class RoleService {
 }
 
 export default new RoleService();
-

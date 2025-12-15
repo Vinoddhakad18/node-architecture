@@ -66,13 +66,10 @@ export class RoleRepository extends BaseRepository<Role, RoleAttributes, RoleCre
    * Soft delete role (set status to inactive)
    */
   async softDelete(id: number, updatedBy?: number): Promise<boolean> {
-    const result = await this.update(
-      id,
-      {
-        status: false,
-        updated_by: updatedBy,
-      } as Partial<RoleAttributes>
-    );
+    const result = await this.update(id, {
+      status: false,
+      updated_by: updatedBy,
+    } as Partial<RoleAttributes>);
     return result !== null;
   }
 
@@ -80,13 +77,10 @@ export class RoleRepository extends BaseRepository<Role, RoleAttributes, RoleCre
    * Activate role
    */
   async activate(id: number, updatedBy?: number): Promise<boolean> {
-    const result = await this.update(
-      id,
-      {
-        status: true,
-        updated_by: updatedBy,
-      } as Partial<RoleAttributes>
-    );
+    const result = await this.update(id, {
+      status: true,
+      updated_by: updatedBy,
+    } as Partial<RoleAttributes>);
     return result !== null;
   }
 

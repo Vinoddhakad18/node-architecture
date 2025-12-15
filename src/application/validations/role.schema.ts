@@ -111,7 +111,7 @@ export const listRolesSchema = z.object({
       .transform((val) => val === 'true')
       .optional(),
     sortBy: z
-      .enum(['id','name', 'created_at', 'updated_at'], {
+      .enum(['id', 'name', 'created_at', 'updated_at'], {
         errorMap: () => ({ message: 'Sort by must be one of: name, created_at, updated_at' }),
       })
       .optional()
@@ -124,4 +124,3 @@ export const listRolesSchema = z.object({
       .default('ASC'),
   }),
 });
-

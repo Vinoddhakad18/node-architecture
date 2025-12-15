@@ -114,4 +114,3 @@ Role.init(
 );
 
 export default Role;
-
