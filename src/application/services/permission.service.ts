@@ -174,9 +174,6 @@ class PermissionService {
               };
             }
           );
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/25a74fed-1ea6-42fc-acc6-a7de668f6ad7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'permission.service.ts:168',message:'Permission records prepared',data:{recordCount:permissionRecords.length,records:permissionRecords},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-          // #endregion
 
           // Bulk upsert permissions
           logger.info(`Starting bulk upsert for role ${data.roleId}`, {
@@ -194,16 +191,10 @@ class PermissionService {
             })),
           });
 
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/25a74fed-1ea6-42fc-acc6-a7de668f6ad7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'permission.service.ts:186',message:'Before bulkUpsert call',data:{recordCount:permissionRecords.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C,D'})}).catch(()=>{});
-          // #endregion
           const upsertedRecords = await roleMenuPermissionRepository.bulkUpsert(
             permissionRecords,
             transaction
           );
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/25a74fed-1ea6-42fc-acc6-a7de668f6ad7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'permission.service.ts:190',message:'After bulkUpsert call',data:{upsertedCount:upsertedRecords.length,upsertedRecords:upsertedRecords.map(r=>({id:r.get('id'),role_id:r.get('role_id'),menu_id:r.get('menu_id')}))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C,D'})}).catch(()=>{});
-          // #endregion
 
           logger.info(
             `Bulk upsert completed for role ${data.roleId}. Upserted ${upsertedRecords.length} records`,
@@ -237,14 +228,8 @@ class PermissionService {
           }
 
           // Transaction will commit here automatically
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/25a74fed-1ea6-42fc-acc6-a7de668f6ad7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'permission.service.ts:221',message:'Transaction callback completed',data:{roleId:data.roleId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-          // #endregion
         }
       );
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/25a74fed-1ea6-42fc-acc6-a7de668f6ad7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'permission.service.ts:224',message:'Transaction committed',data:{roleId:data.roleId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
 
       // Now fetch the updated permissions after transaction has committed
       logger.info(`Fetching updated permissions for role ${data.roleId} after transaction commit`);
@@ -273,9 +258,6 @@ class PermissionService {
       
       return result;
     } catch (error) {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/25a74fed-1ea6-42fc-acc6-a7de668f6ad7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'permission.service.ts:251',message:'Service error caught',data:{errorMessage:error instanceof Error?error.message:String(error),errorStack:error instanceof Error?error.stack:undefined,roleId:data.roleId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C,D'})}).catch(()=>{});
-      // #endregion
       logger.error(`Error updating permissions for role ${data.roleId}:`, error);
       throw error;
     }
