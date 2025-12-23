@@ -125,15 +125,9 @@ class PermissionService {
     data: UpdatePermissionsRequestDTO,
     userId?: number
   ): Promise<RolePermissionsResponseDTO> {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/25a74fed-1ea6-42fc-acc6-a7de668f6ad7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'permission.service.ts:116',message:'Service entry',data:{roleId:data.roleId,permissionsCount:data.permissions.length,permissions:data.permissions},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-    // #endregion
     try {
       // Verify role exists
       const role = await roleRepository.findById(data.roleId);
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/25a74fed-1ea6-42fc-acc6-a7de668f6ad7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'permission.service.ts:122',message:'Role lookup result',data:{roleId:data.roleId,roleFound:!!role},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
       if (!role) {
         throw new Error(`Role with id ${data.roleId} not found`);
       }
@@ -153,14 +147,8 @@ class PermissionService {
       }
 
       // Process permissions within a transaction
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/25a74fed-1ea6-42fc-acc6-a7de668f6ad7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'permission.service.ts:141',message:'Starting transaction',data:{roleId:data.roleId,permissionsCount:data.permissions.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
       await roleMenuPermissionRepository.withTransaction(
         async (transaction: Transaction) => {
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/25a74fed-1ea6-42fc-acc6-a7de668f6ad7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'permission.service.ts:143',message:'Inside transaction callback',data:{hasTransaction:!!transaction},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-          // #endregion
           // Prepare permission records
           const permissionRecords: RoleMenuPermissionCreationAttributes[] = data.permissions.map(
             (perm) => {
