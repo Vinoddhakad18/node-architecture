@@ -32,7 +32,10 @@ class PermissionService {
       }
 
       // Get all active menus
-      const menus = await menuRepository.findAllActive();
+      const menus = await menuRepository.findAllActive({
+        raw: true,
+        nest: true,
+      });
 
       // Get all permissions for this role
       // Use useMaster: true to ensure we read from master (important after writes to avoid replica lag)
@@ -48,7 +51,6 @@ class PermissionService {
           },
         ],
       });
-      console.log('Role Permissions Fetched:', rolePermissions);
       // Create a map of menu_id -> permissions for quick lookup
       // Note: With raw: true, rolePermissions is an array of plain objects, not Sequelize models
       const permissionMap = new Map<number, any>();
@@ -56,8 +58,9 @@ class PermissionService {
         // Access properties directly since raw: true returns plain objects
         const menuId = rp.menu_id as number;
         permissionMap.set(menuId, rp);
+        
       });
-
+      //console.log('Permission Map:', menus);
       // Build response with all menus and their permissions
       const permissions: MenuPermissionDTO[] = menus.map((menu) => {
         const rolePermission = permissionMap.get(menu.id);
@@ -65,12 +68,12 @@ class PermissionService {
           menuId: menu.id,
           permissions: {
             // Access properties directly since raw: true returns plain objects
-            view: rolePermission?.can_view ?? false,
-            add: rolePermission?.can_add ?? false,
-            edit: rolePermission?.can_edit ?? false,
-            delete: rolePermission?.can_delete ?? false,
-            export: rolePermission?.can_export ?? false,
-            status: rolePermission?.can_status ?? false,
+            view: rolePermission?.can_view ?? 0,
+            add: rolePermission?.can_add ?? 0,
+            edit: rolePermission?.can_edit ?? 0,
+            delete: rolePermission?.can_delete ?? 0,
+            export: rolePermission?.can_export ?? 0,
+            status: rolePermission?.can_status ?? 0,
           },
         };
       });
@@ -92,12 +95,12 @@ class PermissionService {
    */
   private normalizePermissions(permissions: PermissionFlags): PermissionFlags {
     const normalized: PermissionFlags = {
-      view: permissions.view ?? false,
-      add: permissions.add ?? false,
-      edit: permissions.edit ?? false,
-      delete: permissions.delete ?? false,
-      export: permissions.export ?? false,
-      status: permissions.status ?? false,
+      view: permissions.view ?? 0,
+      add: permissions.add ?? 0,
+      edit: permissions.edit ?? 0,
+      delete: permissions.delete ?? 0,
+      export: permissions.export ?? 0,
+      status: permissions.status ?? 0,
     };
 
     // Rule: If view = false, disable all other permissions

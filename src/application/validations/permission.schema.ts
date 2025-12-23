@@ -16,6 +16,7 @@ export const getPermissionsSchema = z.object({
 
 /**
  * Permission item schema (reusable)
+ * Accepts both boolean and number (0/1) values, converts to boolean
  */
 const permissionItemSchema = z.object({
   menuId: z
@@ -24,12 +25,30 @@ const permissionItemSchema = z.object({
     })
     .int('Menu ID must be an integer')
     .positive('Menu ID must be positive'),
-  view: z.boolean().optional(),
-  add: z.boolean().optional(),
-  edit: z.boolean().optional(),
-  delete: z.boolean().optional(),
-  export: z.boolean().optional(),
-  status: z.boolean().optional(),
+  view: z
+    .union([z.boolean(), z.number().int().min(0).max(1)])
+    .transform((val) => Boolean(val))
+    .optional(),
+  add: z
+    .union([z.boolean(), z.number().int().min(0).max(1)])
+    .transform((val) => Boolean(val))
+    .optional(),
+  edit: z
+    .union([z.boolean(), z.number().int().min(0).max(1)])
+    .transform((val) => Boolean(val))
+    .optional(),
+  delete: z
+    .union([z.boolean(), z.number().int().min(0).max(1)])
+    .transform((val) => Boolean(val))
+    .optional(),
+  export: z
+    .union([z.boolean(), z.number().int().min(0).max(1)])
+    .transform((val) => Boolean(val))
+    .optional(),
+  status: z
+    .union([z.boolean(), z.number().int().min(0).max(1)])
+    .transform((val) => Boolean(val))
+    .optional(),
 });
 
 /**
