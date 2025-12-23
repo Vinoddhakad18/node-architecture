@@ -78,12 +78,12 @@ export class RoleMenuPermissionRepository extends BaseRepository<
     if (!record) {
       return null;
     }
-    
+
     await record.update(data as Partial<RoleMenuPermission>, options);
-    
+
     // Reload the record to get the latest values from database
     await record.reload();
-    
+
     return record;
   }
 
@@ -101,7 +101,7 @@ export class RoleMenuPermissionRepository extends BaseRepository<
     const record = await this.findByRoleAndMenu(roleId, menuId, {
       transaction,
     });
-    
+
     if (!record) {
       // Record not found, create a new one
       const createData: RoleMenuPermissionCreationAttributes = {
@@ -114,22 +114,22 @@ export class RoleMenuPermissionRepository extends BaseRepository<
         can_export: data.can_export ?? false,
         can_status: data.can_status ?? false,
       };
-      
+
       const newRecord = await this.create(createData, {
         transaction,
       });
-      
+
       return newRecord;
     }
-    
+
     // Record exists, update it
     await record.update(data as Partial<RoleMenuPermission>, {
       transaction,
     });
-    
+
     // Reload the record to get the latest values from database
     await record.reload({ transaction });
-    
+
     return record;
   }
 
@@ -196,11 +196,8 @@ export class RoleMenuPermissionRepository extends BaseRepository<
     ];
 
     try {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/25a74fed-1ea6-42fc-acc6-a7de668f6ad7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'role-menu-permission.repository.ts:198',message:'upsert entry',data:{role_id:data.role_id,menu_id:data.menu_id,can_view:data.can_view,can_add:data.can_add},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
       const { logger } = await import('@config/logger');
-      
+
       logger.info('Executing upsert SQL', {
         role_id: data.role_id,
         menu_id: data.menu_id,
@@ -209,17 +206,11 @@ export class RoleMenuPermissionRepository extends BaseRepository<
         replacements,
       });
 
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/25a74fed-1ea6-42fc-acc6-a7de668f6ad7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'role-menu-permission.repository.ts:209',message:'Before SQL execution',data:{sql:sql.replace(/\s+/g,' ').trim(),replacementsCount:replacements.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
       const [result, metadata] = await sequelize.query(sql, {
         replacements,
         type: QueryTypes.INSERT,
         transaction,
       });
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/25a74fed-1ea6-42fc-acc6-a7de668f6ad7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'role-menu-permission.repository.ts:214',message:'After SQL execution',data:{result,affectedRows:metadata?(metadata as any).affectedRows:'unknown'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
 
       logger.info('Upsert SQL executed successfully', {
         role_id: data.role_id,
@@ -241,7 +232,7 @@ export class RoleMenuPermissionRepository extends BaseRepository<
           role_id: data.role_id,
           menu_id: data.menu_id,
         });
-        
+
         const directRecord = await this.model.findOne({
           where: {
             role_id: data.role_id,
@@ -280,9 +271,6 @@ export class RoleMenuPermissionRepository extends BaseRepository<
 
       return record;
     } catch (error) {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/25a74fed-1ea6-42fc-acc6-a7de668f6ad7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'role-menu-permission.repository.ts:220',message:'upsert error caught',data:{errorMessage:error instanceof Error?error.message:String(error),errorStack:error instanceof Error?error.stack:undefined,role_id:data.role_id,menu_id:data.menu_id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
       // Log the error for debugging
       const { logger } = await import('@config/logger');
       logger.error('Error in upsert permission:', {
@@ -307,24 +295,12 @@ export class RoleMenuPermissionRepository extends BaseRepository<
     data: RoleMenuPermissionCreationAttributes[],
     transaction?: Transaction
   ): Promise<RoleMenuPermission[]> {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/25a74fed-1ea6-42fc-acc6-a7de668f6ad7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'role-menu-permission.repository.ts:226',message:'bulkUpsert entry',data:{itemCount:data.length,items:data.map(i=>({role_id:i.role_id,menu_id:i.menu_id}))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-    // #endregion
     const results: RoleMenuPermission[] = [];
 
     for (const item of data) {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/25a74fed-1ea6-42fc-acc6-a7de668f6ad7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'role-menu-permission.repository.ts:232',message:'Before upsert item',data:{role_id:item.role_id,menu_id:item.menu_id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
       const record = await this.upsert(item, transaction);
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/25a74fed-1ea6-42fc-acc6-a7de668f6ad7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'role-menu-permission.repository.ts:234',message:'After upsert item',data:{recordId:record.id,role_id:record.role_id,menu_id:record.menu_id,can_view:record.can_view},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
       results.push(record);
     }
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/25a74fed-1ea6-42fc-acc6-a7de668f6ad7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'role-menu-permission.repository.ts:237',message:'bulkUpsert completed',data:{resultCount:results.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-    // #endregion
 
     return results;
   }
@@ -362,4 +338,3 @@ export class RoleMenuPermissionRepository extends BaseRepository<
 // Export singleton instance
 export const roleMenuPermissionRepository = new RoleMenuPermissionRepository();
 export default roleMenuPermissionRepository;
-
