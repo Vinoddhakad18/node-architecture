@@ -2,7 +2,7 @@ import Permission, {
   PermissionAttributes,
   PermissionCreationAttributes,
 } from '@models/permission.model';
-import { FindOptions, WhereOptions } from 'sequelize';
+import { Op, WhereOptions } from 'sequelize';
 
 import { BaseRepository } from './base.repository';
 
@@ -44,6 +44,9 @@ export class PermissionRepository extends BaseRepository<
    */
   async isKeyExists(key: string, excludeId?: number): Promise<boolean> {
     const where: WhereOptions<PermissionAttributes> = { key };
+    if (excludeId) {
+      (where as Record<string, unknown>).id = { [Op.ne]: excludeId };
+    }
     return this.exists({ where });
   }
 }
