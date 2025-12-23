@@ -5,6 +5,7 @@ import countryMasterRoutes from './country-master.routes';
 import fileUploadRoutes from './file-upload.routes';
 import menuRoutes from './menu.routes';
 import metricsRoutes from './metrics.routes';
+import permissionRoutes from './permission.routes';
 import roleRoutes from './role.routes';
 
 import { config } from '@/config';
@@ -18,13 +19,14 @@ router.get('/', (_req: Request, res: Response) => {
   res.sendSuccess(
     {
       version: '1.0.0',
-      endpoints: {
-        auth: '/auth',
-        countries: '/countries',
-        files: '/files',
-        menus: '/menus',
-        roles: '/roles',
-      },
+        endpoints: {
+          auth: '/auth',
+          countries: '/countries',
+          files: '/files',
+          menus: '/menus',
+          permissions: '/permissions',
+          roles: '/roles',
+        },
     },
     'Welcome to MVC API'
   );
@@ -49,6 +51,11 @@ router.use('/files', fileUploadRoutes);
  * Menu routes
  */
 router.use('/menus', menuRoutes);
+
+/**
+ * Permission routes
+ */
+router.use('/permissions', permissionRoutes);
 
 /**
  * Role routes
