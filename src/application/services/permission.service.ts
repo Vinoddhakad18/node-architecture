@@ -58,7 +58,6 @@ class PermissionService {
         // Access properties directly since raw: true returns plain objects
         const menuId = rp.menu_id as number;
         permissionMap.set(menuId, rp);
-        
       });
       //console.log('Permission Map:', menus);
       // Build response with all menus and their permissions
@@ -147,105 +146,105 @@ class PermissionService {
       }
 
       // Process permissions within a transaction
-      await roleMenuPermissionRepository.withTransaction(
-        async (transaction: Transaction) => {
-          // Prepare permission records
-          const permissionRecords: RoleMenuPermissionCreationAttributes[] = data.permissions.map(
-            (perm) => {
-              // Normalize permissions (apply business rules)
-              const normalized = this.normalizePermissions({
-                view: perm.view ?? false,
-                add: perm.add ?? false,
-                edit: perm.edit ?? false,
-                delete: perm.delete ?? false,
-                export: perm.export ?? false,
-                status: perm.status ?? false,
-              });
+      await roleMenuPermissionRepository.withTransaction(async (transaction: Transaction) => {
+        // Prepare permission records
+        const permissionRecords: RoleMenuPermissionCreationAttributes[] = data.permissions.map(
+          (perm) => {
+            // Normalize permissions (apply business rules)
+            const normalized = this.normalizePermissions({
+              view: perm.view ?? false,
+              add: perm.add ?? false,
+              edit: perm.edit ?? false,
+              delete: perm.delete ?? false,
+              export: perm.export ?? false,
+              status: perm.status ?? false,
+            });
 
-              return {
-                role_id: data.roleId,
-                menu_id: perm.menuId,
-                can_view: normalized.view,
-                can_add: normalized.add,
-                can_edit: normalized.edit,
-                can_delete: normalized.delete,
-                can_export: normalized.export,
-                can_status: normalized.status,
-              };
-            }
-          );
-
-          // Bulk upsert permissions
-          logger.info(`Starting bulk upsert for role ${data.roleId}`, {
-            roleId: data.roleId,
-            recordCount: permissionRecords.length,
-            records: permissionRecords.map(r => ({
-              role_id: r.role_id,
-              menu_id: r.menu_id,
-              can_view: r.can_view,
-              can_add: r.can_add,
-              can_edit: r.can_edit,
-              can_delete: r.can_delete,
-              can_export: r.can_export,
-              can_status: r.can_status,
-            })),
-          });
-
-          const upsertedRecords = await roleMenuPermissionRepository.bulkUpsert(
-            permissionRecords,
-            transaction
-          );
-
-          logger.info(
-            `Bulk upsert completed for role ${data.roleId}. Upserted ${upsertedRecords.length} records`,
-            {
-              roleId: data.roleId,
-              upsertedCount: upsertedRecords.length,
-              userId,
-            }
-          );
-
-          // Verify updates by checking database directly within transaction
-          for (const record of permissionRecords) {
-            const verify = await roleMenuPermissionRepository.findByRoleAndMenu(
-              record.role_id,
-              record.menu_id,
-              { transaction }
-            );
-            if (verify) {
-              // verify is a Sequelize model instance (not raw), so we can use direct property access
-              logger.info(`Verified permission for role ${record.role_id}, menu ${record.menu_id}`, {
-                can_view: verify.can_view,
-                can_add: verify.can_add,
-                can_edit: verify.can_edit,
-                can_delete: verify.can_delete,
-                can_export: verify.can_export,
-                can_status: verify.can_status,
-              });
-            } else {
-              logger.warn(`Failed to verify permission for role ${record.role_id}, menu ${record.menu_id}`);
-            }
+            return {
+              role_id: data.roleId,
+              menu_id: perm.menuId,
+              can_view: normalized.view,
+              can_add: normalized.add,
+              can_edit: normalized.edit,
+              can_delete: normalized.delete,
+              can_export: normalized.export,
+              can_status: normalized.status,
+            };
           }
+        );
 
-          // Transaction will commit here automatically
+        // Bulk upsert permissions
+        logger.info(`Starting bulk upsert for role ${data.roleId}`, {
+          roleId: data.roleId,
+          recordCount: permissionRecords.length,
+          records: permissionRecords.map((r) => ({
+            role_id: r.role_id,
+            menu_id: r.menu_id,
+            can_view: r.can_view,
+            can_add: r.can_add,
+            can_edit: r.can_edit,
+            can_delete: r.can_delete,
+            can_export: r.can_export,
+            can_status: r.can_status,
+          })),
+        });
+
+        const upsertedRecords = await roleMenuPermissionRepository.bulkUpsert(
+          permissionRecords,
+          transaction
+        );
+
+        logger.info(
+          `Bulk upsert completed for role ${data.roleId}. Upserted ${upsertedRecords.length} records`,
+          {
+            roleId: data.roleId,
+            upsertedCount: upsertedRecords.length,
+            userId,
+          }
+        );
+
+        // Verify updates by checking database directly within transaction
+        for (const record of permissionRecords) {
+          const verify = await roleMenuPermissionRepository.findByRoleAndMenu(
+            record.role_id,
+            record.menu_id,
+            { transaction }
+          );
+          if (verify) {
+            // verify is a Sequelize model instance (not raw), so we can use direct property access
+            logger.info(`Verified permission for role ${record.role_id}, menu ${record.menu_id}`, {
+              can_view: verify.can_view,
+              can_add: verify.can_add,
+              can_edit: verify.can_edit,
+              can_delete: verify.can_delete,
+              can_export: verify.can_export,
+              can_status: verify.can_status,
+            });
+          } else {
+            logger.warn(
+              `Failed to verify permission for role ${record.role_id}, menu ${record.menu_id}`
+            );
+          }
         }
-      );
+
+        // Transaction will commit here automatically
+      });
 
       // Now fetch the updated permissions after transaction has committed
       logger.info(`Fetching updated permissions for role ${data.roleId} after transaction commit`);
-      
+
       // Add a small delay to ensure transaction is fully committed (only if needed)
       // In most cases this isn't needed, but helps with replication lag
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       // Fetch with useMaster to ensure we get latest data
       const result = await this.getRolePermissions(data.roleId);
-      
+
       // Log the result for debugging
       logger.info(`Retrieved permissions after update for role ${data.roleId}`, {
         roleId: data.roleId,
         permissionCount: result.permissions.length,
-        permissions: result.permissions.map(p => ({
+        permissions: result.permissions.map((p) => ({
           menuId: p.menuId,
           view: p.permissions.view,
           add: p.permissions.add,
@@ -255,7 +254,7 @@ class PermissionService {
           status: p.permissions.status,
         })),
       });
-      
+
       return result;
     } catch (error) {
       logger.error(`Error updating permissions for role ${data.roleId}:`, error);
@@ -363,4 +362,3 @@ class PermissionService {
 }
 
 export default new PermissionService();
-

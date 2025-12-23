@@ -26,7 +26,15 @@ export interface RoleMenuPermissionAttributes {
  */
 export type RoleMenuPermissionCreationAttributes = Optional<
   RoleMenuPermissionAttributes,
-  'id' | 'can_view' | 'can_add' | 'can_edit' | 'can_delete' | 'can_export' | 'can_status' | 'created_at' | 'updated_at'
+  | 'id'
+  | 'can_view'
+  | 'can_add'
+  | 'can_edit'
+  | 'can_delete'
+  | 'can_export'
+  | 'can_status'
+  | 'created_at'
+  | 'updated_at'
 >;
 
 /**
@@ -35,7 +43,8 @@ export type RoleMenuPermissionCreationAttributes = Optional<
  */
 export class RoleMenuPermission
   extends Model<RoleMenuPermissionAttributes, RoleMenuPermissionCreationAttributes>
-  implements RoleMenuPermissionAttributes {
+  implements RoleMenuPermissionAttributes
+{
   public id!: number;
   public role_id!: number;
   public menu_id!: number;
@@ -139,4 +148,3 @@ RoleMenuPermission.belongsTo(Role, { foreignKey: 'role_id', as: 'role' });
 RoleMenuPermission.belongsTo(Menu, { foreignKey: 'menu_id', as: 'menu' });
 
 export default RoleMenuPermission;
-

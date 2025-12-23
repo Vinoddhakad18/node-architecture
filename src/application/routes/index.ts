@@ -19,14 +19,14 @@ router.get('/', (_req: Request, res: Response) => {
   res.sendSuccess(
     {
       version: '1.0.0',
-        endpoints: {
-          auth: '/auth',
-          countries: '/countries',
-          files: '/files',
-          menus: '/menus',
-          permissions: '/permissions',
-          roles: '/roles',
-        },
+      endpoints: {
+        auth: '/auth',
+        countries: '/countries',
+        files: '/files',
+        menus: '/menus',
+        permissions: '/permissions',
+        roles: '/roles',
+      },
     },
     'Welcome to MVC API'
   );

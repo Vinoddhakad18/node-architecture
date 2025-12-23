@@ -33,7 +33,7 @@ class PermissionController {
     } catch (error: unknown) {
       logger.error('Error in getRolePermissions controller:', error);
       const errorMessage = getErrorMessage(error);
-      
+
       if (errorMessage.includes('not found')) {
         res.sendNotFound(errorMessage);
         return;
@@ -61,7 +61,9 @@ class PermissionController {
         // Get roleId from query params
         const roleIdParam = req.query.roleId;
         if (!roleIdParam || typeof roleIdParam !== 'string') {
-          res.sendBadRequest('Role ID is required in query params when sending permissions array directly');
+          res.sendBadRequest(
+            'Role ID is required in query params when sending permissions array directly'
+          );
           return;
         }
         roleId = parseInt(roleIdParam, 10);
@@ -109,7 +111,7 @@ class PermissionController {
     } catch (error: unknown) {
       logger.error('Error in updateRolePermissions controller:', error);
       const errorMessage = getErrorMessage(error);
-      
+
       if (errorMessage.includes('not found')) {
         res.sendNotFound(errorMessage);
         return;
@@ -126,4 +128,3 @@ class PermissionController {
 }
 
 export default new PermissionController();
-

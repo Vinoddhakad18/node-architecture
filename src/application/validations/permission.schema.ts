@@ -104,4 +104,4 @@ export const updatePermissionsSchema = z
         });
       }
     }
-  }); 
+  });

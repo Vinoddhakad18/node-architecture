@@ -51,4 +51,3 @@ export class PermissionRepository extends BaseRepository<
 // Export singleton instance
 export const permissionRepository = new PermissionRepository();
 export default permissionRepository;
-

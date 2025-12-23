@@ -15,11 +15,7 @@ export {
 } from './country-master.model';
 export { Menu, MenuAttributes, MenuCreationAttributes } from './menu.model';
 export { Role, RoleAttributes, RoleCreationAttributes } from './role.model';
-export {
-  Permission,
-  PermissionAttributes,
-  PermissionCreationAttributes,
-} from './permission.model';
+export { Permission, PermissionAttributes, PermissionCreationAttributes } from './permission.model';
 export {
   RoleMenuPermission,
   RoleMenuPermissionAttributes,

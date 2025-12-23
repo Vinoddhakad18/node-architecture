@@ -25,8 +25,10 @@ export type PermissionCreationAttributes = Optional<
  * Permission Model Class
  * Represents individual permission actions
  */
-export class Permission extends Model<PermissionAttributes, PermissionCreationAttributes>
-  implements PermissionAttributes {
+export class Permission
+  extends Model<PermissionAttributes, PermissionCreationAttributes>
+  implements PermissionAttributes
+{
   public id!: number;
   public key!: string;
   public label!: string;
@@ -97,4 +99,3 @@ Permission.init(
 );
 
 export default Permission;
-

@@ -129,7 +129,7 @@ export class RoleMenuPermissionRepository extends BaseRepository<
 
     try {
       const { logger } = await import('@config/logger');
-      
+
       logger.info('Executing upsert SQL', {
         role_id: data.role_id,
         menu_id: data.menu_id,
@@ -164,7 +164,7 @@ export class RoleMenuPermissionRepository extends BaseRepository<
           role_id: data.role_id,
           menu_id: data.menu_id,
         });
-        
+
         const directRecord = await this.model.findOne({
           where: {
             role_id: data.role_id,
@@ -270,4 +270,3 @@ export class RoleMenuPermissionRepository extends BaseRepository<
 // Export singleton instance
 export const roleMenuPermissionRepository = new RoleMenuPermissionRepository();
 export default roleMenuPermissionRepository;
-

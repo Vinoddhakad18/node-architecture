@@ -62,4 +62,3 @@ export interface MenuPermissionUpdateItem {
   export: boolean;
   status: boolean;
 }
-
