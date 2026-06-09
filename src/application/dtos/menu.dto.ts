@@ -9,6 +9,7 @@ export class MenuResponseDTO {
   name: string;
   route: string;
   parentId: number | null;
+  icon: string | null;
   sortOrder: number;
   isActive: boolean;
   createdAt: Date;
@@ -21,6 +22,7 @@ export class MenuResponseDTO {
     this.name = menu.name;
     this.route = menu.route;
     this.parentId = menu.parent_id;
+    this.icon = menu.icon;
     this.sortOrder = menu.sort_order;
     this.isActive = menu.is_active;
     this.createdAt = menu.created_at;
@@ -86,6 +88,7 @@ export class MenuTreeDTO {
   id: number;
   name: string;
   route: string;
+  icon: string | null;
   sortOrder: number;
   children: MenuTreeDTO[];
 
@@ -93,6 +96,7 @@ export class MenuTreeDTO {
     this.id = menu.id;
     this.name = menu.name;
     this.route = menu.route;
+    this.icon = menu.icon;
     this.sortOrder = menu.sort_order;
     this.children = menu.children ? MenuTreeDTO.fromModels(menu.children) : [];
   }
@@ -113,6 +117,7 @@ export interface CreateMenuRequestDTO {
   name: string;
   route: string;
   parent_id?: number | null;
+  icon?: string | null;
   sort_order?: number;
   is_active?: boolean;
 }
@@ -124,6 +129,7 @@ export interface UpdateMenuRequestDTO {
   name?: string;
   route?: string;
   parent_id?: number | null;
+  icon?: string | null;
   sort_order?: number;
   is_active?: boolean;
 }

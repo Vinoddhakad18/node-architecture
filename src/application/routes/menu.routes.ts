@@ -290,6 +290,11 @@ router.get('/:id', authenticate, validateRequest(getMenuByIdSchema), menuControl
  *                 type: string
  *                 description: Menu route/path
  *                 example: /dashboard
+ *               icon:
+ *                 type: string
+ *                 nullable: true
+ *                 description: Menu icon
+ *                 example: fa fa-dashboard
  *               parent_id:
  *                 type: integer
  *                 nullable: true
@@ -423,6 +428,10 @@ router.put(
  *               route:
  *                 type: string
  *                 example: /dashboard
+ *               icon:
+ *                 type: string
+ *                 nullable: true
+ *                 example: fa fa-dashboard
  *               parent_id:
  *                 type: integer
  *                 nullable: true

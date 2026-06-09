@@ -39,15 +39,20 @@ class MenuService {
   async create(data: MenuCreationAttributes): Promise<Menu> {
     try {
       // Validate parent exists if provided
-      if (data.parent_id) {
+      if (data.parent_id !== undefined && data.parent_id !== null) {
         const parent = await menuRepository.findById(data.parent_id);
         if (!parent) {
           throw new Error(`Parent menu with id ${data.parent_id} not found`);
         }
       }
 
+      // Remove undefined keys to avoid passing explicit `undefined` to Sequelize
+      const createData = Object.fromEntries(
+        Object.entries(data).filter(([, v]) => v !== undefined)
+      ) as MenuCreationAttributes;
+
       // Create menu
-      const menu = await menuRepository.create(data);
+      const menu = await menuRepository.create(createData);
 
       logger.info(`Menu created: ${menu.name} (${menu.route})`);
       return menu;
@@ -162,7 +167,7 @@ class MenuService {
       }
 
       // Validate parent exists if provided
-      if (data.parent_id) {
+      if (data.parent_id !== undefined && data.parent_id !== null) {
         if (data.parent_id === id) {
           throw new Error('Menu cannot be its own parent');
         }
@@ -178,8 +183,13 @@ class MenuService {
         }
       }
 
+      // Remove undefined keys to avoid passing explicit `undefined` to Sequelize
+      const updateData = Object.fromEntries(
+        Object.entries(data).filter(([, v]) => v !== undefined)
+      ) as Partial<MenuCreationAttributes>;
+
       // Perform update
-      await menu.update(data);
+      await menu.update(updateData as any);
 
       // Reload menu to return the fresh state
       const updatedMenu = await menuRepository.findById(id);

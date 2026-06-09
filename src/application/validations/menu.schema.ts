@@ -25,6 +25,12 @@ export const createMenuSchema = z.object({
       .positive('Parent ID must be a positive number')
       .optional()
       .nullable(),
+    icon: z
+      .string()
+      .max(255, 'Icon must not exceed 255 characters')
+      .trim()
+      .optional()
+      .nullable(),
     sort_order: z
       .number()
       .int('Sort order must be an integer')
@@ -66,6 +72,12 @@ export const updateMenuSchema = z.object({
       .number()
       .int('Parent ID must be an integer')
       .positive('Parent ID must be a positive number')
+      .optional()
+      .nullable(),
+    icon: z
+      .string()
+      .max(255, 'Icon must not exceed 255 characters')
+      .trim()
       .optional()
       .nullable(),
     sort_order: z

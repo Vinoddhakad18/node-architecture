@@ -9,6 +9,7 @@ export interface MenuAttributes {
   name: string;
   route: string;
   parent_id: number | null;
+  icon: string | null;
   sort_order: number;
   is_active: boolean;
   created_at: Date;
@@ -21,7 +22,7 @@ export interface MenuAttributes {
  */
 export type MenuCreationAttributes = Optional<
   MenuAttributes,
-  'id' | 'parent_id' | 'sort_order' | 'is_active' | 'created_at' | 'updated_at'
+  'id' | 'parent_id' | 'icon' | 'sort_order' | 'is_active' | 'created_at' | 'updated_at'
 >;
 
 /**
@@ -29,18 +30,19 @@ export type MenuCreationAttributes = Optional<
  * Represents navigation menu items with hierarchical structure
  */
 export class Menu extends Model<MenuAttributes, MenuCreationAttributes> implements MenuAttributes {
-  public id!: number;
-  public name!: string;
-  public route!: string;
-  public parent_id!: number | null;
-  public sort_order!: number;
-  public is_active!: boolean;
-  public readonly created_at!: Date;
-  public readonly updated_at!: Date;
+  declare  id: number;
+  declare  name: string;
+  declare  route: string;
+  declare  parent_id: number | null;
+  declare  icon: string | null;
+  declare  sort_order: number;
+  declare  is_active: boolean;
+  declare  created_at: Date;
+  declare  updated_at: Date;
 
   // Associations
-  public parent?: Menu;
-  public children?: Menu[];
+  declare parent?: Menu;
+  declare children?: Menu[];
 
   /**
    * Check if menu is active
@@ -83,6 +85,11 @@ Menu.init(
         model: 'menus',
         key: 'id',
       },
+    },
+    icon: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      defaultValue: null,
     },
     sort_order: {
       type: DataTypes.INTEGER,

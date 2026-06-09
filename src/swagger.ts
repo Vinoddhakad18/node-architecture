@@ -211,6 +211,11 @@ const swaggerOptions: swaggerJsdoc.Options = {
               type: 'string',
               example: '/dashboard',
             },
+            icon: {
+              type: 'string',
+              nullable: true,
+              example: 'fa fa-dashboard',
+            },
             parent_id: {
               type: 'integer',
               nullable: true,
@@ -248,6 +253,11 @@ const swaggerOptions: swaggerJsdoc.Options = {
             route: {
               type: 'string',
               example: '/dashboard',
+            },
+            icon: {
+              type: 'string',
+              nullable: true,
+              example: 'fa fa-dashboard',
             },
             parent_id: {
               type: 'integer',

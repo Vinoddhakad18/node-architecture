@@ -14,7 +14,7 @@ class MenuController {
    */
   async create(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const { name, route, parent_id, sort_order, is_active } = req.body;
+      const { name, route, parent_id, icon, sort_order, is_active } = req.body;
 
       // Check if route already exists
       const routeExists = await menuService.isRouteExists(route);
@@ -27,6 +27,7 @@ class MenuController {
         name,
         route,
         parent_id: parent_id || null,
+        icon: icon || null,
         sort_order: sort_order || 0,
         is_active: is_active !== undefined ? is_active : true,
       });
@@ -166,8 +167,7 @@ class MenuController {
   async update(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { name, route, parent_id, sort_order, is_active } = req.body;
-
+      const { name, route, parent_id, icon, sort_order, is_active } = req.body;
       // Check if route already exists (excluding current record)
       if (route) {
         const routeExists = await menuService.isRouteExists(route, Number(id));
@@ -181,6 +181,7 @@ class MenuController {
         name,
         route,
         parent_id,
+        icon,
         sort_order,
         is_active,
       });
