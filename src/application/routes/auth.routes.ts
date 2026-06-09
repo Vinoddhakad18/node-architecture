@@ -42,6 +42,16 @@ const router = Router();
  *           enum: [user, admin]
  *           description: User role
  *           example: user
+ *         branchId:
+ *           type: integer
+ *           nullable: true
+ *           description: Branch ID assigned to the user
+ *           example: 1
+ *         branchName:
+ *           type: string
+ *           nullable: true
+ *           description: Branch name assigned to the user
+ *           example: Downtown Branch
  *         isActive:
  *           type: boolean
  *           description: Whether the user account is active

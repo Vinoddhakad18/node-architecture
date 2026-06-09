@@ -1,6 +1,7 @@
 import { sequelize } from '@config/database';
 import bcrypt from 'bcryptjs';
 import { DataTypes, Model, Optional } from 'sequelize';
+import BranchMaster from './branch-master.model';
 
 /**
  * UserMaster Model Attributes Interface
@@ -12,6 +13,7 @@ export interface UserMasterAttributes {
   mobile: string | null;
   password: string;
   role: 'super_admin' | 'admin' | 'manager' | 'user';
+  branch_id: number | null;
   status: 'active' | 'inactive' | 'deleted';
   last_login: Date | null;
   created_by: number | null;
@@ -29,6 +31,7 @@ export type UserMasterCreationAttributes = Optional<
   | 'id'
   | 'mobile'
   | 'role'
+  | 'branch_id'
   | 'status'
   | 'last_login'
   | 'created_by'
@@ -51,12 +54,15 @@ export class UserMaster
   public mobile!: string | null;
   public password!: string;
   public role!: 'super_admin' | 'admin' | 'manager' | 'user';
+  public branch_id!: number | null;
   public status!: 'active' | 'inactive' | 'deleted';
   public last_login!: Date | null;
   public created_by!: number | null;
   public updated_by!: number | null;
   public readonly created_at!: Date;
   public readonly updated_at!: Date;
+
+  public branch?: BranchMaster | null;
 
   /**
    * Check if user is active
@@ -123,6 +129,11 @@ UserMaster.init(
       allowNull: false,
       defaultValue: 'user',
     },
+    branch_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      comment: 'Branch ID for user assignment',
+    },
     status: {
       type: DataTypes.ENUM('active', 'inactive', 'deleted'),
       allowNull: false,
@@ -177,5 +188,7 @@ UserMaster.init(
     },
   }
 );
+
+UserMaster.belongsTo(BranchMaster, { foreignKey: 'branch_id', as: 'branch' });
 
 export default UserMaster;

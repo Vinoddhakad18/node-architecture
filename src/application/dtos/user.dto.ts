@@ -11,6 +11,8 @@ export class UserResponseDTO {
   email: string;
   mobile: string | null;
   role: UserRole;
+  branchId: number | null;
+  branchName: string | null;
   status: UserStatus;
   lastLogin: Date | null;
   createdAt: Date;
@@ -22,6 +24,8 @@ export class UserResponseDTO {
     this.email = user.email;
     this.mobile = user.mobile;
     this.role = user.role as UserRole;
+    this.branchId = user.branch_id ?? null;
+    this.branchName = (user as any).branch?.branch_name ?? null;
     this.status = user.status as UserStatus;
     this.lastLogin = user.last_login;
     this.createdAt = user.created_at;
@@ -52,16 +56,27 @@ export class UserSummaryDTO {
   name: string;
   email: string;
   role: UserRole;
+  branchId: number | null;
+  branchName: string | null;
 
   constructor(user: Omit<UserMasterAttributes, 'password'>) {
     this.id = user.id;
     this.name = user.name;
     this.email = user.email;
     this.role = user.role as UserRole;
+    this.branchId = user.branch_id ?? null;
+    this.branchName = (user as any).branch?.branch_name ?? null;
   }
 
   static fromModel(user: Omit<UserMasterAttributes, 'password'>): UserSummaryDTO {
     return new UserSummaryDTO(user);
+  }
+
+  /**
+   * Create array of DTOs from user models
+   */
+  static fromModels(users: Omit<UserMasterAttributes, 'password'>[]): UserSummaryDTO[] {
+    return users.map((user) => UserSummaryDTO.fromModel(user));
   }
 }
 
@@ -74,6 +89,7 @@ export interface CreateUserRequestDTO {
   password: string;
   mobile?: string;
   role?: UserRole;
+  branchId?: number;
 }
 
 /**
@@ -84,5 +100,6 @@ export interface UpdateUserRequestDTO {
   email?: string;
   mobile?: string;
   role?: UserRole;
+  branchId?: number;
   status?: UserStatus;
 }

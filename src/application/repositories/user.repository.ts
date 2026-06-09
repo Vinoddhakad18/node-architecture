@@ -3,6 +3,7 @@ import UserMaster, {
   UserMasterAttributes,
   UserMasterCreationAttributes,
 } from '@models/user-master.model';
+import BranchMaster from '@models/branch-master.model';
 import { Op, FindOptions, WhereOptions } from 'sequelize';
 
 import { BaseRepository } from './base.repository';
@@ -49,6 +50,15 @@ export class UserRepository extends BaseRepository<
   }
 
   /**
+   * Find user by ID with branch details
+   */
+  async findById(id: number): Promise<UserMaster | null> {
+    return this.model.findByPk(id, {
+      include: [{ model: BranchMaster, as: 'branch' }],
+    });
+  }
+
+  /**
    * Update user password
    */
   async updatePassword(userId: number, hashedPassword: string): Promise<boolean> {
@@ -71,6 +81,7 @@ export class UserRepository extends BaseRepository<
   async findAllActive(options?: FindOptions): Promise<UserMaster[]> {
     return this.findAll({
       ...options,
+      include: [{ model: BranchMaster, as: 'branch' }],
       where: {
         ...(options?.where as WhereOptions<UserMasterAttributes>),
         status: UserStatus.ACTIVE,
@@ -163,6 +174,39 @@ export class UserRepository extends BaseRepository<
         ...(options?.where as WhereOptions<UserMasterAttributes>),
         [Op.or]: [{ name: { [Op.like]: `%${query}%` } }, { email: { [Op.like]: `%${query}%` } }],
       } as WhereOptions<UserMasterAttributes>,
+    });
+  }
+
+  /**
+   * Find with pagination, search, status filter, and sorting
+   */
+  async findWithFilters(
+    page = 1,
+    limit = 10,
+    search?: string,
+    status?: string,
+    sortBy = 'name',
+    sortOrder: 'ASC' | 'DESC' = 'ASC'
+  ): Promise<{ rows: UserMaster[]; count: number }> {
+    const offset = (page - 1) * limit;
+    const where: WhereOptions<UserMasterAttributes> = {};
+
+    if (search) {
+      Object.assign(where, {
+        [Op.or]: [{ name: { [Op.like]: `%${search}%` } }, { email: { [Op.like]: `%${search}%` } }],
+      });
+    }
+
+    if (status) {
+      Object.assign(where, { status });
+    }
+
+    return this.findAndCountAll({
+      where,
+      include: [{ model: BranchMaster, as: 'branch' }],
+      limit,
+      offset,
+      order: [[sortBy, sortOrder]],
     });
   }
 }

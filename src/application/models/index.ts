@@ -21,3 +21,8 @@ export {
   RoleMenuPermissionAttributes,
   RoleMenuPermissionCreationAttributes,
 } from './role-menu-permission.model';
+export {
+  BranchMaster,
+  BranchMasterAttributes,
+  BranchMasterCreationAttributes,
+} from './branch-master.model';

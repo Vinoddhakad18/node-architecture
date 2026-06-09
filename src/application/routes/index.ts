@@ -1,6 +1,8 @@
 import { Router, Request, Response } from 'express';
 
 import authRoutes from './auth.routes';
+import branchMasterRoutes from './branch-master.routes';
+import userRoutes from './user.routes';
 import countryMasterRoutes from './country-master.routes';
 import fileUploadRoutes from './file-upload.routes';
 import menuRoutes from './menu.routes';
@@ -22,6 +24,8 @@ router.get('/', (_req: Request, res: Response) => {
       endpoints: {
         auth: '/auth',
         countries: '/countries',
+        branches: '/branches',
+        users: '/users',
         files: '/files',
         menus: '/menus',
         permissions: '/permissions',
@@ -41,6 +45,15 @@ router.use('/auth', authRoutes);
  * Country Master routes
  */
 router.use('/countries', countryMasterRoutes);
+
+/**
+ * Branch Master routes
+ */
+router.use('/branches', branchMasterRoutes);
+/**
+ * User routes
+ */
+router.use('/users', userRoutes);
 
 /**
  * File Upload routes
