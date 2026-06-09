@@ -4,6 +4,7 @@ import UserMaster, {
   UserMasterCreationAttributes,
 } from '@models/user-master.model';
 import BranchMaster from '@models/branch-master.model';
+import Role from '@models/role.model';
 import { Op, FindOptions, WhereOptions } from 'sequelize';
 
 import { BaseRepository } from './base.repository';
@@ -37,6 +38,7 @@ export class UserRepository extends BaseRepository<
     return this.model.findOne({
       where: { email: email.toLowerCase() },
       attributes: { include: ['password'] },
+      include: [{ model: Role, as: 'role' }],
     });
   }
 
@@ -50,11 +52,14 @@ export class UserRepository extends BaseRepository<
   }
 
   /**
-   * Find user by ID with branch details
+   * Find user by ID with role and branch details
    */
   async findById(id: number): Promise<UserMaster | null> {
     return this.model.findByPk(id, {
-      include: [{ model: BranchMaster, as: 'branch' }],
+      include: [
+        { model: BranchMaster, as: 'branch' },
+        { model: Role, as: 'role' },
+      ],
     });
   }
 
@@ -81,7 +86,10 @@ export class UserRepository extends BaseRepository<
   async findAllActive(options?: FindOptions): Promise<UserMaster[]> {
     return this.findAll({
       ...options,
-      include: [{ model: BranchMaster, as: 'branch' }],
+      include: [
+        { model: BranchMaster, as: 'branch' },
+        { model: Role, as: 'role' },
+      ],
       where: {
         ...(options?.where as WhereOptions<UserMasterAttributes>),
         status: UserStatus.ACTIVE,
@@ -90,14 +98,15 @@ export class UserRepository extends BaseRepository<
   }
 
   /**
-   * Find users by role
+   * Find users by role id
    */
-  async findByRole(role: string, options?: FindOptions): Promise<UserMaster[]> {
+  async findByRole(roleId: number, options?: FindOptions): Promise<UserMaster[]> {
     return this.findAll({
       ...options,
+      include: [{ model: Role, as: 'role' }],
       where: {
         ...(options?.where as WhereOptions<UserMasterAttributes>),
-        role,
+        role_id: roleId,
       } as WhereOptions<UserMasterAttributes>,
     });
   }
@@ -203,7 +212,10 @@ export class UserRepository extends BaseRepository<
 
     return this.findAndCountAll({
       where,
-      include: [{ model: BranchMaster, as: 'branch' }],
+      include: [
+        { model: BranchMaster, as: 'branch' },
+        { model: Role, as: 'role' },
+      ],
       limit,
       offset,
       order: [[sortBy, sortOrder]],

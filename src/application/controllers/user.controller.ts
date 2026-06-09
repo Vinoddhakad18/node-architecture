@@ -9,7 +9,7 @@ import { Response } from 'express';
 class UserController {
   async create(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const { name, email, password, mobile, role, branchId } = req.body;
+      const { name, email, password, mobile, roleId, branchId } = req.body;
       const userId = req.user?.userId;
 
       const emailExists = await userService.isEmailExists(email);
@@ -27,7 +27,7 @@ class UserController {
       }
 
       const user = await userService.create(
-        { name, email, password, mobile, role, branch_id: branchId } as any,
+        { name, email, password, mobile, role_id: roleId, branch_id: branchId } as any,
         userId
       );
 
@@ -83,7 +83,7 @@ class UserController {
   async update(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { name, email, mobile, role, branchId, status } = req.body;
+      const { name, email, mobile, roleId, branchId, status } = req.body;
       const userId = req.user?.userId;
 
       if (email) {
@@ -102,7 +102,7 @@ class UserController {
         }
       }
 
-      const user = await userService.update(Number(id), { name, email, mobile, role, branch_id: branchId } as any, userId);
+      const user = await userService.update(Number(id), { name, email, mobile, role_id: roleId, branch_id: branchId } as any, userId);
 
       if (!user) {
         res.sendNotFound(`User with id ${id} not found`);

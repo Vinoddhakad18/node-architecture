@@ -1,4 +1,4 @@
-import { UserRole, UserStatus } from '@application/constants';
+import { UserStatus } from '@application/constants';
 import { UserMasterAttributes } from '@models/user-master.model';
 
 /**
@@ -10,7 +10,8 @@ export class UserResponseDTO {
   name: string;
   email: string;
   mobile: string | null;
-  role: UserRole;
+  roleId: number | null;
+  roleName: string | null;
   branchId: number | null;
   branchName: string | null;
   status: UserStatus;
@@ -23,7 +24,8 @@ export class UserResponseDTO {
     this.name = user.name;
     this.email = user.email;
     this.mobile = user.mobile;
-    this.role = user.role as UserRole;
+    this.roleId = user.role_id ?? null;
+    this.roleName = (user as any).role?.name ?? null;
     this.branchId = user.branch_id ?? null;
     this.branchName = (user as any).branch?.branch_name ?? null;
     this.status = user.status as UserStatus;
@@ -55,7 +57,8 @@ export class UserSummaryDTO {
   id: number;
   name: string;
   email: string;
-  role: UserRole;
+  roleId: number | null;
+  roleName: string | null;
   branchId: number | null;
   branchName: string | null;
 
@@ -63,7 +66,8 @@ export class UserSummaryDTO {
     this.id = user.id;
     this.name = user.name;
     this.email = user.email;
-    this.role = user.role as UserRole;
+    this.roleId = user.role_id ?? null;
+    this.roleName = (user as any).role?.name ?? null;
     this.branchId = user.branch_id ?? null;
     this.branchName = (user as any).branch?.branch_name ?? null;
   }
@@ -88,7 +92,7 @@ export interface CreateUserRequestDTO {
   email: string;
   password: string;
   mobile?: string;
-  role?: UserRole;
+  roleId?: number;
   branchId?: number;
 }
 
@@ -99,7 +103,7 @@ export interface UpdateUserRequestDTO {
   name?: string;
   email?: string;
   mobile?: string;
-  role?: UserRole;
+  roleId?: number;
   branchId?: number;
   status?: UserStatus;
 }

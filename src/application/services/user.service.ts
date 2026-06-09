@@ -32,6 +32,7 @@ class UserService {
           {
             ...data,
             email: data.email.toLowerCase(),
+            role_id: (data as any).role_id ?? (data as any).roleId ?? null,
             branch_id: (data as any).branch_id ?? (data as any).branchId ?? null,
             created_by: userId || null,
             updated_by: userId || null,
@@ -42,7 +43,8 @@ class UserService {
       });
 
       logger.info(`User created: ${user.email} by user ${userId || 'system'}`);
-      return user;
+      // Reload with associations so role/branch details are present in the response
+      return (await userRepository.findById(user.id)) ?? user;
     } catch (error) {
       logger.error('Error creating user:', error);
       throw error;
@@ -90,11 +92,12 @@ class UserService {
       const user = await userRepository.findById(id);
       if (!user) return null;
 
-      const updatedUser = await userRepository.withTransaction(async (transaction: Transaction) => {
+      await userRepository.withTransaction(async (transaction: Transaction) => {
         await user.update(
           {
             ...data,
             email: data.email ? (data.email as string).toLowerCase() : user.email,
+            role_id: (data as any).role_id ?? (data as any).roleId ?? user.role_id,
             branch_id: (data as any).branch_id ?? (data as any).branchId ?? user.branch_id,
             updated_by: userId || user.updated_by,
           },
@@ -103,7 +106,10 @@ class UserService {
         return user;
       });
 
-      logger.info(`User updated: ${updatedUser.email} by user ${userId || 'system'}`);
+      // Reload with associations so role/branch details are fresh in the response
+      const updatedUser = await userRepository.findById(id);
+
+      logger.info(`User updated: ${updatedUser?.email ?? user.email} by user ${userId || 'system'}`);
       return updatedUser;
     } catch (error) {
       logger.error(`Error updating user with id ${id}:`, error);

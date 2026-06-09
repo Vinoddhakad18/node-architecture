@@ -2,6 +2,7 @@ import { sequelize } from '@config/database';
 import bcrypt from 'bcryptjs';
 import { DataTypes, Model, Optional } from 'sequelize';
 import BranchMaster from './branch-master.model';
+import Role from './role.model';
 
 /**
  * UserMaster Model Attributes Interface
@@ -12,7 +13,7 @@ export interface UserMasterAttributes {
   email: string;
   mobile: string | null;
   password: string;
-  role: 'super_admin' | 'admin' | 'manager' | 'user';
+  role_id: number | null;
   branch_id: number | null;
   status: 'active' | 'inactive' | 'deleted';
   last_login: Date | null;
@@ -30,7 +31,7 @@ export type UserMasterCreationAttributes = Optional<
   UserMasterAttributes,
   | 'id'
   | 'mobile'
-  | 'role'
+  | 'role_id'
   | 'branch_id'
   | 'status'
   | 'last_login'
@@ -53,7 +54,7 @@ export class UserMaster
   public email!: string;
   public mobile!: string | null;
   public password!: string;
-  public role!: 'super_admin' | 'admin' | 'manager' | 'user';
+  public role_id!: number | null;
   public branch_id!: number | null;
   public status!: 'active' | 'inactive' | 'deleted';
   public last_login!: Date | null;
@@ -63,6 +64,7 @@ export class UserMaster
   public readonly updated_at!: Date;
 
   public branch?: BranchMaster | null;
+  public role?: Role | null;
 
   /**
    * Check if user is active
@@ -124,10 +126,10 @@ UserMaster.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    role: {
-      type: DataTypes.ENUM('super_admin', 'admin', 'manager', 'user'),
-      allowNull: false,
-      defaultValue: 'user',
+    role_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      comment: 'Role assigned to this user',
     },
     branch_id: {
       type: DataTypes.INTEGER,
@@ -189,6 +191,12 @@ UserMaster.init(
   }
 );
 
+// Branch <-> User: one branch has many users, each user belongs to one branch
+BranchMaster.hasMany(UserMaster, { foreignKey: 'branch_id', as: 'users' });
 UserMaster.belongsTo(BranchMaster, { foreignKey: 'branch_id', as: 'branch' });
+
+// Role <-> User: one role has many users, each user belongs to one role
+Role.hasMany(UserMaster, { foreignKey: 'role_id', as: 'users' });
+UserMaster.belongsTo(Role, { foreignKey: 'role_id', as: 'role' });
 
 export default UserMaster;

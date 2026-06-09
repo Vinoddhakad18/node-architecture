@@ -44,11 +44,11 @@ class AuthService {
       await userRepository.updateLastLogin(user.getDataValue('id'));
       logger.info(`User logged in: ${user.getDataValue('email')}`);
 
-      // Generate JWT tokens
+      // Generate JWT tokens - role name is resolved from the associated role
       const tokens = jwtUtil.generateTokenPair({
         userId: user.getDataValue('id'),
         email: user.getDataValue('email'),
-        role: user.getDataValue('role'),
+        role: user.role?.name,
       });
       return { user, tokens };
     } catch (error) {

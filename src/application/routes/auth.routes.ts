@@ -22,7 +22,6 @@ const router = Router();
  *         - id
  *         - email
  *         - name
- *         - role
  *       properties:
  *         id:
  *           type: integer
@@ -37,11 +36,16 @@ const router = Router();
  *           type: string
  *           description: User full name
  *           example: John Doe
- *         role:
+ *         roleId:
+ *           type: integer
+ *           nullable: true
+ *           description: Role ID assigned to the user
+ *           example: 1
+ *         roleName:
  *           type: string
- *           enum: [user, admin]
- *           description: User role
- *           example: user
+ *           nullable: true
+ *           description: Role name assigned to the user
+ *           example: admin
  *         branchId:
  *           type: integer
  *           nullable: true

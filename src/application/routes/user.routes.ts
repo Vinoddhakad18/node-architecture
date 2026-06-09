@@ -209,9 +209,9 @@ router.get('/:id', authenticate, authorize('admin', 'super_admin'), validateRequ
  *               mobile:
  *                 type: string
  *                 example: '+1234567890'
- *               role:
- *                 type: string
- *                 example: user
+ *               roleId:
+ *                 type: integer
+ *                 example: 1
  *               branchId:
  *                 type: integer
  *                 example: 1
@@ -282,8 +282,8 @@ router.post(
  *                 format: email
  *               mobile:
  *                 type: string
- *               role:
- *                 type: string
+ *               roleId:
+ *                 type: integer
  *               branchId:
  *                 type: integer
  *               status:
