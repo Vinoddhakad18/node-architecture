@@ -33,15 +33,15 @@ export class CountryMaster
   extends Model<CountryMasterAttributes, CountryMasterCreationAttributes>
   implements CountryMasterAttributes
 {
-  public id!: number;
-  public name!: string;
-  public code!: string;
-  public currency_code!: string | null;
-  public status!: 'active' | 'inactive';
-  public created_by!: number | null;
-  public updated_by!: number | null;
-  public readonly created_at!: Date;
-  public readonly updated_at!: Date;
+  declare id: number;
+  declare name: string;
+  declare code: string;
+  declare currency_code: string | null;
+  declare status: 'active' | 'inactive';
+  declare created_by: number | null;
+  declare updated_by: number | null;
+  declare readonly created_at: Date;
+  declare readonly updated_at: Date;
 
   /**
    * Check if country is active

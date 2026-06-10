@@ -33,15 +33,18 @@ export class BranchMaster
   extends Model<BranchMasterAttributes, BranchMasterCreationAttributes>
   implements BranchMasterAttributes
 {
-  public id!: number;
-  public branch_name!: string;
-  public branch_code!: string;
-  public address!: string | null;
-  public status!: 'active' | 'inactive';
-  public created_by!: number | null;
-  public updated_by!: number | null;
-  public readonly created_at!: Date;
-  public readonly updated_at!: Date;
+  // Use `declare` (not `public`): with target ES2022 useDefineForClassFields
+  // is on, so `public` fields would shadow Sequelize's dataValues-backed
+  // accessors and read back as undefined (e.g. branch.branch_name === undefined).
+  declare id: number;
+  declare branch_name: string;
+  declare branch_code: string;
+  declare address: string | null;
+  declare status: 'active' | 'inactive';
+  declare created_by: number | null;
+  declare updated_by: number | null;
+  declare readonly created_at: Date;
+  declare readonly updated_at: Date;
 
   public get isActive(): boolean {
     return this.getDataValue('status') === 'active';

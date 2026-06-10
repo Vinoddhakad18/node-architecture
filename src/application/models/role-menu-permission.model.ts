@@ -45,21 +45,21 @@ export class RoleMenuPermission
   extends Model<RoleMenuPermissionAttributes, RoleMenuPermissionCreationAttributes>
   implements RoleMenuPermissionAttributes
 {
-  public id!: number;
-  public role_id!: number;
-  public menu_id!: number;
-  public can_view!: boolean;
-  public can_add!: boolean;
-  public can_edit!: boolean;
-  public can_delete!: boolean;
-  public can_export!: boolean;
-  public can_status!: boolean;
-  public readonly created_at!: Date;
-  public readonly updated_at!: Date;
+  declare id: number;
+  declare role_id: number;
+  declare menu_id: number;
+  declare can_view: boolean;
+  declare can_add: boolean;
+  declare can_edit: boolean;
+  declare can_delete: boolean;
+  declare can_export: boolean;
+  declare can_status: boolean;
+  declare readonly created_at: Date;
+  declare readonly updated_at: Date;
 
   // Associations
-  public role?: Role;
-  public menu?: Menu;
+  declare role?: Role;
+  declare menu?: Menu;
 }
 
 /**

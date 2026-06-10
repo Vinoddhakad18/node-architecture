@@ -34,13 +34,13 @@ export class UserBranch
   extends Model<UserBranchAttributes, UserBranchCreationAttributes>
   implements UserBranchAttributes
 {
-  public id!: number;
-  public user_id!: number;
-  public branch_id!: number;
-  public created_by!: number | null;
-  public updated_by!: number | null;
-  public readonly created_at!: Date;
-  public readonly updated_at!: Date;
+  declare id: number;
+  declare user_id: number;
+  declare branch_id: number;
+  declare created_by: number | null;
+  declare updated_by: number | null;
+  declare readonly created_at: Date;
+  declare readonly updated_at: Date;
 }
 
 UserBranch.init(

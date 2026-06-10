@@ -29,14 +29,17 @@ export type RoleCreationAttributes = Optional<
  * Represents role definitions for RBAC
  */
 export class Role extends Model<RoleAttributes, RoleCreationAttributes> implements RoleAttributes {
-  public id!: number;
-  public name!: string;
-  public description!: string | null;
-  public status!: boolean;
-  public created_by!: number | null;
-  public updated_by!: number | null;
-  public readonly created_at!: Date;
-  public readonly updated_at!: Date;
+  // Use `declare` (not `public`): with target ES2022 useDefineForClassFields
+  // is on, so `public` fields would shadow Sequelize's dataValues-backed
+  // accessors and read back as undefined (e.g. role.name === undefined).
+  declare id: number;
+  declare name: string;
+  declare description: string | null;
+  declare status: boolean;
+  declare created_by: number | null;
+  declare updated_by: number | null;
+  declare readonly created_at: Date;
+  declare readonly updated_at: Date;
 
   /**
    * Check if role is active

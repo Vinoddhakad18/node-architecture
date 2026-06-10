@@ -29,11 +29,11 @@ export class Permission
   extends Model<PermissionAttributes, PermissionCreationAttributes>
   implements PermissionAttributes
 {
-  public id!: number;
-  public key!: string;
-  public label!: string;
-  public readonly created_at!: Date;
-  public readonly updated_at!: Date;
+  declare id: number;
+  declare key: string;
+  declare label: string;
+  declare readonly created_at: Date;
+  declare readonly updated_at: Date;
 }
 
 /**

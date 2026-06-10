@@ -74,11 +74,16 @@ export class UserMaster
   declare branch?: BranchMaster | null;
   declare role?: Role | null;
 
-  // Many-to-many: branches assigned to this user
-  public branches?: BranchMaster[];
-  public getBranches!: BelongsToManyGetAssociationsMixin<BranchMaster>;
-  public setBranches!: BelongsToManySetAssociationsMixin<BranchMaster, number>;
-  public addBranch!: BelongsToManyAddAssociationMixin<BranchMaster, number>;
+  // Many-to-many: branches assigned to this user.
+  // These MUST use `declare` (not `public`): with target ES2022,
+  // useDefineForClassFields defaults to true, so a real `public` field
+  // would be initialized to undefined in the constructor and shadow the
+  // association mixins Sequelize attaches to the prototype, causing
+  // "setBranches is not a function" at runtime.
+  declare branches?: BranchMaster[];
+  declare getBranches: BelongsToManyGetAssociationsMixin<BranchMaster>;
+  declare setBranches: BelongsToManySetAssociationsMixin<BranchMaster, number>;
+  declare addBranch: BelongsToManyAddAssociationMixin<BranchMaster, number>;
 
   /**
    * Check if user is active
