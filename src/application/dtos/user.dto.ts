@@ -2,6 +2,28 @@ import { UserStatus } from '@application/constants';
 import { UserMasterAttributes } from '@models/user-master.model';
 
 /**
+ * Branch summary used inside user responses
+ */
+export interface UserBranchSummary {
+  id: number;
+  branchName: string;
+}
+
+/**
+ * Map associated branch models to a lightweight summary list
+ */
+function mapBranches(user: Omit<UserMasterAttributes, 'password'>): UserBranchSummary[] {
+  const branches = (user as any).branches;
+  if (!Array.isArray(branches)) {
+    return [];
+  }
+  return branches.map((branch: any) => ({
+    id: branch.id,
+    branchName: branch.branch_name,
+  }));
+}
+
+/**
  * User Response DTO
  * Transforms user model to API response format
  */
@@ -14,6 +36,7 @@ export class UserResponseDTO {
   roleName: string | null;
   branchId: number | null;
   branchName: string | null;
+  branches: UserBranchSummary[];
   status: UserStatus;
   lastLogin: Date | null;
   createdAt: Date;
@@ -28,6 +51,7 @@ export class UserResponseDTO {
     this.roleName = (user as any).role?.name ?? null;
     this.branchId = user.branch_id ?? null;
     this.branchName = (user as any).branch?.branch_name ?? null;
+    this.branches = mapBranches(user);
     this.status = user.status as UserStatus;
     this.lastLogin = user.last_login;
     this.createdAt = user.created_at;
@@ -61,6 +85,7 @@ export class UserSummaryDTO {
   roleName: string | null;
   branchId: number | null;
   branchName: string | null;
+  branches: UserBranchSummary[];
 
   constructor(user: Omit<UserMasterAttributes, 'password'>) {
     this.id = user.id;
@@ -70,6 +95,7 @@ export class UserSummaryDTO {
     this.roleName = (user as any).role?.name ?? null;
     this.branchId = user.branch_id ?? null;
     this.branchName = (user as any).branch?.branch_name ?? null;
+    this.branches = mapBranches(user);
   }
 
   static fromModel(user: Omit<UserMasterAttributes, 'password'>): UserSummaryDTO {
@@ -94,6 +120,7 @@ export interface CreateUserRequestDTO {
   mobile?: string;
   roleId?: number;
   branchId?: number;
+  branchIds?: number[];
 }
 
 /**
@@ -105,5 +132,6 @@ export interface UpdateUserRequestDTO {
   mobile?: string;
   roleId?: number;
   branchId?: number;
+  branchIds?: number[];
   status?: UserStatus;
 }

@@ -54,8 +54,20 @@ const router = Router();
  *         branchName:
  *           type: string
  *           nullable: true
- *           description: Branch name assigned to the user
+ *           description: Primary branch name assigned to the user
  *           example: Downtown Branch
+ *         branches:
+ *           type: array
+ *           description: All branches the user is assigned to (many-to-many)
+ *           items:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 example: 1
+ *               branchName:
+ *                 type: string
+ *                 example: Downtown Branch
  *         isActive:
  *           type: boolean
  *           description: Whether the user account is active

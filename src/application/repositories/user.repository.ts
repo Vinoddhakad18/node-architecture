@@ -58,6 +58,7 @@ export class UserRepository extends BaseRepository<
     return this.model.findByPk(id, {
       include: [
         { model: BranchMaster, as: 'branch' },
+        { model: BranchMaster, as: 'branches', through: { attributes: [] } },
         { model: Role, as: 'role' },
       ],
     });
@@ -88,6 +89,7 @@ export class UserRepository extends BaseRepository<
       ...options,
       include: [
         { model: BranchMaster, as: 'branch' },
+        { model: BranchMaster, as: 'branches', through: { attributes: [] } },
         { model: Role, as: 'role' },
       ],
       where: {
@@ -210,10 +212,12 @@ export class UserRepository extends BaseRepository<
       Object.assign(where, { status });
     }
 
+    console.log('UserRepository findWithFilters - where clause:', where);
     return this.findAndCountAll({
       where,
       include: [
         { model: BranchMaster, as: 'branch' },
+        { model: BranchMaster, as: 'branches', through: { attributes: [] } },
         { model: Role, as: 'role' },
       ],
       limit,

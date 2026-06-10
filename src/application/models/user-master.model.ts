@@ -1,8 +1,16 @@
 import { sequelize } from '@config/database';
 import bcrypt from 'bcryptjs';
-import { DataTypes, Model, Optional } from 'sequelize';
+import {
+  DataTypes,
+  Model,
+  Optional,
+  BelongsToManyGetAssociationsMixin,
+  BelongsToManySetAssociationsMixin,
+  BelongsToManyAddAssociationMixin,
+} from 'sequelize';
 import BranchMaster from './branch-master.model';
 import Role from './role.model';
+import UserBranch from './user-branch.model';
 
 /**
  * UserMaster Model Attributes Interface
@@ -49,22 +57,28 @@ export class UserMaster
   extends Model<UserMasterAttributes, UserMasterCreationAttributes>
   implements UserMasterAttributes
 {
-  public id!: number;
-  public name!: string;
-  public email!: string;
-  public mobile!: string | null;
-  public password!: string;
-  public role_id!: number | null;
-  public branch_id!: number | null;
-  public status!: 'active' | 'inactive' | 'deleted';
-  public last_login!: Date | null;
-  public created_by!: number | null;
-  public updated_by!: number | null;
-  public readonly created_at!: Date;
-  public readonly updated_at!: Date;
+  declare id: number;
+  declare name: string;
+  declare email: string;
+  declare mobile: string | null;
+  declare password: string;
+  declare role_id: number | null;
+  declare branch_id: number | null;
+  declare status: 'active' | 'inactive' | 'deleted';
+  declare last_login: Date | null;
+  declare created_by: number | null;
+  declare updated_by: number | null;
+  declare readonly created_at: Date;
+  declare readonly updated_at: Date;
 
-  public branch?: BranchMaster | null;
-  public role?: Role | null;
+  declare branch?: BranchMaster | null;
+  declare role?: Role | null;
+
+  // Many-to-many: branches assigned to this user
+  public branches?: BranchMaster[];
+  public getBranches!: BelongsToManyGetAssociationsMixin<BranchMaster>;
+  public setBranches!: BelongsToManySetAssociationsMixin<BranchMaster, number>;
+  public addBranch!: BelongsToManyAddAssociationMixin<BranchMaster, number>;
 
   /**
    * Check if user is active
@@ -191,9 +205,23 @@ UserMaster.init(
   }
 );
 
-// Branch <-> User: one branch has many users, each user belongs to one branch
-BranchMaster.hasMany(UserMaster, { foreignKey: 'branch_id', as: 'users' });
+// Branch <-> User (optional primary branch): each user may reference one primary branch
 UserMaster.belongsTo(BranchMaster, { foreignKey: 'branch_id', as: 'branch' });
+
+// Branch <-> User (many-to-many): one user can be assigned to multiple branches
+// and a branch can have many users, via the user_branches junction table
+UserMaster.belongsToMany(BranchMaster, {
+  through: UserBranch,
+  foreignKey: 'user_id',
+  otherKey: 'branch_id',
+  as: 'branches',
+});
+BranchMaster.belongsToMany(UserMaster, {
+  through: UserBranch,
+  foreignKey: 'branch_id',
+  otherKey: 'user_id',
+  as: 'users',
+});
 
 // Role <-> User: one role has many users, each user belongs to one role
 Role.hasMany(UserMaster, { foreignKey: 'role_id', as: 'users' });

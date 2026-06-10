@@ -212,9 +212,12 @@ router.get('/:id', authenticate, authorize('admin', 'super_admin'), validateRequ
  *               roleId:
  *                 type: integer
  *                 example: 1
- *               branchId:
- *                 type: integer
- *                 example: 1
+ *               branchIds:
+ *                 type: array
+ *                 description: Branch IDs to assign the user to (many-to-many)
+ *                 items:
+ *                   type: integer
+ *                 example: [1, 2, 3]
  *     responses:
  *       201:
  *         description: User created successfully
@@ -286,6 +289,13 @@ router.post(
  *                 type: integer
  *               branchId:
  *                 type: integer
+ *                 description: Optional primary branch for the user
+ *               branchIds:
+ *                 type: array
+ *                 description: Branch IDs to assign the user to (many-to-many)
+ *                 items:
+ *                   type: integer
+ *                 example: [1, 2, 3]
  *               status:
  *                 type: string
  *                 enum: [active, inactive]

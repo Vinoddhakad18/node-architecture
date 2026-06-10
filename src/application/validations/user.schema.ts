@@ -10,6 +10,7 @@ export const createUserSchema = z.object({
     mobile: z.string().max(15).optional().nullable(),
     roleId: z.number().int().positive().optional(),
     branchId: z.number().int().positive().optional(),
+    branchIds: z.array(z.number().int().positive()).optional(),
   }),
 });
 
@@ -26,6 +27,7 @@ export const updateUserSchema = z.object({
     mobile: z.string().max(15).optional().nullable(),
     roleId: z.number().int().positive().optional(),
     branchId: z.number().int().positive().optional(),
+    branchIds: z.array(z.number().int().positive()).optional(),
     status: z.string().optional(),
   }),
 });

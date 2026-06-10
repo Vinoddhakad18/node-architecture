@@ -25,8 +25,26 @@ interface PaginatedResult<T> {
 }
 
 class UserService {
+  /**
+   * Normalize branchIds input into a unique list of numeric ids.
+   * Returns undefined when no branchIds field was provided (so existing
+   * assignments are left untouched on update).
+   */
+  private extractBranchIds(data: unknown): number[] | undefined {
+    const raw = (data as any)?.branchIds;
+    if (raw === undefined || raw === null) {
+      return undefined;
+    }
+    const ids = (Array.isArray(raw) ? raw : [raw])
+      .map((value) => Number(value))
+      .filter((value) => Number.isInteger(value) && value > 0);
+    return Array.from(new Set(ids));
+  }
+
   async create(data: UserMasterCreationAttributes, userId?: number): Promise<UserMaster> {
     try {
+      const branchIds = this.extractBranchIds(data);
+
       const user = await userRepository.withTransaction(async (transaction: Transaction) => {
         const newUser = await userRepository.create(
           {
@@ -39,6 +57,12 @@ class UserService {
           },
           { transaction }
         );
+
+        // Assign the user to multiple branches (many-to-many)
+        if (branchIds) {
+          await newUser.setBranches(branchIds, { transaction });
+        }
+
         return newUser;
       });
 
@@ -92,6 +116,8 @@ class UserService {
       const user = await userRepository.findById(id);
       if (!user) return null;
 
+      const branchIds = this.extractBranchIds(data);
+
       await userRepository.withTransaction(async (transaction: Transaction) => {
         await user.update(
           {
@@ -103,6 +129,12 @@ class UserService {
           },
           { transaction }
         );
+
+        // Replace the user's branch assignments when branchIds is provided
+        if (branchIds) {
+          await user.setBranches(branchIds, { transaction });
+        }
+
         return user;
       });
 

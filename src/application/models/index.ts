@@ -26,3 +26,8 @@ export {
   BranchMasterAttributes,
   BranchMasterCreationAttributes,
 } from './branch-master.model';
+export {
+  UserBranch,
+  UserBranchAttributes,
+  UserBranchCreationAttributes,
+} from './user-branch.model';
