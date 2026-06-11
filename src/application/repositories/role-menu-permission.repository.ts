@@ -2,7 +2,14 @@ import RoleMenuPermission, {
   RoleMenuPermissionAttributes,
   RoleMenuPermissionCreationAttributes,
 } from '@models/role-menu-permission.model';
-import { FindOptions, WhereOptions, Transaction, QueryTypes, UpdateOptions } from 'sequelize';
+import {
+  FindOptions,
+  WhereOptions,
+  Transaction,
+  QueryTypes,
+  UpdateOptions,
+  InstanceUpdateOptions,
+} from 'sequelize';
 import { sequelize } from '@config/database';
 
 import { BaseRepository } from './base.repository';
@@ -79,7 +86,10 @@ export class RoleMenuPermissionRepository extends BaseRepository<
       return null;
     }
 
-    await record.update(data as Partial<RoleMenuPermission>, options);
+    await record.update(
+      data as Partial<RoleMenuPermission>,
+      options as InstanceUpdateOptions<RoleMenuPermissionAttributes>
+    );
 
     // Reload the record to get the latest values from database
     await record.reload();

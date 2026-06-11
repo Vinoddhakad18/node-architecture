@@ -8,7 +8,8 @@ import {
   listUsersSchema,
 } from '@application/validations/user.schema';
 import userController from '@controllers/user.controller';
-import { authenticate, authorize } from '@middleware/auth.middleware';
+import { MenuRoute, PermissionAction } from '@application/constants';
+import { authenticate, requirePermission } from '@middleware/auth.middleware';
 import { validateRequest } from '@middleware/validateRequest';
 import { Router } from 'express';
 
@@ -48,7 +49,12 @@ const router = Router();
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/active/list', authenticate, authorize('admin', 'super_admin'), userController.findAllActive);
+router.get(
+  '/active/list',
+  authenticate,
+  requirePermission(MenuRoute.USERS, PermissionAction.VIEW),
+  userController.findAllActive
+);
 
 /**
  * @swagger
@@ -129,7 +135,13 @@ router.get('/active/list', authenticate, authorize('admin', 'super_admin'), user
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/', authenticate, authorize('admin', 'super_admin'), validateRequest(listUsersSchema), userController.findAll);
+router.get(
+  '/',
+  authenticate,
+  requirePermission(MenuRoute.USERS, PermissionAction.VIEW),
+  validateRequest(listUsersSchema),
+  userController.findAll
+);
 
 /**
  * @swagger
@@ -172,7 +184,13 @@ router.get('/', authenticate, authorize('admin', 'super_admin'), validateRequest
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/:id', authenticate, authorize('admin', 'super_admin'), validateRequest(getUserByIdSchema), userController.findById);
+router.get(
+  '/:id',
+  authenticate,
+  requirePermission(MenuRoute.USERS, PermissionAction.VIEW),
+  validateRequest(getUserByIdSchema),
+  userController.findById
+);
 
 /**
  * @swagger
@@ -248,7 +266,7 @@ router.get('/:id', authenticate, authorize('admin', 'super_admin'), validateRequ
 router.post(
   '/',
   authenticate,
-  authorize('admin', 'super_admin'),
+  requirePermission(MenuRoute.USERS, PermissionAction.ADD),
   validateRequest(createUserSchema),
   userController.create
 );
@@ -332,7 +350,7 @@ router.post(
 router.put(
   '/:id',
   authenticate,
-  authorize('admin', 'super_admin'),
+  requirePermission(MenuRoute.USERS, PermissionAction.EDIT),
   validateRequest(updateUserSchema),
   userController.update
 );
@@ -384,7 +402,7 @@ router.put(
 router.delete(
   '/:id',
   authenticate,
-  authorize('admin', 'super_admin'),
+  requirePermission(MenuRoute.USERS, PermissionAction.DELETE),
   validateRequest(deleteUserSchema),
   userController.delete
 );

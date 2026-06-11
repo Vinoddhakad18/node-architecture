@@ -6,7 +6,8 @@ import {
   listRolesSchema,
 } from '@application/validations/role.schema';
 import roleController from '@controllers/role.controller';
-import { authenticate, authorize } from '@middleware/auth.middleware';
+import { MenuRoute, PermissionAction } from '@application/constants';
+import { authenticate, requirePermission } from '@middleware/auth.middleware';
 import { validateRequest } from '@middleware/validateRequest';
 import { Router } from 'express';
 
@@ -237,7 +238,7 @@ router.get('/:id', authenticate, validateRequest(getRoleByIdSchema), roleControl
 router.post(
   '/',
   authenticate,
-  authorize('admin', 'super_admin'),
+  requirePermission(MenuRoute.ROLES, PermissionAction.ADD),
   validateRequest(createRoleSchema),
   roleController.create
 );
@@ -311,7 +312,7 @@ router.post(
 router.put(
   '/:id',
   authenticate,
-  authorize('admin', 'super_admin'),
+  requirePermission(MenuRoute.ROLES, PermissionAction.EDIT),
   validateRequest(updateRoleSchema),
   roleController.update
 );
@@ -360,7 +361,7 @@ router.put(
 router.delete(
   '/:id',
   authenticate,
-  authorize('admin', 'super_admin'),
+  requirePermission(MenuRoute.ROLES, PermissionAction.DELETE),
   validateRequest(deleteRoleSchema),
   roleController.delete
 );

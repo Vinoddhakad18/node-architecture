@@ -8,7 +8,8 @@ import {
   getMenuChildrenSchema,
 } from '@application/validations/menu.schema';
 import menuController from '@controllers/menu.controller';
-import { authenticate } from '@middleware/auth.middleware';
+import { MenuRoute, PermissionAction } from '@application/constants';
+import { authenticate, requirePermission } from '@middleware/auth.middleware';
 import { validateRequest } from '@middleware/validateRequest';
 import { Router } from 'express';
 
@@ -333,7 +334,13 @@ router.get('/:id', authenticate, validateRequest(getMenuByIdSchema), menuControl
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.post('/', authenticate, validateRequest(createMenuSchema), menuController.create);
+router.post(
+  '/',
+  authenticate,
+  requirePermission(MenuRoute.MENUS, PermissionAction.ADD),
+  validateRequest(createMenuSchema),
+  menuController.create
+);
 
 /**
  * @swagger
@@ -393,6 +400,7 @@ router.post('/', authenticate, validateRequest(createMenuSchema), menuController
 router.put(
   '/reorder',
   authenticate,
+  requirePermission(MenuRoute.MENUS, PermissionAction.EDIT),
   validateRequest(reorderMenusSchema),
   menuController.reorderMenus
 );
@@ -466,7 +474,13 @@ router.put(
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.put('/:id', authenticate, validateRequest(updateMenuSchema), menuController.update);
+router.put(
+  '/:id',
+  authenticate,
+  requirePermission(MenuRoute.MENUS, PermissionAction.EDIT),
+  validateRequest(updateMenuSchema),
+  menuController.update
+);
 
 /**
  * @swagger
@@ -507,7 +521,13 @@ router.put('/:id', authenticate, validateRequest(updateMenuSchema), menuControll
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.delete('/:id', authenticate, validateRequest(deleteMenuSchema), menuController.delete);
+router.delete(
+  '/:id',
+  authenticate,
+  requirePermission(MenuRoute.MENUS, PermissionAction.DELETE),
+  validateRequest(deleteMenuSchema),
+  menuController.delete
+);
 
 /**
  * @swagger
@@ -551,6 +571,7 @@ router.delete('/:id', authenticate, validateRequest(deleteMenuSchema), menuContr
 router.delete(
   '/:id/permanent',
   authenticate,
+  requirePermission(MenuRoute.MENUS, PermissionAction.DELETE),
   validateRequest(deleteMenuSchema),
   menuController.hardDelete
 );

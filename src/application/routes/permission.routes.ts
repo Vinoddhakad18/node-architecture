@@ -3,7 +3,8 @@ import {
   updatePermissionsSchema,
 } from '@application/validations/permission.schema';
 import permissionController from '@controllers/permission.controller';
-import { authenticate, authorize } from '@middleware/auth.middleware';
+import { MenuRoute, PermissionAction } from '@application/constants';
+import { authenticate, requirePermission } from '@middleware/auth.middleware';
 import { validateRequest } from '@middleware/validateRequest';
 import { Router } from 'express';
 
@@ -215,7 +216,7 @@ router.get(
 router.put(
   '/',
   authenticate,
-  authorize('admin', 'super_admin'),
+  requirePermission(MenuRoute.PERMISSIONS, PermissionAction.EDIT),
   validateRequest(updatePermissionsSchema),
   permissionController.updateRolePermissions
 );

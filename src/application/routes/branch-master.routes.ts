@@ -8,7 +8,8 @@ import {
   listBranchesSchema,
 } from '@application/validations/branch-master.schema';
 import branchMasterController from '@controllers/branch-master.controller';
-import { authenticate, authorize } from '@middleware/auth.middleware';
+import { MenuRoute, PermissionAction } from '@application/constants';
+import { authenticate, requirePermission } from '@middleware/auth.middleware';
 import { validateRequest } from '@middleware/validateRequest';
 import { Router } from 'express';
 
@@ -151,7 +152,13 @@ router.get('/active/list', authenticate, branchMasterController.findAllActive);
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/', authenticate, validateRequest(listBranchesSchema), branchMasterController.findAll);
+router.get(
+  '/',
+  authenticate,
+  requirePermission(MenuRoute.BRANCHES, PermissionAction.VIEW),
+  validateRequest(listBranchesSchema),
+  branchMasterController.findAll
+);
 
 /**
  * @swagger
@@ -282,7 +289,7 @@ router.get('/:id', authenticate, validateRequest(getBranchByIdSchema), branchMas
 router.post(
   '/',
   authenticate,
-  authorize('admin', 'super_admin'),
+  requirePermission(MenuRoute.BRANCHES, PermissionAction.ADD),
   validateRequest(createBranchSchema),
   branchMasterController.create
 );
@@ -368,7 +375,7 @@ router.post(
 router.put(
   '/:id',
   authenticate,
-  authorize('admin', 'super_admin'),
+  requirePermission(MenuRoute.BRANCHES, PermissionAction.EDIT),
   validateRequest(updateBranchSchema),
   branchMasterController.update
 );
@@ -420,7 +427,7 @@ router.put(
 router.delete(
   '/:id',
   authenticate,
-  authorize('admin', 'super_admin'),
+  requirePermission(MenuRoute.BRANCHES, PermissionAction.DELETE),
   validateRequest(deleteBranchSchema),
   branchMasterController.delete
 );

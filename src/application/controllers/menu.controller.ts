@@ -83,7 +83,7 @@ class MenuController {
       const { active_only = 'true' } = req.query;
       const activeOnly = active_only === 'true';
 
-      const menus = await menuService.findMenuTree(activeOnly);
+      const menus = await menuService.findMenuTree(activeOnly, req.user?.role);
 
       res.sendSuccess(menus, 'Menu tree retrieved successfully');
     } catch (error: unknown) {

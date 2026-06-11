@@ -1,5 +1,7 @@
 import jwtUtil from '@application/utils/jwt.util';
 import { logger } from '@config/logger';
+import { PermissionAction } from '@constants/rbac.constants';
+import rbacService from '@services/rbac.service';
 import tokenBlacklistService from '@services/token-blacklist.service';
 import { Request, Response, NextFunction } from 'express';
 
@@ -142,12 +144,59 @@ export const authorize = (...allowedRoles: string[]) => {
     }
 
     if (!req.user.role || !allowedRoles.includes(req.user.role)) {
-      //logger.warn(`Unauthorized access attempt by user: ${req.user.email}`);
-     // res.sendForbidden('Insufficient permissions');
-     // return;
+      logger.warn(`Unauthorized access attempt by user: ${req.user.email}`);
+      res.sendForbidden('Insufficient permissions');
+      return;
     }
 
     next();
+  };
+};
+
+/**
+ * Dynamic (database-driven) Authorization Middleware
+ *
+ * Replaces hardcoded role lists with permissions resolved from the
+ * `role_menu_permissions` table at request time. The endpoint declares which
+ * menu it belongs to and which action it represents; the caller's role must
+ * have the matching flag enabled for that menu.
+ *
+ * - `super_admin` always passes (handled in rbacService.hasPermission).
+ * - Results are cached per-role in Redis and invalidated on permission change.
+ *
+ * @example
+ *   router.post('/', authenticate, requirePermission(MenuRoute.ROLES, PermissionAction.ADD), ...)
+ */
+export const requirePermission = (menuRoute: string, action: PermissionAction) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    if (!req.user) {
+      res.sendUnauthorized('Authentication required');
+      return;
+    }
+
+    const role = req.user.role;
+    if (!role) {
+      logger.warn(`Authorization failed: user ${req.user.email} has no role`);
+      res.sendForbidden('Insufficient permissions');
+      return;
+    }
+
+    try {
+      const allowed = await rbacService.hasPermission(role, menuRoute, action);
+
+      if (!allowed) {
+        logger.warn(
+          `Access denied for user ${req.user.email} (role: ${role}) on ${menuRoute} [${action}]`
+        );
+        res.sendForbidden('Insufficient permissions');
+        return;
+      }
+
+      next();
+    } catch (error) {
+      logger.error('Permission check failed:', error);
+      res.sendForbidden('Insufficient permissions');
+    }
   };
 };
 

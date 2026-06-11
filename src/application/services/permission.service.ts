@@ -6,6 +6,7 @@ import RoleMenuPermission, {
 import roleMenuPermissionRepository from '@repositories/role-menu-permission.repository';
 import menuRepository from '@repositories/menu.repository';
 import roleRepository from '@repositories/role.repository';
+import rbacService from '@services/rbac.service';
 import { Transaction } from 'sequelize';
 import {
   MenuPermissionDTO,
@@ -230,6 +231,9 @@ class PermissionService {
         // Transaction will commit here automatically
       });
 
+      // Invalidate cached RBAC permissions so the next request sees fresh data
+      await rbacService.invalidateRole(role.name);
+
       // Now fetch the updated permissions after transaction has committed
       logger.info(`Fetching updated permissions for role ${data.roleId} after transaction commit`);
 
@@ -302,6 +306,8 @@ class PermissionService {
             `Select-all permissions set for role ${roleId}, menu ${menuId} by user ${userId || 'system'}`
           );
 
+          await rbacService.invalidateRole(role.name);
+
           return permission;
         }
       );
@@ -350,6 +356,8 @@ class PermissionService {
           logger.info(
             `Permissions cleared for role ${roleId}, menu ${menuId} by user ${userId || 'system'}`
           );
+
+          await rbacService.invalidateRole(role.name);
 
           return permission;
         }

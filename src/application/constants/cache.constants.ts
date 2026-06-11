@@ -14,6 +14,7 @@ export const CachePrefix = {
   TOKEN: 'token',
   RATE_LIMIT: 'rate_limit',
   FILE: 'file',
+  RBAC: 'rbac',
 };
 
 /**
@@ -54,4 +55,7 @@ export const CacheKeys = {
 
   // File cache keys
   fileMetadata: (id: number) => `${CachePrefix.FILE}:metadata:${id}`,
+
+  // RBAC cache keys (per-role resolved menu permission map)
+  rolePermissions: (roleName: string) => `${CachePrefix.RBAC}:role:${roleName}`,
 };

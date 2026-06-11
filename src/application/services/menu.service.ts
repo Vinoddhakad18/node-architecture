@@ -1,6 +1,9 @@
+import { UserRole } from '@application/constants';
 import { logger } from '@config/logger';
 import Menu, { MenuCreationAttributes } from '@models/menu.model';
 import menuRepository from '@repositories/menu.repository';
+import roleRepository from '@repositories/role.repository';
+import roleMenuPermissionRepository from '@repositories/role-menu-permission.repository';
 
 /**
  * Query options for listing menus
@@ -13,6 +16,24 @@ interface MenuQueryOptions {
   parentId?: number | null;
   sortBy?: string;
   sortOrder?: 'ASC' | 'DESC';
+  skipCache?: boolean;
+}
+
+/**
+ * Plain (serialized) menu tree node used when filtering by role permission
+ */
+interface MenuTreeNode {
+  id: number;
+  name: string;
+  route: string;
+  parent_id: number | null;
+  icon: string | null;
+  sort_order: number;
+  is_active: boolean;
+  created_at: Date;
+  updated_at: Date;
+  children?: MenuTreeNode[];
+  [key: string]: unknown;
 }
 
 /**
@@ -132,16 +153,72 @@ class MenuService {
   }
 
   /**
-   * Get menu tree (hierarchical structure)
+   * Get menu tree (hierarchical structure), scoped to what the given role may view.
+   *
+   * - super_admin (or any role mapped to UserRole.SUPER_ADMIN) receives the full tree.
+   * - Any other role receives only the menus it has `can_view` permission for,
+   *   keeping parent nodes whenever one of their descendants is viewable.
    */
-  async findMenuTree(activeOnly = true): Promise<Menu[]> {
+  async findMenuTree(activeOnly = true, roleName?: string): Promise<MenuTreeNode[]> {
     try {
       const menus = await menuRepository.findMenuTree(activeOnly);
-      return menus;
+      const tree = menus.map((menu) => menu.toJSON() as MenuTreeNode);
+
+      // Super admin bypasses permission filtering and sees everything.
+      if (roleName === UserRole.SUPER_ADMIN) {
+        return tree;
+      }
+
+      const viewableMenuIds = await this.getViewableMenuIds(roleName);
+      return this.filterTreeByPermission(tree, viewableMenuIds);
     } catch (error) {
       logger.error('Error fetching menu tree:', error);
       throw error;
     }
+  }
+
+  /**
+   * Resolve the set of menu ids a role is allowed to view (can_view = true).
+   * Returns an empty set when the role is unknown or has no permissions.
+   */
+  private async getViewableMenuIds(roleName?: string): Promise<Set<number>> {
+    if (!roleName) {
+      return new Set();
+    }
+
+    const role = await roleRepository.findByName(roleName);
+    if (!role) {
+      return new Set();
+    }
+
+    const permissions = await roleMenuPermissionRepository.findByRoleId(role.id, {
+      where: { can_view: true },
+    });
+
+    return new Set(permissions.map((permission) => permission.menu_id));
+  }
+
+  /**
+   * Recursively prune a menu tree, keeping a node when it is directly viewable
+   * or when at least one of its descendants is viewable.
+   */
+  private filterTreeByPermission(
+    nodes: MenuTreeNode[],
+    viewableMenuIds: Set<number>
+  ): MenuTreeNode[] {
+    const result: MenuTreeNode[] = [];
+
+    for (const node of nodes) {
+      const children = node.children
+        ? this.filterTreeByPermission(node.children, viewableMenuIds)
+        : [];
+
+      if (viewableMenuIds.has(node.id) || children.length > 0) {
+        result.push({ ...node, children });
+      }
+    }
+
+    return result;
   }
 
   /**
