@@ -4,7 +4,7 @@ to: src/application/routes/<%= h.changeCase.camel(name) %>/<%= h.changeCase.came
 
 import { Router } from 'express';
 import { <%= h.changeCase.pascal(name) %>Controller } from '@/application/controllers/<%= h.changeCase.camel(name) %>/<%= h.changeCase.camel(name) %>.controller';
-
+import { validateRequest } from '@middleware/validateRequest';
 const router = Router();
 const controller = new <%= h.changeCase.pascal(name) %>Controller();
 
@@ -27,7 +27,7 @@ const controller = new <%= h.changeCase.pascal(name) %>Controller();
  *       201:
  *         description: Created successfully
  */
-router.post('/', controller.create);
+router.post('/', authenticate, controller.create);
 
 /**
  * @swagger
@@ -57,7 +57,7 @@ router.get('/', controller.getAll);
  *       200:
  *         description: Success
  */
-router.get('/:id', controller.getById);
+router.get('/:id', authenticate, controller.getById);
 
 /**
  * @swagger
@@ -75,7 +75,7 @@ router.get('/:id', controller.getById);
  *       200:
  *         description: Updated successfully
  */
-router.put('/:id', controller.update);
+router.put('/:id', authenticate, controller.update);
 
 /**
  * @swagger
@@ -93,6 +93,6 @@ router.put('/:id', controller.update);
  *       204:
  *         description: Deleted successfully
  */
-router.delete('/:id', controller.delete);
+router.delete('/:id', authenticate, controller.delete);
 
 export default router;
