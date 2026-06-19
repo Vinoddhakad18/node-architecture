@@ -10,6 +10,7 @@ import metricsRoutes from './metrics.routes';
 import permissionRoutes from './permission.routes';
 import roleRoutes from './role.routes';
 // HYGEN_IMPORTS
+import categoryRoutes from './category/category.route';
 
 import { config } from '@/config';
 
@@ -32,6 +33,7 @@ router.get('/', (_req: Request, res: Response) => {
         permissions: '/permissions',
         roles: '/roles',
         // HYGEN_ENDPOINTS
+        category: '/category',
       
       },
     },
@@ -79,6 +81,11 @@ router.use('/permissions', permissionRoutes);
 router.use('/roles', roleRoutes);
 
 // HYGEN_ROUTES_USE
+router.use(
+  '/categorys',
+  categoryRoutes
+);
+
 
 
 
