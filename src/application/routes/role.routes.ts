@@ -7,7 +7,7 @@ import {
 } from '@application/validations/role.schema';
 import roleController from '@controllers/role.controller';
 import { MenuRoute, PermissionAction } from '@application/constants';
-import { authenticate, requirePermission } from '@middleware/auth.middleware';
+import { attachPermissions, authenticate, requirePermission } from '@middleware/auth.middleware';
 import { validateRequest } from '@middleware/validateRequest';
 import { Router } from 'express';
 
@@ -47,7 +47,13 @@ const router = Router();
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/active/list', authenticate, roleController.findAllActive);
+router.get(
+  '/active/list',
+  authenticate,
+  requirePermission(MenuRoute.ROLES, PermissionAction.VIEW),
+  attachPermissions(MenuRoute.ROLES),
+  roleController.findAllActive
+);
 
 /**
  * @swagger
@@ -127,7 +133,14 @@ router.get('/active/list', authenticate, roleController.findAllActive);
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/', authenticate, validateRequest(listRolesSchema), roleController.findAll);
+router.get(
+  '/',
+  authenticate,
+  requirePermission(MenuRoute.ROLES, PermissionAction.VIEW),
+  attachPermissions(MenuRoute.ROLES),
+  validateRequest(listRolesSchema),
+  roleController.findAll
+);
 
 /**
  * @swagger
@@ -170,7 +183,13 @@ router.get('/', authenticate, validateRequest(listRolesSchema), roleController.f
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/:id', authenticate, validateRequest(getRoleByIdSchema), roleController.findById);
+router.get(
+  '/:id',
+  authenticate,
+  requirePermission(MenuRoute.ROLES, PermissionAction.VIEW),
+  validateRequest(getRoleByIdSchema),
+  roleController.findById
+);
 
 /**
  * @swagger

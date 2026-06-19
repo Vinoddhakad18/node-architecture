@@ -201,6 +201,49 @@ export const requirePermission = (menuRoute: string, action: PermissionAction) =
 };
 
 /**
+ * Attach Permissions Middleware
+ *
+ * Injects the authenticated user's effective action flags for a given menu
+ * into `res.locals.permissions`, which the response handler then includes in
+ * the standard response envelope as a top-level `permissions` object. This
+ * lets a page receive its data and its button flags (add/edit/delete/export/
+ * status) in a single request and gate the UI at runtime.
+ *
+ * Best-effort: it never blocks the request. If the user is missing or the
+ * lookup fails, all flags default to `false`.
+ *
+ * Place AFTER `authenticate` in the route chain.
+ *
+ * @example
+ *   router.get('/', authenticate, attachPermissions(MenuRoute.ROLES), requirePermission(MenuRoute.ROLES, PermissionAction.VIEW), ...)
+ */
+export const attachPermissions = (menuRoute: string) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const flags = {
+      [PermissionAction.VIEW]: false,
+      [PermissionAction.ADD]: false,
+      [PermissionAction.EDIT]: false,
+      [PermissionAction.DELETE]: false,
+      [PermissionAction.EXPORT]: false,
+      [PermissionAction.STATUS]: false,
+    };
+
+    try {
+      const role = req.user?.role;
+      if (role) {
+        const map = await rbacService.getEffectivePermissionMap(role);
+        Object.assign(flags, map[menuRoute] ?? {});
+      }
+    } catch (error) {
+      logger.warn(`attachPermissions failed for ${menuRoute}:`, error);
+    }
+
+    res.locals.permissions = { menu: menuRoute, ...flags };
+    next();
+  };
+};
+
+/**
  * Check Token Ownership Middleware
  * Verifies that the authenticated user matches the requested userId
  */

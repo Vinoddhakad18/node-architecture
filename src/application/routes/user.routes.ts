@@ -9,7 +9,7 @@ import {
 } from '@application/validations/user.schema';
 import userController from '@controllers/user.controller';
 import { MenuRoute, PermissionAction } from '@application/constants';
-import { authenticate, requirePermission } from '@middleware/auth.middleware';
+import { attachPermissions, authenticate, requirePermission } from '@middleware/auth.middleware';
 import { validateRequest } from '@middleware/validateRequest';
 import { Router } from 'express';
 
@@ -52,6 +52,7 @@ const router = Router();
 router.get(
   '/active/list',
   authenticate,
+  attachPermissions(MenuRoute.USERS),
   requirePermission(MenuRoute.USERS, PermissionAction.VIEW),
   userController.findAllActive
 );
@@ -138,6 +139,7 @@ router.get(
 router.get(
   '/',
   authenticate,
+  attachPermissions(MenuRoute.USERS),
   requirePermission(MenuRoute.USERS, PermissionAction.VIEW),
   validateRequest(listUsersSchema),
   userController.findAll
@@ -187,6 +189,7 @@ router.get(
 router.get(
   '/:id',
   authenticate,
+  attachPermissions(MenuRoute.USERS),
   requirePermission(MenuRoute.USERS, PermissionAction.VIEW),
   validateRequest(getUserByIdSchema),
   userController.findById

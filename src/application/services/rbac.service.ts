@@ -4,6 +4,7 @@ import { PermissionAction } from '@constants/rbac.constants';
 import { UserRole } from '@constants/user.constants';
 import redisService from '@helpers/redis.helper';
 import Menu from '@models/menu.model';
+import menuRepository from '@repositories/menu.repository';
 import roleMenuPermissionRepository from '@repositories/role-menu-permission.repository';
 import roleRepository from '@repositories/role.repository';
 
@@ -99,6 +100,31 @@ class RbacService {
     }
 
     return map;
+  }
+
+  /**
+   * Resolve the effective permission map for a role, suitable for sending to
+   * the client to drive UI gating. `super_admin` receives every active menu
+   * with all flags enabled; other roles receive their cached DB-resolved map.
+   */
+  async getEffectivePermissionMap(roleName: string): Promise<RolePermissionMap> {
+    if (roleName === UserRole.SUPER_ADMIN) {
+      const menus = await menuRepository.findAllActive();
+      const map: RolePermissionMap = {};
+      for (const menu of menus) {
+        map[menu.route] = {
+          [PermissionAction.VIEW]: true,
+          [PermissionAction.ADD]: true,
+          [PermissionAction.EDIT]: true,
+          [PermissionAction.DELETE]: true,
+          [PermissionAction.EXPORT]: true,
+          [PermissionAction.STATUS]: true,
+        };
+      }
+      return map;
+    }
+
+    return this.getRolePermissionMap(roleName);
   }
 
   /**

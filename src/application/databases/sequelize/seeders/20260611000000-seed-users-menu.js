@@ -15,7 +15,7 @@ module.exports = {
       {
         name: 'User Management',
         route: '/admin/users',
-        parent_id: null,
+        parent_id: 1,
         sort_order: 5,
         is_active: true,
         created_at: new Date(),
