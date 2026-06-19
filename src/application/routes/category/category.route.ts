@@ -1,26 +1,22 @@
----
-to: src/application/routes/<%= h.changeCase.camel(name) %>/<%= h.changeCase.camel(name) %>.route.ts
----
-
 import { Router } from 'express';
-import { <%= h.changeCase.pascal(name) %>Controller } from '@/application/controllers/<%= h.changeCase.camel(name) %>/<%= h.changeCase.camel(name) %>.controller';
+import { CategoryController } from '@/application/controllers/category/category.controller';
 
 const router = Router();
-const controller = new <%= h.changeCase.pascal(name) %>Controller();
+const controller = new CategoryController();
 
 /**
  * @swagger
  * tags:
- *   name: <%= h.changeCase.pascal(name) %>
- *   description: <%= h.changeCase.pascal(name) %> Management APIs
+ *   name: Category
+ *   description: Category Management APIs
  */
 
 /**
  * @swagger
- * /api/<%= h.changeCase.kebab(name) %>:
+ * /api/category:
  *   post:
- *     summary: Create <%= h.changeCase.pascal(name) %>
- *     tags: [<%= h.changeCase.pascal(name) %>]
+ *     summary: Create Category
+ *     tags: [Category]
  *     requestBody:
  *       required: true
  *     responses:
@@ -31,10 +27,10 @@ router.post('/', controller.create);
 
 /**
  * @swagger
- * /api/<%= h.changeCase.kebab(name) %>:
+ * /api/category:
  *   get:
- *     summary: Get all <%= h.changeCase.pascal(name) %>
- *     tags: [<%= h.changeCase.pascal(name) %>]
+ *     summary: Get all Category
+ *     tags: [Category]
  *     responses:
  *       200:
  *         description: Success
@@ -43,10 +39,10 @@ router.get('/', controller.getAll);
 
 /**
  * @swagger
- * /api/<%= h.changeCase.kebab(name) %>/{id}:
+ * /api/category/{id}:
  *   get:
- *     summary: Get <%= h.changeCase.pascal(name) %> by ID
- *     tags: [<%= h.changeCase.pascal(name) %>]
+ *     summary: Get Category by ID
+ *     tags: [Category]
  *     parameters:
  *       - in: path
  *         name: id
@@ -61,10 +57,10 @@ router.get('/:id', controller.getById);
 
 /**
  * @swagger
- * /api/<%= h.changeCase.kebab(name) %>/{id}:
+ * /api/category/{id}:
  *   put:
- *     summary: Update <%= h.changeCase.pascal(name) %>
- *     tags: [<%= h.changeCase.pascal(name) %>]
+ *     summary: Update Category
+ *     tags: [Category]
  *     parameters:
  *       - in: path
  *         name: id
@@ -79,10 +75,10 @@ router.put('/:id', controller.update);
 
 /**
  * @swagger
- * /api/<%= h.changeCase.kebab(name) %>/{id}:
+ * /api/category/{id}:
  *   delete:
- *     summary: Delete <%= h.changeCase.pascal(name) %>
- *     tags: [<%= h.changeCase.pascal(name) %>]
+ *     summary: Delete Category
+ *     tags: [Category]
  *     parameters:
  *       - in: path
  *         name: id

@@ -9,6 +9,8 @@ import menuRoutes from './menu.routes';
 import metricsRoutes from './metrics.routes';
 import permissionRoutes from './permission.routes';
 import roleRoutes from './role.routes';
+// HYGEN_IMPORTS
+import categoryRoutes from './category/category.route';
 
 import { config } from '@/config';
 
@@ -30,6 +32,9 @@ router.get('/', (_req: Request, res: Response) => {
         menus: '/menus',
         permissions: '/permissions',
         roles: '/roles',
+        // HYGEN_ENDPOINTS
+        category: '/category',
+      
       },
     },
     'Welcome to MVC API'
@@ -74,6 +79,13 @@ router.use('/permissions', permissionRoutes);
  * Role routes
  */
 router.use('/roles', roleRoutes);
+
+// HYGEN_ROUTES_USE
+router.use(
+  '/categorys',
+  categoryRoutes
+);
+
 
 /**
  * Metrics route (Prometheus endpoint)
