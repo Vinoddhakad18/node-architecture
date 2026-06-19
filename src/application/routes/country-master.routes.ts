@@ -7,7 +7,8 @@ import {
   listCountriesSchema,
 } from '@application/validations/country-master.schema';
 import countryMasterController from '@controllers/country-master.controller';
-import { authenticate } from '@middleware/auth.middleware';
+import { MenuRoute, PermissionAction } from '@application/constants';
+import { authenticate, requirePermission } from '@middleware/auth.middleware';
 import { validateRequest } from '@middleware/validateRequest';
 import { Router } from 'express';
 
@@ -274,6 +275,7 @@ router.get('/:id', validateRequest(getCountryByIdSchema), countryMasterControlle
 router.post(
   '/',
   authenticate,
+  requirePermission(MenuRoute.COUNTRIES, PermissionAction.ADD),
   validateRequest(createCountrySchema),
   countryMasterController.create
 );
@@ -345,6 +347,7 @@ router.post(
 router.put(
   '/:id',
   authenticate,
+  requirePermission(MenuRoute.COUNTRIES, PermissionAction.EDIT),
   validateRequest(updateCountrySchema),
   countryMasterController.update
 );
@@ -391,6 +394,7 @@ router.put(
 router.delete(
   '/:id',
   authenticate,
+  requirePermission(MenuRoute.COUNTRIES, PermissionAction.DELETE),
   validateRequest(deleteCountrySchema),
   countryMasterController.delete
 );
@@ -437,6 +441,7 @@ router.delete(
 router.delete(
   '/:id/permanent',
   authenticate,
+  requirePermission(MenuRoute.COUNTRIES, PermissionAction.DELETE),
   validateRequest(deleteCountrySchema),
   countryMasterController.hardDelete
 );

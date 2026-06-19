@@ -9,7 +9,7 @@ import {
 } from '@application/validations/branch-master.schema';
 import branchMasterController from '@controllers/branch-master.controller';
 import { MenuRoute, PermissionAction } from '@application/constants';
-import { authenticate, requirePermission } from '@middleware/auth.middleware';
+import { attachPermissions, authenticate, requirePermission } from '@middleware/auth.middleware';
 import { validateRequest } from '@middleware/validateRequest';
 import { Router } from 'express';
 
@@ -60,7 +60,13 @@ const router = Router();
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/active/list', authenticate, branchMasterController.findAllActive);
+router.get(
+  '/active/list',
+  authenticate,
+  requirePermission(MenuRoute.BRANCHES, PermissionAction.VIEW),
+  attachPermissions(MenuRoute.BRANCHES),
+  branchMasterController.findAllActive
+);
 
 /**
  * @swagger
@@ -156,6 +162,7 @@ router.get(
   '/',
   authenticate,
   requirePermission(MenuRoute.BRANCHES, PermissionAction.VIEW),
+  attachPermissions(MenuRoute.BRANCHES),
   validateRequest(listBranchesSchema),
   branchMasterController.findAll
 );
@@ -212,7 +219,14 @@ router.get(
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/:id', authenticate, validateRequest(getBranchByIdSchema), branchMasterController.findById);
+router.get(
+  '/:id',
+  authenticate,
+  requirePermission(MenuRoute.BRANCHES, PermissionAction.VIEW),
+  attachPermissions(MenuRoute.BRANCHES),
+  validateRequest(getBranchByIdSchema),
+  branchMasterController.findById
+);
 
 /**
  * @swagger

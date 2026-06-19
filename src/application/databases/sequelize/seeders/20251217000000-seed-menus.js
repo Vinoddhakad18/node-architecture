@@ -8,10 +8,19 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     const menus = [
+       {
+        name: 'Admin Panel',
+        route: '/#',
+        parent_id: null,
+        sort_order: 1,
+        is_active: true,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
       {
         name: 'Menu Management',
         route: '/admin/menus',
-        parent_id: null,
+        parent_id: 1,
         sort_order: 1,
         is_active: true,
         created_at: new Date(),
@@ -20,7 +29,7 @@ module.exports = {
       {
         name: 'Role Management',
         route: '/admin/roles',
-        parent_id: null,
+        parent_id: 1,
         sort_order: 2,
         is_active: true,
         created_at: new Date(),
@@ -29,7 +38,7 @@ module.exports = {
       {
         name: 'RBAC Permission',
         route: '/admin/rbac-permissions',
-        parent_id: null,
+        parent_id: 1,
         sort_order: 4,
         is_active: true,
         created_at: new Date(),
@@ -38,7 +47,7 @@ module.exports = {
       {
         name: 'Branch Management',
         route: '/admin/branches',
-        parent_id: null,
+        parent_id: 1,
         sort_order: 3,
         is_active: true,
         created_at: new Date(),

@@ -4,7 +4,7 @@ import {
 } from '@application/validations/permission.schema';
 import permissionController from '@controllers/permission.controller';
 import { MenuRoute, PermissionAction } from '@application/constants';
-import { authenticate, requirePermission } from '@middleware/auth.middleware';
+import { attachPermissions, authenticate, requirePermission } from '@middleware/auth.middleware';
 import { validateRequest } from '@middleware/validateRequest';
 import { Router } from 'express';
 
@@ -86,9 +86,32 @@ const router = Router();
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
+/**
+ * @swagger
+ * /permissions/me:
+ *   get:
+ *     summary: Get the current user's effective permissions
+ *     description: Returns the logged-in user's per-menu action flags for front-end UI gating.
+ *     tags:
+ *       - Permissions
+ *     security:
+ *       - apiKey: []
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Permissions retrieved successfully
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+router.get('/me', authenticate, permissionController.getMyPermissions);
+
 router.get(
   '/',
   authenticate,
+  attachPermissions(MenuRoute.PERMISSIONS),
+  requirePermission(MenuRoute.PERMISSIONS, PermissionAction.VIEW),
   validateRequest(getPermissionsSchema),
   permissionController.getRolePermissions
 );

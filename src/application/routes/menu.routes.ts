@@ -9,7 +9,7 @@ import {
 } from '@application/validations/menu.schema';
 import menuController from '@controllers/menu.controller';
 import { MenuRoute, PermissionAction } from '@application/constants';
-import { authenticate, requirePermission } from '@middleware/auth.middleware';
+import { attachPermissions, authenticate, requirePermission } from '@middleware/auth.middleware';
 import { validateRequest } from '@middleware/validateRequest';
 import { Router } from 'express';
 
@@ -47,7 +47,13 @@ const router = Router();
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/active/list', authenticate, menuController.findAllActive);
+router.get(
+  '/active/list',
+  authenticate,
+  requirePermission(MenuRoute.MENUS, PermissionAction.VIEW),
+  attachPermissions(MenuRoute.MENUS),
+  validateRequest(listMenusSchema),  menuController.findAllActive
+);
 
 /**
  * @swagger
@@ -171,7 +177,14 @@ router.get('/tree', authenticate, menuController.findMenuTree);
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/', authenticate, validateRequest(listMenusSchema), menuController.findAll);
+router.get(
+  '/',
+  authenticate,
+  requirePermission(MenuRoute.MENUS, PermissionAction.VIEW),
+  attachPermissions(MenuRoute.MENUS),
+  validateRequest(listMenusSchema),
+  menuController.findAll
+);
 
 /**
  * @swagger
@@ -260,7 +273,13 @@ router.get(
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/:id', authenticate, validateRequest(getMenuByIdSchema), menuController.findById);
+router.get(
+  '/:id',
+  authenticate,
+  requirePermission(MenuRoute.MENUS, PermissionAction.VIEW),
+  validateRequest(getMenuByIdSchema),
+  menuController.findById
+);
 
 /**
  * @swagger

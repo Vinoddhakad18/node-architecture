@@ -1,6 +1,8 @@
 import { logger } from '@config/logger';
+import { UserRole } from '@constants/user.constants';
 import { AuthenticatedRequest, getErrorMessage } from '@interfaces/common.interface';
 import permissionService from '@services/permission.service';
+import rbacService from '@services/rbac.service';
 import { Response } from 'express';
 
 /**
@@ -39,6 +41,37 @@ class PermissionController {
         return;
       }
 
+      res.sendServerError(errorMessage || 'Failed to retrieve permissions');
+    }
+  }
+
+  /**
+   * Get the authenticated user's own effective permissions.
+   * GET /api/permissions/me
+   * Drives front-end button gating (UX only; routes remain enforced server-side).
+   */
+  async getMyPermissions(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const role = req.user?.role;
+
+      if (!role) {
+        res.sendUnauthorized('Authentication required');
+        return;
+      }
+
+      const permissions = await rbacService.getEffectivePermissionMap(role);
+
+      res.sendSuccess(
+        {
+          role,
+          isSuperAdmin: role === UserRole.SUPER_ADMIN,
+          permissions,
+        },
+        'Permissions retrieved successfully'
+      );
+    } catch (error: unknown) {
+      logger.error('Error in getMyPermissions controller:', error);
+      const errorMessage = getErrorMessage(error);
       res.sendServerError(errorMessage || 'Failed to retrieve permissions');
     }
   }

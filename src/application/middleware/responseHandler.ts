@@ -12,6 +12,7 @@ interface ResponseData<T = unknown> {
   data?: T;
   errors?: ValidationError[] | ErrorDetail | string;
   meta?: ResponseMeta;
+  permissions?: Record<string, unknown>;
 }
 
 class ResponseHandler {
@@ -40,6 +41,13 @@ class ResponseHandler {
     // Add errors if they exist
     if (errors) {
       response.errors = errors;
+    }
+
+    // Attach the caller's per-menu permission flags when a route opted in via
+    // the attachPermissions middleware (drives front-end button gating).
+    const localPermissions = res.locals?.permissions as Record<string, unknown> | undefined;
+    if (localPermissions) {
+      response.permissions = localPermissions;
     }
 
     // Add metadata in development mode
