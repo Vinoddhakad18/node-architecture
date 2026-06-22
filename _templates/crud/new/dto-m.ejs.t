@@ -10,10 +10,9 @@ const fieldList = (locals.fields || '')
 
 export interface Create<%= h.changeCase.pascal(name) %>Dto {
   <%= fieldName.trim() %>: <%= fieldType?.trim() || 'string' %>;
-<% }) %>
-}
+<% } %>
+
 
 export interface Update<%= h.changeCase.pascal(name) %>Dto {
   <%= fieldName.trim() %>: <%= fieldType?.trim() || 'string' %>;
-<% }) %>
-}
+<% } %>
