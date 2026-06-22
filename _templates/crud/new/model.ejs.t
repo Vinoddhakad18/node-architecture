@@ -33,7 +33,7 @@ extends Model<
 >
 implements <%= h.changeCase.pascal(name) %>Attributes {
 
-  declare id!: number;
+  declare id: number;
 
 <%
 fieldList.forEach(field => {
