@@ -23,7 +23,7 @@ export class <%= h.changeCase.pascal(name) %>Controller {
         result,
         '<%= h.changeCase.pascal(name) %> created successfully'
       );
-    } catch (error) {
+    } catch (error: any) {
       res.sendBadRequest(getErrorMessage(error) || 'Error creating <%= h.changeCase.pascal(name) %>');
 
     }
@@ -38,12 +38,28 @@ export class <%= h.changeCase.pascal(name) %>Controller {
     next: NextFunction
   ): Promise<void> => {
     try {
-      const result = await this.service.getAll(req.query);
+       const {
+        page = 1,
+        limit = 10,
+        search,
+        status,
+        sortBy = 'id',
+        sortOrder = 'ASC',
+      } = req.query;
+
+      const result = await this.service.getAll({
+        page: Number(page),
+        limit: Number(limit),
+        search: search as string,
+        status: status as 'active' | 'inactive',
+        sortBy: sortBy as string,
+        sortOrder: sortOrder as 'ASC' | 'DESC',
+      });
       res.sendSuccess(
         result,
         '<%= h.changeCase.pascal(name) %> list fetched successfully'
       );
-    } catch (error) {
+    } catch (error: any) {
       res.sendBadRequest(getErrorMessage(error) || 'Error fetching <%= h.changeCase.pascal(name) %>s');
     }
   };
@@ -65,7 +81,7 @@ export class <%= h.changeCase.pascal(name) %>Controller {
         result,
         '<%= h.changeCase.pascal(name) %> fetched successfully'
       );
-    } catch (error) {
+    } catch (error: any) {
       res.sendBadRequest(getErrorMessage(error) || 'Error fetching <%= h.changeCase.pascal(name) %>');
     }
   };
@@ -90,7 +106,7 @@ export class <%= h.changeCase.pascal(name) %>Controller {
         result,
         '<%= h.changeCase.pascal(name) %> updated successfully'
       );
-    } catch (error) {
+    } catch (error: any) {
       res.sendBadRequest(getErrorMessage(error) || 'Error updating <%= h.changeCase.pascal(name) %>');
     }
   };
@@ -112,7 +128,7 @@ export class <%= h.changeCase.pascal(name) %>Controller {
         null,
         '<%= h.changeCase.pascal(name) %> deleted successfully'
       );
-    } catch (error) {
+    } catch (error: any) {
       res.sendBadRequest(getErrorMessage(error) || 'Error deleting <%= h.changeCase.pascal(name) %>');
     }
   };

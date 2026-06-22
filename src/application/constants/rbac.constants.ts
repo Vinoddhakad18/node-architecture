@@ -35,7 +35,6 @@ export const MenuRoute = {
   MENUS: '/admin/menus',
   COUNTRIES: '/admin/countries',
   // HYGEN_API_ROUTES
-  CATEGORY: '/admin/categorys',
 } as const;
 
 export type MenuRouteValue = (typeof MenuRoute)[keyof typeof MenuRoute];

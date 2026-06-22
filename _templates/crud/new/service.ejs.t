@@ -51,7 +51,7 @@ export class <%= h.changeCase.pascal(name) %>Service {
           });
       logger.info(`Successfully created <%= h.changeCase.camel(name) %> with ID: ${result.id}`);
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Error creating <%= h.changeCase.camel(name) %>: ${error.message}`);
       throw error;
     }
@@ -62,13 +62,13 @@ export class <%= h.changeCase.pascal(name) %>Service {
    * @returns A paginated list of <%= h.changeCase.camel(name) %> records
    */
 
-  async getAll(query?: <%= h.changeCase.pascal(name) %>QueryOptions) {
+  async getAll(query?: <%= h.changeCase.pascal(name) %>QueryOptions): Promise<PaginatedResult<any>> {
     try {
       logger.info(`Fetching all <%= h.changeCase.camel(name) %> records with query: ${JSON.stringify(query)}`);
       const result = await this.repository.findAll(query);
       logger.info(`Successfully fetched ${result.data.length} <%= h.changeCase.camel(name) %> records`);
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Error fetching <%= h.changeCase.camel(name) %> records: ${error.message}`);
       throw error;
     }
@@ -79,13 +79,13 @@ export class <%= h.changeCase.pascal(name) %>Service {
    * @param id - The ID of the <%= h.changeCase.camel(name) %> to retrieve
    * @returns The <%= h.changeCase.camel(name) %> record with the specified ID, or null if not found
    */
-  async getById(id: number) {
+  async getById(id: number): Promise<any | null> {
     try {
       logger.info(`Fetching <%= h.changeCase.camel(name) %> with ID: ${id}`);
       const result = await this.repository.findById(id);
       logger.info(`Successfully fetched <%= h.changeCase.camel(name) %> with ID: ${id}`);
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Error fetching <%= h.changeCase.camel(name) %> with ID: ${id}: ${error.message}`);
       throw error;
     }
@@ -107,7 +107,7 @@ export class <%= h.changeCase.pascal(name) %>Service {
       });
       logger.info(`Successfully updated <%= h.changeCase.camel(name) %> with ID: ${id}`);
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Error updating <%= h.changeCase.camel(name) %> with ID: ${id}: ${error.message}`);
       throw error;
     }
@@ -124,7 +124,7 @@ export class <%= h.changeCase.pascal(name) %>Service {
       const result = await this.repository.delete(id);
       logger.info(`Successfully deleted <%= h.changeCase.camel(name) %> with ID: ${id}`);
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Error deleting <%= h.changeCase.camel(name) %> with ID: ${id}: ${error.message}`);
       throw error;
     }
