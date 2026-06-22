@@ -1,5 +1,5 @@
 ---
-to: src/application/validations/<%= h.changeCase.camel(name) %>/<%= h.changeCase.camel(name) %>.validation.ts
+to: src/application/validations/<%= h.changeCase.camel(name) %>/<%= h.changeCase.camel(name) %>.schema.ts
 ---
 
 import { z } from "zod";
