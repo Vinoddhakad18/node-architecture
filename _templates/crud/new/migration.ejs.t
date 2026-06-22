@@ -1,5 +1,5 @@
 ---
-to: src/infrastructure/database/migrations/<%= Date.now() %>-create-<%= h.changeCase.kebab(name) %>.ts
+to: src/application/database/migrations/<%= Date.now() %>-create-<%= h.changeCase.kebab(name) %>.ts
 ---
 
 import { QueryInterface, DataTypes } from 'sequelize';
