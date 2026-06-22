@@ -4,8 +4,11 @@ to: src/application/repositories/<%= h.changeCase.camel(name) %>/<%= h.changeCas
 'use strict';
 
 import { Op, FindOptions, WhereOptions } from 'sequelize';
-import { BaseRepository } from './base.repository';
-import <%= h.changeCase.pascal(name) %> from '@models/<%= h.changeCase.kebab(name) %>.model';
+import { BaseRepository } from './../base.repository';
+import <%= h.changeCase.pascal(name) %>, {
+  <%= h.changeCase.pascal(name) %>Attributes,
+  <%= h.changeCase.pascal(name) %>CreationAttributes,
+} from '@models/<%= h.changeCase.kebab(name) %>.model';
 
 
 export class <%= h.changeCase.pascal(name) %>Repository   extends BaseRepository<

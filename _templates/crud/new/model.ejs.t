@@ -1,141 +1,83 @@
 ---
- to: src/application/models/<%= h.changeCase.kebab(name) %>.model.ts
+to: src/application/models/<%= h.changeCase.camel(name) %>.model.ts
 ---
-import {
-DataTypes,
-Model,
-Optional,
-} from 'sequelize';
 
-import sequelize from '@config/database';
+'use strict';
+
+import { sequelize } from '@config/database';
+import { DataTypes, Model, Optional } from 'sequelize';
 
 export interface <%= h.changeCase.pascal(name) %>Attributes {
-id: number;
+  id: number;
 
-} from 'sequelize';
-
-import sequelize from '@config/database';
-
-export interface <%= h.changeCase.pascal(name) %>Attributes {
-id: number;
-
-.filter(Boolean);
-
+<%
+const fieldList = fields.split(',');
 fieldList.forEach(field => {
-const [fieldName, fieldType] = field.split(':');
+ const [fieldName, fieldType] = field.split(':');
 %>
-<%= fieldName.trim() %>: <%= fieldType === 'number'
-? 'number'
-: fieldType === 'boolean'
-? 'boolean'
-: 'string'
-%>;
+  <%= fieldName %>: <%= fieldType === 'number'
+      ? 'number'
+      : fieldType === 'boolean'
+      ? 'boolean'
+      : 'string' %>;
 <% }) %>
-
-created_by?: number;
-updated_by?: number;
-created_at?: number;
-updated_at?: number;
-deleted_at?: number | null;
 }
 
 export interface <%= h.changeCase.pascal(name) %>CreationAttributes
-extends Optional<
-<%= h.changeCase.pascal(name) %>Attributes,
-| 'id'
-| 'created_by'
-| 'updated_by'
-| 'created_at'
-| 'updated_at'
-| 'deleted_at'
-
-> {}
+extends Optional<<%= h.changeCase.pascal(name) %>Attributes, 'id'> {}
 
 class <%= h.changeCase.pascal(name) %>
 extends Model<
 <%= h.changeCase.pascal(name) %>Attributes,
 <%= h.changeCase.pascal(name) %>CreationAttributes
-
 >
+implements <%= h.changeCase.pascal(name) %>Attributes {
 
-implements <%= h.changeCase.pascal(name) %>Attributes
-{
-public id!: number;
+  public id!: number;
 
 <%
 fieldList.forEach(field => {
-const [fieldName, fieldType] = field.split(':');
+ const [fieldName, fieldType] = field.split(':');
 %>
-public <%= fieldName.trim() %>!: <%= fieldType === 'number'
-? 'number'
-: fieldType === 'boolean'
-? 'boolean'
-: 'string'
-%>;
+  public <%= fieldName %>!:
+  <%= fieldType === 'number'
+      ? 'number'
+      : fieldType === 'boolean'
+      ? 'boolean'
+      : 'string' %>;
 <% }) %>
-
-public created_by!: number;
-public updated_by!: number;
-public created_at!: number;
-public updated_at!: number;
-public deleted_at!: number | null;
 }
 
 <%= h.changeCase.pascal(name) %>.init(
 {
-id: {
-type: DataTypes.BIGINT,
-autoIncrement: true,
-primaryKey: true,
-},
+  id: {
+    type: DataTypes.BIGINT,
+    autoIncrement: true,
+    primaryKey: true,
+  },
 
 <%
 fieldList.forEach(field => {
-const [fieldName, fieldType] = field.split(':');
+ const [fieldName, fieldType] = field.split(':');
 
-let dbType = 'DataTypes.STRING';
+ let dataType = 'STRING';
 
-if (fieldType === 'number') dbType = 'DataTypes.INTEGER';
-if (fieldType === 'boolean') dbType = 'DataTypes.BOOLEAN';
+ if (fieldType === 'number') {
+   dataType = 'INTEGER';
+ } else if (fieldType === 'boolean') {
+   dataType = 'BOOLEAN';
+ }
 %>
-<%= fieldName.trim() %>: {
-type: <%= dbType %>,
-allowNull: false,
-},
+  <%= fieldName %>: {
+    type: DataTypes.<%= dataType %>,
+    allowNull: false,
+  },
 <% }) %>
-
-```
-created_by: {
-  type: DataTypes.BIGINT,
-  allowNull: true,
-},
-
-updated_by: {
-  type: DataTypes.BIGINT,
-  allowNull: true,
-},
-
-created_at: {
-  type: DataTypes.BIGINT,
-  allowNull: false,
-},
-
-updated_at: {
-  type: DataTypes.BIGINT,
-  allowNull: false,
-},
-
-deleted_at: {
-  type: DataTypes.BIGINT,
-  allowNull: true,
-},
-```
-
 },
 {
-sequelize,
-tableName: '<%= h.changeCase.snake(name) %>s',
-timestamps: false,
+  sequelize,
+  tableName: '<%= h.changeCase.snake(name) %>',
+  timestamps: true,
 }
 );
 
