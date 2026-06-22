@@ -82,7 +82,7 @@ export class <%= h.changeCase.pascal(name) %>Repository   extends BaseRepository
     } catch (error:any) {
         throw new Error(`Error fetching <%= h.changeCase.camel(name) %> with ID ${id}: ${error.message}`);
     }
-
+  }
   /**
    * Update a <%= h.changeCase.camel(name) %> record by ID
    * @param id - The ID of the <%= h.changeCase.camel(name) %> to update
