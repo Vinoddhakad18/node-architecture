@@ -6,9 +6,10 @@ import { Router } from 'express';
 import { <%= h.changeCase.pascal(name) %>Controller } from '@/application/controllers/<%= h.changeCase.camel(name) %>/<%= h.changeCase.camel(name) %>.controller';
 import { attachPermissions, authenticate, requirePermission } from '@middleware/auth.middleware';
 import { MenuRoute, PermissionAction } from '@application/constants';
-
+import {create<%= h.changeCase.camel(name) %>Schema, update<%= h.changeCase.pascal(name) %>Schema} from '@/application/validators/<%= h.changeCase.camel(name) %>/<%= h.changeCase.camel(name) %>.schema';
 const router = Router();
 const controller = new <%= h.changeCase.pascal(name) %>Controller();
+import { validateRequest } from '@middleware/validateRequest';
 
 /**
  * @swagger
@@ -29,7 +30,7 @@ const controller = new <%= h.changeCase.pascal(name) %>Controller();
  *       201:
  *         description: Created successfully
  */
-router.post('/', requirePermission(MenuRoute.<%= h.changeCase.constantCase(name) %>, PermissionAction.ADD),
+router.post('/', validateRequest(create<%= h.changeCase.pascal(name) %>Schema), requirePermission(MenuRoute.<%= h.changeCase.constantCase(name) %>, PermissionAction.ADD),
   attachPermissions(MenuRoute.BRANCHES),authenticate, controller.create);
 
 /**
@@ -80,7 +81,7 @@ router.get('/:id', requirePermission(MenuRoute.<%= h.changeCase.constantCase(nam
  *       200:
  *         description: Updated successfully
  */
-router.put('/:id', requirePermission(MenuRoute.<%= h.changeCase.constantCase(name) %>, PermissionAction.EDIT),
+router.put('/:id', validateRequest(update<%= h.changeCase.pascal(name) %>Schema), requirePermission(MenuRoute.<%= h.changeCase.constantCase(name) %>, PermissionAction.EDIT),
   attachPermissions(MenuRoute.BRANCHES),authenticate, controller.update);
 
 /**
