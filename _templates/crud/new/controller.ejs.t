@@ -17,8 +17,8 @@ export class <%= h.changeCase.pascal(name) %>Controller {
     next: NextFunction
   ): Promise<void> => {
     try {
-      const result = await this.service.create(req.body);
-
+      const userId = req.user?.userId;
+      const result = await this.service.create(req.body, userId);
       res.sendCreated(
         result,
         '<%= h.changeCase.pascal(name) %> created successfully'
@@ -79,9 +79,11 @@ export class <%= h.changeCase.pascal(name) %>Controller {
     next: NextFunction
   ): Promise<void> => {
     try {
+      const userId = req.user?.userId;
       const result = await this.service.update(
         Number(req.params.id),
-        req.body
+        req.body,
+        userId
       );
 
       res.sendSuccess(
@@ -100,8 +102,10 @@ export class <%= h.changeCase.pascal(name) %>Controller {
     next: NextFunction
   ): Promise<void> => {
     try {
+      const userId = req.user?.userId;
       await this.service.delete(
-        Number(req.params.id)
+        Number(req.params.id),
+        userId
       );
 
       res.sendSuccess(

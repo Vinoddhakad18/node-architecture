@@ -37,10 +37,18 @@ export class <%= h.changeCase.pascal(name) %>Service {
    * @param payload - The data to create a new <%= h.changeCase.camel(name) %>
    * @returns The created <%= h.changeCase.camel(name) %> record
    */
-  async create(payload: any) {
+  async create(payload: any, userId?: number) {
     try {
       logger.info(`Creating new <%= h.changeCase.camel(name) %> with payload: ${JSON.stringify(payload)}`);
-      const result = await this.repository.create(payload);
+      const timestamp = Math.floor(Date.now() / 1000);
+      const result = await this.repository.create(  {
+            ...payload,
+            status: payload.status ?? 'active',
+            created_by: userId || null,
+            updated_by: userId || null,
+            created_at: timestamp,
+            updated_at: timestamp,
+          });
       logger.info(`Successfully created <%= h.changeCase.camel(name) %> with ID: ${result.id}`);
       return result;
     } catch (error) {
@@ -89,10 +97,14 @@ export class <%= h.changeCase.pascal(name) %>Service {
    * @param payload - The data to update the <%= h.changeCase.camel(name) %> record with
    * @returns The updated <%= h.changeCase.camel(name) %> record, or null if not found
    */
-  async update(id: number, payload: any) {
+  async update(id: number, payload: any, userId?: number) {
     try {
       logger.info(`Updating <%= h.changeCase.camel(name) %> with ID: ${id}`);
-      const result = await this.repository.update(id, payload);
+      const result = await this.repository.update(id, {
+        ...payload,
+        updated_by: userId || null,
+        updated_at: Math.floor(Date.now() / 1000),
+      });
       logger.info(`Successfully updated <%= h.changeCase.camel(name) %> with ID: ${id}`);
       return result;
     } catch (error) {
@@ -106,7 +118,7 @@ export class <%= h.changeCase.pascal(name) %>Service {
    * @param id - The ID of the <%= h.changeCase.camel(name) %> to delete
    * @returns A boolean indicating whether the deletion was successful
    */
-  async delete(id: number) {
+  async delete(id: number, userId?: number) {
     try {
       logger.info(`Deleting <%= h.changeCase.camel(name) %> with ID: ${id}`);
       const result = await this.repository.delete(id);
