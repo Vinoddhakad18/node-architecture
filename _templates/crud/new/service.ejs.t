@@ -2,7 +2,7 @@
 to: src/application/services/<%= h.changeCase.camel(name) %>/<%= h.changeCase.camel(name) %>.service.ts
 ---
 import { logger } from '@config/logger';
-import { <%= h.changeCase.pascal(name) %>Repository } from '@/infrastructure/repositories/<%= h.changeCase.camel(name) %>/<%= h.changeCase.camel(name) %>.repository';
+import { <%= h.changeCase.pascal(name) %>Repository } from '@application/repositories/<%= h.changeCase.camel(name) %>/<%= h.changeCase.camel(name) %>.repository';
 
 /**
  * Query options for listing menus

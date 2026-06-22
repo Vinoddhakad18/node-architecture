@@ -1,4 +1,3 @@
-
 ---
 to: src/application/dtos/<%= h.changeCase.camel(name) %>/<%= h.changeCase.camel(name) %>.dto.ts
 ---
