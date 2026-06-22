@@ -6,7 +6,7 @@ import { Router } from 'express';
 import { <%= h.changeCase.pascal(name) %>Controller } from '@/application/controllers/<%= h.changeCase.camel(name) %>/<%= h.changeCase.camel(name) %>.controller';
 import { attachPermissions, authenticate, requirePermission } from '@middleware/auth.middleware';
 import { MenuRoute, PermissionAction } from '@application/constants';
-import {create<%= h.changeCase.camel(name) %>Schema, update<%= h.changeCase.pascal(name) %>Schema} from '@/application/validators/<%= h.changeCase.camel(name) %>/<%= h.changeCase.camel(name) %>.schema';
+import {create<%= h.changeCase.pascal(name) %>Schema, update<%= h.changeCase.pascal(name) %>Schema} from '@application/validations/<%= h.changeCase.camel(name) %>/<%= h.changeCase.camel(name) %>.scheme';
 const router = Router();
 const controller = new <%= h.changeCase.pascal(name) %>Controller();
 import { validateRequest } from '@middleware/validateRequest';
