@@ -33,13 +33,13 @@ extends Model<
 >
 implements <%= h.changeCase.pascal(name) %>Attributes {
 
-  public id!: number;
+  declare id!: number;
 
 <%
 fieldList.forEach(field => {
  const [fieldName, fieldType] = field.split(':');
 %>
-  public <%= fieldName %>!:
+  declare <%= fieldName %>!:
   <%= fieldType === 'number'
       ? 'number'
       : fieldType === 'boolean'

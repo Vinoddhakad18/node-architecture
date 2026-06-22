@@ -1,7 +1,7 @@
 ---
 to: src/application/dtos/<%= h.changeCase.camel(name) %>/<%= h.changeCase.camel(name) %>.dto.ts
 ---
-
+import { <%= h.changeCase.pascal(name) %>Attributes } from '@models/<%= h.changeCase.camel(name) %>.model';
 <%
 const fieldList = (locals.fields || '')
   .split(',')
@@ -9,17 +9,11 @@ const fieldList = (locals.fields || '')
 %>
 
 export interface Create<%= h.changeCase.pascal(name) %>Dto {
-<% fieldList.forEach(field => {
-  const [fieldName, fieldType] = field.split(':');
-%>
   <%= fieldName.trim() %>: <%= fieldType?.trim() || 'string' %>;
 <% }) %>
 }
 
 export interface Update<%= h.changeCase.pascal(name) %>Dto {
-<% fieldList.forEach(field => {
-  const [fieldName, fieldType] = field.split(':');
-%>
-  <%= fieldName.trim() %>?: <%= fieldType?.trim() || 'string' %>;
+  <%= fieldName.trim() %>: <%= fieldType?.trim() || 'string' %>;
 <% }) %>
 }
