@@ -13,8 +13,7 @@ export class <%= h.changeCase.pascal(name) %>Controller {
   */
   create = async (
     req: Request,
-    res: Response,
-    next: NextFunction
+    res: Response
   ): Promise<void> => {
     try {
       const userId = req.user?.userId;
@@ -34,8 +33,7 @@ export class <%= h.changeCase.pascal(name) %>Controller {
  */
   getAll = async (
     req: Request,
-    res: Response,
-    next: NextFunction
+    res: Response
   ): Promise<void> => {
     try {
        const {
@@ -69,8 +67,7 @@ export class <%= h.changeCase.pascal(name) %>Controller {
   */
   getById = async (
     req: Request,
-    res: Response,
-    next: NextFunction
+    res: Response
   ): Promise<void> => {
     try {
       const result = await this.service.getById(
@@ -91,8 +88,7 @@ export class <%= h.changeCase.pascal(name) %>Controller {
   */
   update = async (
     req: Request,
-    res: Response,
-    next: NextFunction
+    res: Response
   ): Promise<void> => {
     try {
       const userId = req.user?.userId;
@@ -114,8 +110,7 @@ export class <%= h.changeCase.pascal(name) %>Controller {
   */
   delete = async (
     req: Request,
-    res: Response,
-    next: NextFunction
+    res: Response
   ): Promise<void> => {
     try {
       const userId = req.user?.userId;

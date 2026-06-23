@@ -8,7 +8,7 @@ import { attachPermissions, authenticate, requirePermission } from '@middleware/
 import { MenuRoute, PermissionAction } from '@application/constants';
 import {create<%= h.changeCase.pascal(name) %>Schema, update<%= h.changeCase.pascal(name) %>Schema} from '@application/validations/<%= h.changeCase.camel(name) %>/<%= h.changeCase.camel(name) %>.scheme';
 const router = Router();
-const controller = ''; //new <%= h.changeCase.pascal(name) %>Controller();
+const controller = new <%= h.changeCase.pascal(name) %>Controller();
 import { validateRequest } from '@middleware/validateRequest';
 
 /**
@@ -31,7 +31,7 @@ import { validateRequest } from '@middleware/validateRequest';
  *         description: Created successfully
  */
 router.post('/', validateRequest(create<%= h.changeCase.pascal(name) %>Schema), requirePermission(MenuRoute.<%= h.changeCase.constantCase(name) %>, PermissionAction.ADD),
-  attachPermissions(MenuRoute.<%= h.changeCase.constantCase(name) %>),authenticate, {console.log('controller.create')}); //controller.create);
+  attachPermissions(MenuRoute.<%= h.changeCase.constantCase(name) %>),authenticate, controller.create);
 
 /**
  * @swagger
@@ -44,7 +44,7 @@ router.post('/', validateRequest(create<%= h.changeCase.pascal(name) %>Schema), 
  *         description: Success
  */
 router.get('/', requirePermission(MenuRoute.<%= h.changeCase.constantCase(name) %>, PermissionAction.VIEW),
-  attachPermissions(MenuRoute.<%= h.changeCase.constantCase(name) %>),authenticate, {console.log('controller.getAll')}); //controller.getAll);
+  attachPermissions(MenuRoute.<%= h.changeCase.constantCase(name) %>),authenticate, controller.getAll);
 
 /**
  * @swagger
@@ -63,7 +63,7 @@ router.get('/', requirePermission(MenuRoute.<%= h.changeCase.constantCase(name) 
  *         description: Success
  */
 router.get('/:id', requirePermission(MenuRoute.<%= h.changeCase.constantCase(name) %>, PermissionAction.VIEW),
-  attachPermissions(MenuRoute.<%= h.changeCase.constantCase(name) %>),authenticate, {console.log('controller.getById')}); //controller.getById);
+  attachPermissions(MenuRoute.<%= h.changeCase.constantCase(name) %>),authenticate, controller.getById);
 
 /**
  * @swagger
@@ -82,7 +82,7 @@ router.get('/:id', requirePermission(MenuRoute.<%= h.changeCase.constantCase(nam
  *         description: Updated successfully
  */
 router.put('/:id', validateRequest(update<%= h.changeCase.pascal(name) %>Schema), requirePermission(MenuRoute.<%= h.changeCase.constantCase(name) %>, PermissionAction.EDIT),
-  attachPermissions(MenuRoute.<%= h.changeCase.constantCase(name) %>),authenticate, {console.log('controller.update')}); //controller.update);
+  attachPermissions(MenuRoute.<%= h.changeCase.constantCase(name) %>),authenticate, controller.update);
 
 /**
  * @swagger
@@ -101,6 +101,6 @@ router.put('/:id', validateRequest(update<%= h.changeCase.pascal(name) %>Schema)
  *         description: Deleted successfully
  */
 router.delete('/:id', requirePermission(MenuRoute.<%= h.changeCase.constantCase(name) %>, PermissionAction.DELETE),
-  attachPermissions(MenuRoute.<%= h.changeCase.constantCase(name) %>),authenticate, {console.log('controller.delete')}); //controller.delete);
+  attachPermissions(MenuRoute.<%= h.changeCase.constantCase(name) %>),authenticate, controller.delete);
 
 export default router;
