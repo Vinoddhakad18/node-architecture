@@ -6,7 +6,7 @@ import { QueryInterface, DataTypes } from 'sequelize';
 
 export default {
   async up(queryInterface: QueryInterface) {
-    await queryInterface.createTable('<%= h.changeCase.snake(name) %>s', {
+    await queryInterface.createTable('<%= h.changeCase.snake(name) %>', {
       id: {
         type: DataTypes.BIGINT,
         primaryKey: true,
@@ -45,6 +45,6 @@ fieldList.forEach(field => {
   },
 
   async down(queryInterface: QueryInterface) {
-    await queryInterface.dropTable('<%= h.changeCase.snake(name) %>s');
+    await queryInterface.dropTable('<%= h.changeCase.snake(name) %>');
   }
 };
