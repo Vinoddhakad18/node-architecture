@@ -11,6 +11,14 @@ const router = Router();
 const controller = new <%= h.changeCase.pascal(name) %>Controller();
 import { validateRequest } from '@middleware/validateRequest';
 
+<%
+const fieldList = (locals.fields || '').split(',');
+const swaggerFields = fieldList.filter(field => {
+  const [fieldName] = field.split(':');
+  return !fieldName.startsWith('created_') &&
+         !fieldName.startsWith('updated_');
+});
+%>
 /**
  * @swagger
  * tags:
@@ -20,7 +28,7 @@ import { validateRequest } from '@middleware/validateRequest';
 
 /**
  * @swagger
- * /api/<%= h.changeCase.kebab(name) %>:
+ * /<%= h.changeCase.kebab(name) %>:
  *   post:
  *     summary: Create <%= h.changeCase.pascal(name) %>
  *     tags: [<%= h.changeCase.pascal(name) %>]
@@ -29,32 +37,64 @@ import { validateRequest } from '@middleware/validateRequest';
  *       - apiKey: []
  *     requestBody:
  *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+<%
+swaggerFields.forEach(field => {
+  const [fieldName, fieldType] = field.split(':');
+%>
+ *               <%= fieldName %>:
+ *                 type: <%= fieldType === 'number' ? 'integer' : fieldType === 'boolean' ? 'boolean' : 'string' %>
+ *                 example: <%= fieldType === 'number' ? 1 : fieldType === 'boolean' ? 'true' : 'sample value' %>
+<%
+});
+%>
  *     responses:
  *       201:
  *         description: Created successfully
  */
-router.post('/', validateRequest(create<%= h.changeCase.pascal(name) %>Schema), requirePermission(MenuRoute.<%= h.changeCase.constantCase(name) %>, PermissionAction.ADD),
-  attachPermissions(MenuRoute.<%= h.changeCase.constantCase(name) %>),authenticate, controller.create);
+router.post('/', authenticate, validateRequest(create<%= h.changeCase.pascal(name) %>Schema), requirePermission(MenuRoute.<%= h.changeCase.constantCase(name) %>, PermissionAction.ADD),
+  attachPermissions(MenuRoute.<%= h.changeCase.constantCase(name) %>), controller.create);
 
 /**
  * @swagger
- * /api/<%= h.changeCase.kebab(name) %>:
+ * /<%= h.changeCase.kebab(name) %>:
  *   get:
  *     summary: Get all <%= h.changeCase.pascal(name) %>
  *     tags: [<%= h.changeCase.pascal(name) %>]
  *     security:
- *       - bearerAuth: []
  *       - apiKey: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Success
+ *         description: <%= h.changeCase.pascal(name) %> retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Fetch successfully
+ *                 data:
+ *                   type: array
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/', requirePermission(MenuRoute.<%= h.changeCase.constantCase(name) %>, PermissionAction.VIEW),
-  attachPermissions(MenuRoute.<%= h.changeCase.constantCase(name) %>),authenticate, controller.getAll);
+router.get('/', authenticate, requirePermission(MenuRoute.<%= h.changeCase.constantCase(name) %>, PermissionAction.VIEW),
+  attachPermissions(MenuRoute.<%= h.changeCase.constantCase(name) %>), controller.getAll);
 
 /**
  * @swagger
- * /api/<%= h.changeCase.kebab(name) %>/{id}:
+ * /<%= h.changeCase.kebab(name) %>/{id}:
  *   get:
  *     summary: Get <%= h.changeCase.pascal(name) %> by ID
  *     tags: [<%= h.changeCase.pascal(name) %>]
@@ -66,14 +106,14 @@ router.get('/', requirePermission(MenuRoute.<%= h.changeCase.constantCase(name) 
  *           type: integer
  *     responses:
  *       200:
- *         description: Success
+ *         description: <%= h.changeCase.pascal(name) %> retrieved successfully
  */
-router.get('/:id', requirePermission(MenuRoute.<%= h.changeCase.constantCase(name) %>, PermissionAction.VIEW),
-  attachPermissions(MenuRoute.<%= h.changeCase.constantCase(name) %>),authenticate, controller.getById);
+router.get('/:id', authenticate, requirePermission(MenuRoute.<%= h.changeCase.constantCase(name) %>, PermissionAction.VIEW),
+  attachPermissions(MenuRoute.<%= h.changeCase.constantCase(name) %>), controller.getById);
 
 /**
  * @swagger
- * /api/<%= h.changeCase.kebab(name) %>/{id}:
+ * /<%= h.changeCase.kebab(name) %>/{id}:
  *   put:
  *     summary: Update <%= h.changeCase.pascal(name) %>
  *     tags: [<%= h.changeCase.pascal(name) %>]
@@ -87,12 +127,12 @@ router.get('/:id', requirePermission(MenuRoute.<%= h.changeCase.constantCase(nam
  *       200:
  *         description: Updated successfully
  */
-router.put('/:id', validateRequest(update<%= h.changeCase.pascal(name) %>Schema), requirePermission(MenuRoute.<%= h.changeCase.constantCase(name) %>, PermissionAction.EDIT),
-  attachPermissions(MenuRoute.<%= h.changeCase.constantCase(name) %>),authenticate, controller.update);
+router.put('/:id', authenticate, validateRequest(update<%= h.changeCase.pascal(name) %>Schema), requirePermission(MenuRoute.<%= h.changeCase.constantCase(name) %>, PermissionAction.EDIT),
+  attachPermissions(MenuRoute.<%= h.changeCase.constantCase(name) %>), controller.update);
 
 /**
  * @swagger
- * /api/<%= h.changeCase.kebab(name) %>/{id}:
+ * /<%= h.changeCase.kebab(name) %>/{id}:
  *   delete:
  *     summary: Delete <%= h.changeCase.pascal(name) %>
  *     tags: [<%= h.changeCase.pascal(name) %>]
@@ -106,7 +146,7 @@ router.put('/:id', validateRequest(update<%= h.changeCase.pascal(name) %>Schema)
  *       204:
  *         description: Deleted successfully
  */
-router.delete('/:id', requirePermission(MenuRoute.<%= h.changeCase.constantCase(name) %>, PermissionAction.DELETE),
-  attachPermissions(MenuRoute.<%= h.changeCase.constantCase(name) %>),authenticate, controller.delete);
+router.delete('/:id', authenticate, requirePermission(MenuRoute.<%= h.changeCase.constantCase(name) %>, PermissionAction.DELETE),
+  attachPermissions(MenuRoute.<%= h.changeCase.constantCase(name) %>), controller.delete);
 
 export default router;
