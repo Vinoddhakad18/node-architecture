@@ -2,7 +2,7 @@
 to: src/application/controllers/<%= h.changeCase.camel(name) %>/<%= h.changeCase.camel(name) %>.controller.ts
 ---
 
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { getErrorMessage } from '@interfaces/common.interface';
 import { <%= h.changeCase.pascal(name) %>Service } from '@/application/services/<%= h.changeCase.camel(name) %>/<%= h.changeCase.camel(name) %>.service';
 
