@@ -24,6 +24,9 @@ import { validateRequest } from '@middleware/validateRequest';
  *   post:
  *     summary: Create <%= h.changeCase.pascal(name) %>
  *     tags: [<%= h.changeCase.pascal(name) %>]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKey: []
  *     requestBody:
  *       required: true
  *     responses:
@@ -39,6 +42,9 @@ router.post('/', validateRequest(create<%= h.changeCase.pascal(name) %>Schema), 
  *   get:
  *     summary: Get all <%= h.changeCase.pascal(name) %>
  *     tags: [<%= h.changeCase.pascal(name) %>]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKey: []
  *     responses:
  *       200:
  *         description: Success
