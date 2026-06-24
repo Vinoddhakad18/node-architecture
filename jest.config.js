@@ -3,15 +3,15 @@ module.exports = {
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
   testMatch: [
-    '**/__tests__/**/*.+(ts|tsx|js)',
+    '**/tests/**/*.+(ts|tsx|js)',
     '**/?(*.)+(spec|test).+(ts|tsx|js)'
   ],
   testPathIgnorePatterns: [
     '/node_modules/',
     '/src/environment/',
-    '/src/__tests__/helpers/',
-    '/src/__tests__/mocks/',
-    '/src/__tests__/setup.ts',
+    '/src/tests/helpers/',
+    '/src/tests/mocks/',
+    '/src/tests/setup.ts',
     '/e2e/'
   ],
   transform: {
@@ -62,7 +62,7 @@ module.exports = {
     '^@services/(.*)$': '<rootDir>/src/application/services/$1',
     '^@environment/(.*)$': '<rootDir>/src/environment/$1',
   },
-  setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/src/tests/setup.ts'],
   testTimeout: 10000,
   verbose: true,
 };

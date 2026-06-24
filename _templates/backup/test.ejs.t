@@ -1,5 +1,5 @@
 ---
-to: src/_tests_/<%= h.changeCase.camel(name) %>/<%= h.changeCase.camel(name) %>.test.ts
+to: src/tests/<%= h.changeCase.camel(name) %>/<%= h.changeCase.camel(name) %>.test.ts
 ---
 
 import { describe, expect, test } from "@jest/globals";

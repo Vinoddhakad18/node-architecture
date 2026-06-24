@@ -5,7 +5,7 @@ This directory contains the test suite for the Node.js MVC Architecture applicat
 ## Directory Structure
 
 ```
-__tests__/
+tests/
 ├── setup.ts                 # Global test setup and configuration
 ├── helpers/
 │   └── test-helpers.ts     # Shared testing utilities
@@ -14,14 +14,10 @@ __tests__/
 │   └── logger.mock.ts      # Logger mocks
 └── e2e/
     └── auth.e2e.test.ts    # End-to-end authentication tests
-
-application/
-├── services/
-│   └── __tests__/
+services/
 │       └── auth.service.test.ts      # Unit tests for auth service
-└── controllers/
-    └── __tests__/
-        └── auth.controller.test.ts   # Integration tests for auth controller
+controllers/
+         └── auth.controller.test.ts   # Integration tests for auth controller
 ```
 
 ## Test Types
