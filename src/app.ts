@@ -27,7 +27,8 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
-
+import compression from 'compression';
+import { slowDown } from 'express-slow-down';
 import { swaggerSpec, swaggerUiOptions } from './swagger';
 
 import { config } from '@/config';
@@ -58,6 +59,16 @@ const limiter = rateLimit({
 });
 
 /**
+ * Speed limiter configuration
+ */
+const speedLimiter = slowDown({
+  windowMs: 15 * 60 * 1000, // 15 minute
+  delayAfter: 50,           // Allow 50 requests without delay
+  delayMs: () => 500,       // Add 500ms delay per request after the limit
+});
+
+
+/**
  * Create and configure Express application
  */
 export const createApp = async (): Promise<Application> => {
@@ -67,6 +78,12 @@ export const createApp = async (): Promise<Application> => {
 
   // Security middleware
   app.use(helmet());
+
+  // Disable 'X-Powered-By' header for security reasons
+  app.disable('x-powered-by');
+  
+  // Compress all responses
+  app.use(compression());
 
   // CORS configuration
   app.use(
@@ -78,6 +95,9 @@ export const createApp = async (): Promise<Application> => {
 
   // Rate limiting
   app.use(limiter);
+
+  // Speed limiting
+  app.use(speedLimiter);
 
   // Middleware
   app.use(express.json());

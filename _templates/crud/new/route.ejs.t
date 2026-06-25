@@ -95,6 +95,7 @@ router.get('/', authenticate, requirePermission(MenuRoute.<%= h.changeCase.const
 /**
  * @swagger
  * /<%= h.changeCase.kebab(name) %>/{id}:
+
  *   get:
  *     summary: Get <%= h.changeCase.pascal(name) %> by ID
  *     tags: [<%= h.changeCase.pascal(name) %>]
@@ -123,6 +124,26 @@ router.get('/:id', authenticate, requirePermission(MenuRoute.<%= h.changeCase.co
  *         required: true
  *         schema:
  *           type: integer
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKey: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+<%
+swaggerFields.forEach(field => {
+  const [fieldName, fieldType] = field.split(':');
+%>
+ *               <%= fieldName %>:
+ *                 type: <%= fieldType === 'number' ? 'integer' : fieldType === 'boolean' ? 'boolean' : 'string' %>
+ *                 example: <%= fieldType === 'number' ? 1 : fieldType === 'boolean' ? 'true' : 'sample value' %>
+<%
+});
+%>
  *     responses:
  *       200:
  *         description: Updated successfully
