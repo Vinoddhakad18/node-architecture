@@ -13,6 +13,7 @@ export default {
     name: '<env:DB_NAME>',
     username: '<env:DB_USERNAME>',
     password: '<env:DB_PASSWORD>',
+    
   },
   jwt: {
     secret: '<env:JWT_SECRET>',

@@ -37,20 +37,19 @@ try {
 
 // Override with environment variables
 if (environmentConfig.database) {
-  environmentConfig.database.host = process.env.DB_HOST || environmentConfig.database.host;
-  environmentConfig.database.port = process.env.DB_PORT
-    ? parseInt(process.env.DB_PORT)
-    : environmentConfig.database.port;
-  environmentConfig.database.name = process.env.DB_NAME || environmentConfig.database.name;
-  environmentConfig.database.username =
-    process.env.DB_USERNAME || environmentConfig.database.username;
-  environmentConfig.database.password =
-    process.env.DB_PASSWORD || environmentConfig.database.password;
+  environmentConfig.database.driver = process.env.DB_DRIVER || environmentConfig.database.driver;
+    environmentConfig.database.host = process.env.DB_HOST || environmentConfig.database.host;
+    environmentConfig.database.port = process.env.DB_PORT
+      ? parseInt(process.env.DB_PORT)
+      : environmentConfig.database.port;
+    environmentConfig.database.name = process.env.DB_NAME || environmentConfig.database.name;
+    environmentConfig.database.username = process.env.DB_USERNAME || environmentConfig.database.username;
+    environmentConfig.database.password = process.env.DB_PASSWORD || environmentConfig.database.password;
+  
 }
 
 // Override port from env
 environmentConfig.port = process.env.PORT ? parseInt(process.env.PORT) : environmentConfig.port;
-
 // Override API prefix from env
 environmentConfig.apiPrefix = process.env.API_PREFIX || environmentConfig.apiPrefix;
 

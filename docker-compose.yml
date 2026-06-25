@@ -4,48 +4,83 @@
 #   Production:  docker-compose --profile production up
 
 services:
-  mysql:
+  postgres:
+    container_name: node-mvc-postgres
     build:
-      context: ./docker/mysql
+      context: ./docker/postgres
       dockerfile: Dockerfile
-    image: node-mvc-mysql:latest
-    container_name: node-mvc-mysql
+    image: node-mvc-postgres:latest
     restart: unless-stopped
+
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-node_app_db}
-      MYSQL_USER: ${MYSQL_USER:-node_user}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-nodepassword}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres123}
+      POSTGRES_DB: ${POSTGRES_DB:-node_app}
+
     ports:
-      - "${MYSQL_PORT:-3306}:3306"
+      - "${POSTGRES_PORT:-5432}:5432"
+
     volumes:
-      - mysql-data:/var/lib/mysql
-      - mysql-logs:/var/log/mysql
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
     networks:
       - app-network
+
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
-      interval: 30s
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-node_app}"]
+      interval: 10s
       timeout: 5s
-      retries: 3
-      start_period: 30s
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 1G
-        reservations:
-          cpus: '0.5'
-          memory: 256M
+      retries: 5
+      start_period: 20s
+
     logging:
-      driver: "json-file"
+      driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
-        labels: "service"
-    labels:
-      - "com.node-architecture.service=database"
-      - "com.node-architecture.description=MySQL database server"
+  # mysql:
+    # build:
+    #   context: ./docker/mysql
+    #   dockerfile: Dockerfile
+    # image: node-mvc-mysql:latest
+    # container_name: node-mvc-mysql
+    # restart: unless-stopped
+    # environment:
+    #   MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+    #   MYSQL_DATABASE: ${MYSQL_DATABASE:-node_app_db}
+    #   MYSQL_USER: ${MYSQL_USER:-node_user}
+    #   MYSQL_PASSWORD: ${MYSQL_PASSWORD:-nodepassword}
+    # ports:
+    #   - "${MYSQL_PORT:-3306}:3306"
+    # volumes:
+    #   - mysql-data:/var/lib/mysql
+    #   - mysql-logs:/var/log/mysql
+    # networks:
+    #   - app-network
+    # healthcheck:
+    #   test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+    #   interval: 30s
+    #   timeout: 5s
+    #   retries: 3
+    #   start_period: 30s
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2'
+    #       memory: 1G
+    #     reservations:
+    #       cpus: '0.5'
+    #       memory: 256M
+    # logging:
+    #   driver: "json-file"
+    #   options:
+    #     max-size: "10m"
+    #     max-file: "3"
+    #     labels: "service"
+    # labels:
+    #   - "com.node-architecture.service=database"
+    #   - "com.node-architecture.description=MySQL database server"
 
   redis:
     build:
@@ -105,10 +140,14 @@ services:
       - NODE_OPTIONS=--disable-warning=DEP0176
       - DOCKER_CONTAINER=true
       - NOENV=true
-      - DB_HOST=mysql
-      - DB_USERNAME=${MYSQL_USER:-node_user}
-      - DB_PASSWORD=${MYSQL_PASSWORD:-nodepassword}
-      - DB_NAME=${MYSQL_DATABASE:-node_app_db}
+      # - DB_HOST=mysql
+      # - DB_USERNAME=${MYSQL_USER:-node_user}
+      # - DB_PASSWORD=${MYSQL_PASSWORD:-nodepassword}
+      # - DB_NAME=${MYSQL_DATABASE:-node_app_db}
+      - DB_HOST:postgres
+      - DB_NAME:${POSTGRES_DB:-node_app}
+      - DB_USERNAME:${POSTGRES_USER:-postgres}
+      - DB_PASSWORD:${POSTGRES_PASSWORD:-postgres123}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD:-redispassword}
@@ -124,8 +163,10 @@ services:
       # Prevent node_modules from being overwritten
       - /app/node_modules
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
+      # mysql:
+      #   condition: service_healthy
       redis:
         condition: service_healthy
     networks:
@@ -251,14 +292,22 @@ networks:
         - subnet: 172.28.0.0/16
 
 volumes:
-  mysql-data:
+  postgres-data:
     driver: local
     labels:
-      - "com.node-architecture.volume=mysql-data"
-  mysql-logs:
+      - "com.node-architecture.volume=postgres-data"
+  postgres-logs:
     driver: local
     labels:
-      - "com.node-architecture.volume=mysql-logs"
+      - "com.node-architecture.volume=postgres-logs"
+  # mysql-data:
+  #   driver: local
+  #   labels:
+  #     - "com.node-architecture.volume=mysql-data"
+  # mysql-logs:
+  #   driver: local
+  #   labels:
+  #     - "com.node-architecture.volume=mysql-logs"
   redis-data:
     driver: local
     labels:

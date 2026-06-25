@@ -48,7 +48,7 @@ if (isDocker && (process.env.DB_HOST || process.env.NODE_ENV)) {
 
 // Base configuration shared across environments
 const baseConfig = {
-  dialect: 'mysql',
+  dialect: process.env.DB_DRIVER || 'mysql',
   dialectOptions: {
     charset: process.env.DB_CHARSET || 'utf8mb4',
     connectTimeout: parseInt(process.env.DB_CONNECT_TIMEOUT || '10000', 10),

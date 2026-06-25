@@ -1,6 +1,6 @@
 import { logger } from '@config/logger';
 import redisService from '@helpers/redis.helper';
-import { Sequelize, Options } from 'sequelize';
+import { Sequelize, Options, Dialect } from 'sequelize';
 
 import { config } from '@/config';
 
@@ -20,7 +20,7 @@ const isReplicationEnabled = process.env.DB_REPLICATION === 'true';
 
 // Build configuration
 const sequelizeConfig: Options = {
-  dialect: 'mysql',
+  dialect: process.env.DB_DRIVER as Dialect,
   logging: process.env.DB_LOGGING === 'true' ? console.log : false,
 
   // Connection pool

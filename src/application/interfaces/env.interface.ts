@@ -8,6 +8,7 @@ export interface envInterface {
     env: string;
   };
   database: {
+    driver: dialect;
     host: string;
     port: number;
     name: string;
