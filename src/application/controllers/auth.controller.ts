@@ -1,6 +1,7 @@
+import { logger } from '@config/logger';
+import { getErrorMessage } from '@interfaces/common.interface';
+import authService from '@services/auth.service';
 import { Request, Response } from 'express';
-import authService from '../services/auth.service';
-import { logger } from '../config/logger';
 
 /**
  * Authentication Controller
@@ -8,218 +9,137 @@ import { logger } from '../config/logger';
  */
 class AuthController {
   /**
-   * Register a new user
-   * POST /api/auth/register
-   */
-  async register(req: Request, res: Response): Promise<void> {
-    try {
-      const { email, password, name, role } = req.body;
-
-      // Validate required fields
-      if (!email || !password || !name) {
-        res.status(400).json({
-          success: false,
-          message: 'Please provide email, password, and name',
-        });
-        return;
-      }
-
-      // Register user
-      const user = await authService.register({
-        email,
-        password,
-        name,
-        role: role || 'user',
-      });
-
-      res.status(201).json({
-        success: true,
-        message: 'User registered successfully',
-        data: user.toJSON(),
-      });
-    } catch (error: any) {
-      logger.error('Error in register controller:', error);
-      res.status(400).json({
-        success: false,
-        message: error.message || 'Failed to register user',
-      });
-    }
-  }
-
-  /**
    * Login user
    * POST /api/auth/login
    */
   async login(req: Request, res: Response): Promise<void> {
     try {
       const { email, password } = req.body;
-      const user = await authService.login(email, password);
-      res.status(200).json({
-        success: true,
-        message: 'Login successful',
-        data: user.toJSON(),
-      });
-    } catch (error: any) {
+      const { tokens } = await authService.login(email, password);
+      res.sendSuccess(tokens, 'Login successful');
+    } catch (error: unknown) {
       logger.error('Error in login controller:', error);
-      res.status(401).json({
-        success: false,
-        message: error.message || 'Login failed',
-      });
+      res.sendUnauthorized(getErrorMessage(error) || 'Login failed');
     }
   }
 
   /**
-   * Get current user profile
-   * GET /api/auth/profile/:id
+   * Refresh access token
+   * POST /api/auth/refresh-token
    */
-  async getProfile(req: Request, res: Response): Promise<void> {
+  async refreshToken(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
+      const { refreshToken } = req.body;
 
-      const user = await authService.getUserById(parseInt(id));
-
-      if (!user) {
-        res.status(404).json({
-          success: false,
-          message: 'User not found',
-        });
+      if (!refreshToken) {
+        res.sendBadRequest('Refresh token is required');
         return;
       }
 
-      res.status(200).json({
-        success: true,
-        data: user.toJSON(),
-      });
-    } catch (error: any) {
-      logger.error('Error in getProfile controller:', error);
-      res.status(500).json({
-        success: false,
-        message: error.message || 'Failed to fetch profile',
-      });
+      const { accessToken } = await authService.refreshToken(refreshToken);
+
+      res.sendSuccess({ accessToken }, 'Token refreshed successfully');
+    } catch (error: unknown) {
+      logger.error('Error in refresh token controller:', error);
+      res.sendUnauthorized(getErrorMessage(error) || 'Token refresh failed');
     }
   }
 
   /**
-   * Update user profile
-   * PUT /api/auth/profile/:id
+   * Verify token
+   * POST /api/auth/verify-token
    */
-  async updateProfile(req: Request, res: Response): Promise<void> {
+  async verifyToken(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
-      const { email, name, role } = req.body;
+      const { token } = req.body;
 
-      const user = await authService.updateUser(parseInt(id), {
-        email,
-        name,
-        role,
-      });
+      if (!token) {
+        res.sendBadRequest('Token is required');
+        return;
+      }
 
-      res.status(200).json({
-        success: true,
-        message: 'Profile updated successfully',
-        data: user.toJSON(),
-      });
-    } catch (error: any) {
-      logger.error('Error in updateProfile controller:', error);
-      res.status(400).json({
-        success: false,
-        message: error.message || 'Failed to update profile',
-      });
+      const isValid = await authService.verifyToken(token);
+
+      res.sendSuccess({ valid: isValid }, isValid ? 'Token is valid' : 'Token is invalid');
+    } catch (error: unknown) {
+      logger.error('Error in verify token controller:', error);
+      res.sendBadRequest(getErrorMessage(error) || 'Token verification failed');
     }
   }
 
   /**
-   * Delete user account
-   * DELETE /api/auth/profile/:id
+   * Logout user
+   * POST /api/auth/logout
    */
-  async deleteAccount(req: Request, res: Response): Promise<void> {
+  async logout(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
+      const accessToken = req.token;
+      const { refreshToken } = req.body;
 
-      await authService.deleteUser(parseInt(id));
+      if (!accessToken) {
+        res.sendBadRequest('No active session');
+        return;
+      }
 
-      res.status(200).json({
-        success: true,
-        message: 'Account deactivated successfully',
-      });
-    } catch (error: any) {
-      logger.error('Error in deleteAccount controller:', error);
-      res.status(400).json({
-        success: false,
-        message: error.message || 'Failed to delete account',
-      });
+      await authService.logout(accessToken, refreshToken);
+
+      res.sendSuccess(null, 'Logged out successfully');
+    } catch (error: unknown) {
+      logger.error('Error in logout controller:', error);
+      res.sendBadRequest(getErrorMessage(error) || 'Logout failed');
     }
   }
 
   /**
    * Change password
-   * POST /api/auth/change-password/:id
+   * POST /api/auth/change-password
    */
   async changePassword(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
-      const { oldPassword, newPassword } = req.body;
+      const { currentPassword, newPassword } = req.body;
+      const userId = req.user?.userId;
 
-      // Validate required fields
-      if (!oldPassword || !newPassword) {
-        res.status(400).json({
-          success: false,
-          message: 'Please provide old password and new password',
-        });
+      if (!userId) {
+        res.sendUnauthorized('Authentication required');
         return;
       }
 
-      // Validate new password length
-      if (newPassword.length < 8) {
-        res.status(400).json({
-          success: false,
-          message: 'New password must be at least 8 characters long',
-        });
+      if (!currentPassword || !newPassword) {
+        res.sendBadRequest('Current password and new password are required');
         return;
       }
 
-      await authService.changePassword(parseInt(id), oldPassword, newPassword);
+      await authService.changePassword(userId, currentPassword, newPassword);
 
-      res.status(200).json({
-        success: true,
-        message: 'Password changed successfully',
-      });
-    } catch (error: any) {
-      logger.error('Error in changePassword controller:', error);
-      res.status(400).json({
-        success: false,
-        message: error.message || 'Failed to change password',
-      });
+      res.sendSuccess(
+        null,
+        'Password changed successfully. Please login again with your new password.'
+      );
+    } catch (error: unknown) {
+      logger.error('Error in change password controller:', error);
+      res.sendBadRequest(getErrorMessage(error) || 'Password change failed');
     }
   }
 
   /**
-   * Get all users (admin only)
-   * GET /api/auth/users
+   * Refresh token with rotation
+   * POST /api/auth/refresh-token-rotate
    */
-  async getAllUsers(req: Request, res: Response): Promise<void> {
+  async refreshTokenWithRotation(req: Request, res: Response): Promise<void> {
     try {
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
+      const { refreshToken } = req.body;
 
-      const result = await authService.getAllUsers(page, limit);
+      if (!refreshToken) {
+        res.sendBadRequest('Refresh token is required');
+        return;
+      }
 
-      res.status(200).json({
-        success: true,
-        data: result.users,
-        pagination: {
-          page,
-          limit,
-          total: result.total,
-          pages: result.pages,
-        },
-      });
-    } catch (error: any) {
-      logger.error('Error in getAllUsers controller:', error);
-      res.status(500).json({
-        success: false,
-        message: error.message || 'Failed to fetch users',
-      });
+      const tokens = await authService.refreshTokenWithRotation(refreshToken);
+
+      res.sendSuccess(tokens, 'Tokens refreshed successfully');
+    } catch (error: unknown) {
+      logger.error('Error in refresh token rotation controller:', error);
+      res.sendUnauthorized(getErrorMessage(error) || 'Token refresh failed');
     }
   }
 }

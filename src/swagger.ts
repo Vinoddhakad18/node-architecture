@@ -1,4 +1,5 @@
 import swaggerJsdoc from 'swagger-jsdoc';
+
 import { config } from './config';
 
 /**
@@ -43,6 +44,241 @@ const swaggerOptions: swaggerJsdoc.Options = {
           in: 'header',
           name: 'X-API-Key',
           description: 'API key for authentication',
+        },
+      },
+      schemas: {
+        SuccessResponse: {
+          type: 'object',
+          properties: {
+            success: {
+              type: 'boolean',
+              example: true,
+            },
+            message: {
+              type: 'string',
+              example: 'Operation successful',
+            },
+            data: {
+              type: 'object',
+              description: 'Response data payload',
+            },
+          },
+        },
+        PaginationMeta: {
+          type: 'object',
+          properties: {
+            total: {
+              type: 'integer',
+              example: 100,
+              description: 'Total number of records',
+            },
+            page: {
+              type: 'integer',
+              example: 1,
+              description: 'Current page number',
+            },
+            limit: {
+              type: 'integer',
+              example: 10,
+              description: 'Records per page',
+            },
+            totalPages: {
+              type: 'integer',
+              example: 10,
+              description: 'Total number of pages',
+            },
+          },
+        },
+        Country: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer',
+              example: 1,
+            },
+            name: {
+              type: 'string',
+              example: 'United States',
+            },
+            code: {
+              type: 'string',
+              example: 'US',
+            },
+            currency_code: {
+              type: 'string',
+              example: 'USD',
+            },
+            status: {
+              type: 'string',
+              enum: ['active', 'inactive'],
+              example: 'active',
+            },
+            created_at: {
+              type: 'string',
+              format: 'date-time',
+            },
+            updated_at: {
+              type: 'string',
+              format: 'date-time',
+            },
+          },
+        },
+        FileMetadata: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer',
+              example: 1,
+            },
+            original_name: {
+              type: 'string',
+              example: 'document.pdf',
+            },
+            storage_key: {
+              type: 'string',
+              example: 'uploads/2024/01/document-abc123.pdf',
+            },
+            mime_type: {
+              type: 'string',
+              example: 'application/pdf',
+            },
+            size: {
+              type: 'integer',
+              example: 1024000,
+            },
+            url: {
+              type: 'string',
+              example: 'https://storage.example.com/uploads/document.pdf',
+            },
+            category: {
+              type: 'string',
+              example: 'documents',
+            },
+            status: {
+              type: 'string',
+              enum: ['active', 'inactive', 'deleted'],
+              example: 'active',
+            },
+            created_at: {
+              type: 'string',
+              format: 'date-time',
+            },
+          },
+        },
+        TokenPair: {
+          type: 'object',
+          properties: {
+            accessToken: {
+              type: 'string',
+              example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+            },
+            refreshToken: {
+              type: 'string',
+              example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+            },
+            expiresAt: {
+              type: 'integer',
+              example: 1704067200,
+              description: 'Unix timestamp when access token expires',
+            },
+          },
+        },
+        ValidationError: {
+          type: 'object',
+          properties: {
+            field: {
+              type: 'string',
+              example: 'email',
+            },
+            message: {
+              type: 'string',
+              example: 'Invalid email format',
+            },
+          },
+        },
+        Menu: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer',
+              example: 1,
+            },
+            name: {
+              type: 'string',
+              example: 'Dashboard',
+            },
+            route: {
+              type: 'string',
+              example: '/dashboard',
+            },
+            icon: {
+              type: 'string',
+              nullable: true,
+              example: 'fa fa-dashboard',
+            },
+            parent_id: {
+              type: 'integer',
+              nullable: true,
+              example: null,
+            },
+            sort_order: {
+              type: 'integer',
+              example: 0,
+            },
+            is_active: {
+              type: 'boolean',
+              example: true,
+            },
+            created_at: {
+              type: 'string',
+              format: 'date-time',
+            },
+            updated_at: {
+              type: 'string',
+              format: 'date-time',
+            },
+          },
+        },
+        MenuTree: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer',
+              example: 1,
+            },
+            name: {
+              type: 'string',
+              example: 'Dashboard',
+            },
+            route: {
+              type: 'string',
+              example: '/dashboard',
+            },
+            icon: {
+              type: 'string',
+              nullable: true,
+              example: 'fa fa-dashboard',
+            },
+            parent_id: {
+              type: 'integer',
+              nullable: true,
+              example: null,
+            },
+            sort_order: {
+              type: 'integer',
+              example: 0,
+            },
+            is_active: {
+              type: 'boolean',
+              example: true,
+            },
+            children: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/MenuTree',
+              },
+            },
+          },
         },
       },
       responses: {
@@ -132,6 +368,52 @@ const swaggerOptions: swaggerJsdoc.Options = {
             },
           },
         },
+        ConflictError: {
+          description: 'Resource conflict',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  success: {
+                    type: 'boolean',
+                    example: false,
+                  },
+                  message: {
+                    type: 'string',
+                    example: 'Resource already exists',
+                  },
+                },
+              },
+            },
+          },
+        },
+        ValidationError: {
+          description: 'Validation failed',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  success: {
+                    type: 'boolean',
+                    example: false,
+                  },
+                  message: {
+                    type: 'string',
+                    example: 'Validation failed',
+                  },
+                  errors: {
+                    type: 'array',
+                    items: {
+                      $ref: '#/components/schemas/ValidationError',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     },
     tags: [
@@ -140,12 +422,24 @@ const swaggerOptions: swaggerJsdoc.Options = {
         description: 'Health check endpoints',
       },
       {
-        name: 'Users',
-        description: 'User management endpoints',
-      },
-      {
         name: 'Authentication',
         description: 'Authentication endpoints',
+      },
+      {
+        name: 'Countries',
+        description: 'Country master data management',
+      },
+      {
+        name: 'Files',
+        description: 'File upload and management',
+      },
+      {
+        name: 'Monitoring',
+        description: 'Application monitoring and metrics',
+      },
+      {
+        name: 'Menus',
+        description: 'Menu management endpoints',
       },
     ],
   },

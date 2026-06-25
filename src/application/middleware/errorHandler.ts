@@ -1,5 +1,8 @@
+import { logger } from '@config/logger';
+import { ValidationError, ErrorDetail } from '@interfaces/common.interface';
 import { Request, Response, NextFunction } from 'express';
-import { AppError } from '../../domain/errors/AppError';
+
+import { AppError } from '@/domain/errors/AppError';
 
 /**
  * Global error handling middleware
@@ -14,10 +17,20 @@ export const errorHandler = (
   if (err instanceof AppError) {
     // Only log stack trace for server errors (5xx), not client errors (4xx)
     if (err.statusCode >= 500) {
-      console.error('Error:', err.stack);
+      logger.error('Server error occurred', {
+        message: err.message,
+        statusCode: err.statusCode,
+        stack: err.stack,
+        details: err.details,
+      });
     }
 
-    const responseBody: any = {
+    const responseBody: {
+      success: boolean;
+      message: string;
+      errors?: ValidationError[] | ErrorDetail;
+      details?: string;
+    } = {
       success: false,
       message: err.message,
     };
@@ -25,36 +38,27 @@ export const errorHandler = (
     // Include validation details if present
     if (err.details) {
       try {
-        responseBody.errors = JSON.parse(err.details);
+        responseBody.errors = JSON.parse(err.details) as ValidationError[] | ErrorDetail;
       } catch {
         responseBody.details = err.details;
       }
     }
-
-    res.status(err.statusCode).json(responseBody);
+    res.sendCustom(err.statusCode, null, err.message, false, responseBody.errors);
     return;
   }
 
   // Handle generic errors - always log these
-  console.error('Error:', err.stack);
-
-  res.status(500).json({
-    success: false,
-    message: 'Internal Server Error',
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined,
+  logger.error('Unexpected error occurred', {
+    message: err.message,
+    stack: err.stack,
+    name: err.name,
   });
+  res.sendServiceUnavailable('An unexpected error occurred');
 };
 
 /**
  * 404 Not Found handler
  */
-export const notFoundHandler = (
-  req: Request,
-  res: Response,
-  _next: NextFunction
-): void => {
-  res.status(404).json({
-    success: false,
-    message: `Route ${req.method} ${req.url} not found`,
-  });
+export const notFoundHandler = (_req: Request, res: Response, _next: NextFunction): void => {
+  res.sendNotFound('Resource not found');
 };

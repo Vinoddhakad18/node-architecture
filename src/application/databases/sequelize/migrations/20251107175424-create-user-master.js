@@ -14,57 +14,42 @@ module.exports = {
         autoIncrement: true,
         allowNull: false
       },
-
       name: {
         type: Sequelize.STRING(100),
         allowNull: false
       },
-
       email: {
         type: Sequelize.STRING(120),
         allowNull: false,
         unique: true,
       },
-
       mobile: {
         type: Sequelize.STRING(15),
         allowNull: true,
         unique: true
       },
-
       password: {
         type: Sequelize.STRING,
         allowNull: false
       },
-
-      role: {
-        type: Sequelize.ENUM('super_admin', 'admin', 'manager', 'user'),
-        allowNull: false,
-        defaultValue: 'user'
-      },
-
       status: {
         type: Sequelize.ENUM('active', 'inactive', 'deleted'),
         allowNull: false,
         defaultValue: 'active'
       },
-
       created_by: {
         type: Sequelize.INTEGER,
         allowNull: true
       },
-
       updated_by: {
         type: Sequelize.INTEGER,
         allowNull: true
       },
-
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.fn('NOW')
       },
-
       updated_at: {
         allowNull: false,
         type: Sequelize.DATE,

@@ -1,0 +1,137 @@
+import { UserStatus } from '@application/constants';
+import { UserMasterAttributes } from '@models/user-master.model';
+
+/**
+ * Branch summary used inside user responses
+ */
+export interface UserBranchSummary {
+  id: number;
+  branchName: string;
+}
+
+/**
+ * Map associated branch models to a lightweight summary list
+ */
+function mapBranches(user: Omit<UserMasterAttributes, 'password'>): UserBranchSummary[] {
+  const branches = (user as any).branches;
+  if (!Array.isArray(branches)) {
+    return [];
+  }
+  return branches.map((branch: any) => ({
+    id: branch.id,
+    branchName: branch.branch_name,
+  }));
+}
+
+/**
+ * User Response DTO
+ * Transforms user model to API response format
+ */
+export class UserResponseDTO {
+  id: number;
+  name: string;
+  email: string;
+  mobile: string | null;
+  roleId: number | null;
+  roleName: string | null;
+  branchId: number | null;
+  branchName: string | null;
+  branches: UserBranchSummary[];
+  status: UserStatus;
+  lastLogin: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+
+  constructor(user: Omit<UserMasterAttributes, 'password'>) {
+    this.id = user.id;
+    this.name = user.name;
+    this.email = user.email;
+    this.mobile = user.mobile;
+    this.roleId = user.role_id ?? null;
+    this.roleName = (user as any).role?.name ?? null;
+    this.branchId = user.branch_id ?? null;
+    this.branchName = (user as any).branch?.branch_name ?? null;
+    this.branches = mapBranches(user);
+    this.status = user.status as UserStatus;
+    this.lastLogin = user.last_login;
+    this.createdAt = user.created_at;
+    this.updatedAt = user.updated_at;
+  }
+
+  /**
+   * Create DTO from user model
+   */
+  static fromModel(user: Omit<UserMasterAttributes, 'password'>): UserResponseDTO {
+    return new UserResponseDTO(user);
+  }
+
+  /**
+   * Create array of DTOs from user models
+   */
+  static fromModels(users: Omit<UserMasterAttributes, 'password'>[]): UserResponseDTO[] {
+    return users.map((user) => UserResponseDTO.fromModel(user));
+  }
+}
+
+/**
+ * User Summary DTO
+ * Minimal user information for listings
+ */
+export class UserSummaryDTO {
+  id: number;
+  name: string;
+  email: string;
+  roleId: number | null;
+  roleName: string | null;
+  branchId: number | null;
+  branchName: string | null;
+  branches: UserBranchSummary[];
+
+  constructor(user: Omit<UserMasterAttributes, 'password'>) {
+    this.id = user.id;
+    this.name = user.name;
+    this.email = user.email;
+    this.roleId = user.role_id ?? null;
+    this.roleName = (user as any).role?.name ?? null;
+    this.branchId = user.branch_id ?? null;
+    this.branchName = (user as any).branch?.branch_name ?? null;
+    this.branches = mapBranches(user);
+  }
+
+  static fromModel(user: Omit<UserMasterAttributes, 'password'>): UserSummaryDTO {
+    return new UserSummaryDTO(user);
+  }
+
+  /**
+   * Create array of DTOs from user models
+   */
+  static fromModels(users: Omit<UserMasterAttributes, 'password'>[]): UserSummaryDTO[] {
+    return users.map((user) => UserSummaryDTO.fromModel(user));
+  }
+}
+
+/**
+ * Create User Request DTO
+ */
+export interface CreateUserRequestDTO {
+  name: string;
+  email: string;
+  password: string;
+  mobile?: string;
+  roleId?: number;
+  branchId?: number;
+  branchIds?: number[];
+}
+
+/**
+ * Update User Request DTO
+ */
+export interface UpdateUserRequestDTO {
+  name?: string;
+  email?: string;
+  mobile?: string;
+  roleId?: number;
+  branchId?: number;
+  branchIds?: number[];
+  status?: UserStatus;
+}

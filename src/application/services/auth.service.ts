@@ -1,5 +1,10 @@
-import UserMaster, { UserMasterCreationAttributes } from '../models/user-master.model';
-import { logger } from '../config/logger';
+import jwtUtil from '@application/utils/jwt.util';
+import { logger } from '@config/logger';
+import { TokenPair } from '@interfaces/jwt.interface';
+import UserMaster from '@models/user-master.model';
+import userRepository from '@repositories/user.repository';
+import tokenBlacklistService from '@services/token-blacklist.service';
+import bcrypt from 'bcryptjs';
 
 /**
  * Authentication Service
@@ -7,55 +12,19 @@ import { logger } from '../config/logger';
  */
 class AuthService {
   /**
-   * Register a new user
+   * Login user and generate JWT tokens
    */
-  async register(userData: UserMasterCreationAttributes): Promise<UserMaster> {
-    try {
-      // Check if user already exists
-      const existingUser = await UserMaster.findOne({
-        where: { email: userData.email },
-      });
-
-      if (existingUser) {
-        throw new Error('User with this email already exists');
-      }
-
-      // Create new user
-      const user = await UserMaster.create(userData);
-
-      logger.info(`New user registered: ${user.email}`);
-      return user;
-    } catch (error) {
-      logger.error('Error in register service:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Login user
-   */
-  async login(email: string, password: string): Promise<UserMaster> {
+  async login(email: string, password: string): Promise<{ user: UserMaster; tokens: TokenPair }> {
     try {
       // Find user by email - explicitly include password for authentication
-      const user = await UserMaster.findOne({
-        where: { email },
-        attributes: { include: ['password'] },
-      });
+      const user = await userRepository.findByEmailWithPassword(email);
 
       if (!user) {
         throw new Error('Invalid email or password');
       }
 
-      // Debug: Log user data (remove in production)
-      logger.debug('User fetched from database:', {
-        id: user.id,
-        email: user.email,
-        hasPassword: !!user.password,
-        passwordLength: user.password?.length || 0
-      });
-
       // Check if password exists in database
-      if (!user.password) {
+      if (!user.getDataValue('password')) {
         logger.error('Password field is missing from user record');
         throw new Error('Invalid password');
       }
@@ -71,12 +40,17 @@ class AuthService {
         throw new Error('Invalid email or password');
       }
 
-      // Update last login
-      user.last_login = new Date();
-      await user.save();
+      // Update last login using repository
+      await userRepository.updateLastLogin(user.getDataValue('id'));
+      logger.info(`User logged in: ${user.getDataValue('email')}`);
 
-      logger.info(`User logged in: ${user.email}`);
-      return user;
+      // Generate JWT tokens - role name is resolved from the associated role
+      const tokens = jwtUtil.generateTokenPair({
+        userId: user.getDataValue('id'),
+        email: user.getDataValue('email'),
+        role: user.role?.name,
+      });
+      return { user, tokens };
     } catch (error) {
       logger.error('Error in login service:', error);
       throw error;
@@ -84,138 +58,133 @@ class AuthService {
   }
 
   /**
-   * Get user by ID
+   * Refresh access token using refresh token
    */
-  async getUserById(id: number): Promise<UserMaster | null> {
+  async refreshToken(refreshToken: string): Promise<{ accessToken: string }> {
     try {
-      const user = await UserMaster.findByPk(id);
-      return user;
+      const accessToken = jwtUtil.refreshAccessToken(refreshToken);
+      logger.info('Access token refreshed successfully');
+      return { accessToken };
     } catch (error) {
-      logger.error('Error in getUserById service:', error);
-      throw error;
+      logger.error('Error refreshing token:', error);
+      throw new Error('Failed to refresh token');
     }
   }
 
   /**
-   * Get user by email
+   * Verify access token
    */
-  async getUserByEmail(email: string): Promise<UserMaster | null> {
+  async verifyToken(token: string): Promise<boolean> {
     try {
-      const user = await UserMaster.findOne({
-        where: { email },
-      });
-      return user;
+      jwtUtil.verifyAccessToken(token);
+
+      // Also check if token is blacklisted
+      const isBlacklisted = await tokenBlacklistService.isBlacklisted(token);
+      if (isBlacklisted) {
+        return false;
+      }
+
+      return true;
     } catch (error) {
-      logger.error('Error in getUserByEmail service:', error);
-      throw error;
+      logger.error('Token verification failed:', error);
+      return false;
     }
   }
 
   /**
-   * Update user
+   * Logout user and blacklist the token
    */
-  async updateUser(id: number, userData: Partial<UserMasterCreationAttributes>): Promise<UserMaster> {
+  async logout(accessToken: string, refreshToken?: string): Promise<void> {
     try {
-      const user = await UserMaster.findByPk(id);
+      // Blacklist the access token
+      await tokenBlacklistService.addToBlacklist(accessToken, 'logout');
+
+      // If refresh token provided, blacklist it too
+      if (refreshToken) {
+        await tokenBlacklistService.addToBlacklist(refreshToken, 'logout');
+      }
+
+      const decoded = jwtUtil.decodeToken(accessToken);
+      logger.info(`User logged out: ${decoded?.email}`);
+    } catch (error) {
+      logger.error('Error in logout service:', error);
+      throw new Error('Failed to logout');
+    }
+  }
+
+  /**
+   * Change user password and invalidate all existing tokens
+   */
+  async changePassword(
+    userId: number,
+    currentPassword: string,
+    newPassword: string
+  ): Promise<void> {
+    try {
+      // Find user with password using repository
+      const user = await userRepository.findByIdWithPassword(userId);
 
       if (!user) {
         throw new Error('User not found');
       }
 
-      // If email is being updated, check if it's already taken
-      if (userData.email && userData.email !== user.email) {
-        const existingUser = await UserMaster.findOne({
-          where: { email: userData.email },
-        });
-
-        if (existingUser) {
-          throw new Error('Email is already taken');
-        }
-      }
-
-      // Update user
-      await user.update(userData);
-
-      logger.info(`User updated: ${user.email}`);
-      return user;
-    } catch (error) {
-      logger.error('Error in updateUser service:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Delete user (soft delete by deactivating)
-   */
-  async deleteUser(id: number): Promise<void> {
-    try {
-      const user = await UserMaster.findByPk(id);
-
-      if (!user) {
-        throw new Error('User not found');
-      }
-
-      // Soft delete by setting status to deleted
-      user.status = 'deleted';
-      await user.save();
-
-      logger.info(`User deactivated: ${user.email}`);
-    } catch (error) {
-      logger.error('Error in deleteUser service:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Change password
-   */
-  async changePassword(id: number, oldPassword: string, newPassword: string): Promise<void> {
-    try {
-      const user = await UserMaster.findByPk(id, {
-        attributes: { include: ['password'] },
-      });
-
-      if (!user) {
-        throw new Error('User not found');
-      }
-
-      // Verify old password
-      const isPasswordValid = await user.comparePassword(oldPassword);
+      // Verify current password
+      const isPasswordValid = await user.comparePassword(currentPassword);
       if (!isPasswordValid) {
         throw new Error('Current password is incorrect');
       }
 
-      // Update password
-      user.password = newPassword;
-      await user.save();
+      // Hash new password
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
-      logger.info(`Password changed for user: ${user.email}`);
+      // Update password using repository
+      await userRepository.updatePassword(userId, hashedPassword);
+
+      // Invalidate all existing tokens for this user
+      await tokenBlacklistService.invalidateAllUserTokens(userId, 'password_change');
+
+      logger.info(`Password changed for user ${userId}`);
     } catch (error) {
-      logger.error('Error in changePassword service:', error);
+      logger.error('Error changing password:', error);
       throw error;
     }
   }
 
   /**
-   * Get all users (admin only)
+   * Refresh tokens with rotation (invalidates old refresh token)
    */
-  async getAllUsers(page: number = 1, limit: number = 10): Promise<{ users: UserMaster[]; total: number; pages: number }> {
+  async refreshTokenWithRotation(refreshToken: string): Promise<TokenPair> {
     try {
-      const offset = (page - 1) * limit;
+      // Verify refresh token
+      const decoded = jwtUtil.verifyRefreshToken(refreshToken);
 
-      const { count, rows } = await UserMaster.findAndCountAll({
-        limit,
-        offset,
-        order: [['created_at', 'DESC']],
+      // Check if refresh token is blacklisted
+      const isBlacklisted = await tokenBlacklistService.isBlacklisted(refreshToken);
+      if (isBlacklisted) {
+        throw new Error('Refresh token has been revoked');
+      }
+
+      // Check if user's tokens have been invalidated
+      const isUserInvalidated = await tokenBlacklistService.isTokenInvalidatedByUser(refreshToken);
+      if (isUserInvalidated) {
+        throw new Error('Session has been invalidated. Please login again.');
+      }
+
+      // Generate new token pair
+      const newTokens = jwtUtil.generateTokenPair({
+        userId: decoded.userId,
+        email: decoded.email,
+        role: decoded.role,
       });
 
-      return {
-        users: rows,
-        total: count,
-        pages: Math.ceil(count / limit),
-      };
+      // Blacklist old refresh token (rotation)
+      await tokenBlacklistService.addToBlacklist(refreshToken, 'token_rotation');
+
+      logger.info(`Tokens refreshed with rotation for user: ${decoded.email}`);
+      return newTokens;
     } catch (error) {
-      logger.error('Error in getAllUsers service:', error);
+      logger.error('Error refreshing token with rotation:', error);
       throw error;
     }
   }

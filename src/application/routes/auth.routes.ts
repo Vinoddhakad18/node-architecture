@@ -1,15 +1,14 @@
-import { Router } from 'express';
-import authController from '../controllers/auth.controller';
-import { validateRequest } from '../middleware/validateRequest';
 import {
-  registerSchema,
   loginSchema,
-  getProfileSchema,
-  updateProfileSchema,
-  deleteAccountSchema,
+  refreshTokenSchema,
+  verifyTokenSchema,
+  logoutSchema,
   changePasswordSchema,
-  getAllUsersSchema,
-} from '../validations/auth.schema';
+} from '@application/validations/auth.schema';
+import authController from '@controllers/auth.controller';
+import { authenticate } from '@middleware/auth.middleware';
+import { validateRequest } from '@middleware/validateRequest';
+import { Router } from 'express';
 
 const router = Router();
 
@@ -23,7 +22,6 @@ const router = Router();
  *         - id
  *         - email
  *         - name
- *         - role
  *       properties:
  *         id:
  *           type: integer
@@ -38,11 +36,38 @@ const router = Router();
  *           type: string
  *           description: User full name
  *           example: John Doe
- *         role:
+ *         roleId:
+ *           type: integer
+ *           nullable: true
+ *           description: Role ID assigned to the user
+ *           example: 1
+ *         roleName:
  *           type: string
- *           enum: [user, admin]
- *           description: User role
- *           example: user
+ *           nullable: true
+ *           description: Role name assigned to the user
+ *           example: admin
+ *         branchId:
+ *           type: integer
+ *           nullable: true
+ *           description: Branch ID assigned to the user
+ *           example: 1
+ *         branchName:
+ *           type: string
+ *           nullable: true
+ *           description: Primary branch name assigned to the user
+ *           example: Downtown Branch
+ *         branches:
+ *           type: array
+ *           description: All branches the user is assigned to (many-to-many)
+ *           items:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 example: 1
+ *               branchName:
+ *                 type: string
+ *                 example: Downtown Branch
  *         isActive:
  *           type: boolean
  *           description: Whether the user account is active
@@ -62,30 +87,7 @@ const router = Router();
  *           format: date-time
  *           description: User last update timestamp
  *           example: 2024-01-01T12:00:00.000Z
- *     RegisterRequest:
- *       type: object
- *       required:
- *         - email
- *         - password
- *         - name
- *       properties:
- *         email:
- *           type: string
- *           format: email
- *           example: user@example.com
- *         password:
- *           type: string
- *           format: password
- *           minLength: 8
- *           example: SecurePassword123!
- *         name:
- *           type: string
- *           example: John Doe
- *         role:
- *           type: string
- *           enum: [user, admin]
- *           default: user
- *           example: user
+ *
  *     LoginRequest:
  *       type: object
  *       required:
@@ -100,68 +102,8 @@ const router = Router();
  *           type: string
  *           format: password
  *           example: SecurePassword123!
- *     ChangePasswordRequest:
- *       type: object
- *       required:
- *         - oldPassword
- *         - newPassword
- *       properties:
- *         oldPassword:
- *           type: string
- *           format: password
- *           example: OldPassword123!
- *         newPassword:
- *           type: string
- *           format: password
- *           minLength: 8
- *           example: NewPassword123!
+ *
  */
-
-/**
- * @swagger
- * /auth/register:
- *   post:
- *     summary: Register a new user
- *     description: Create a new user account
- *     tags:
- *       - Authentication
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/RegisterRequest'
- *     responses:
- *       201:
- *         description: User registered successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: User registered successfully
- *                 data:
- *                   $ref: '#/components/schemas/User'
- *       400:
- *         description: Bad request - validation error or user already exists
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: User with this email already exists
- */
-router.post('/register', validateRequest(registerSchema), authController.register);
 
 /**
  * @swagger
@@ -171,6 +113,8 @@ router.post('/register', validateRequest(registerSchema), authController.registe
  *     description: Authenticate user and return user data
  *     tags:
  *       - Authentication
+ *     security:
+ *       - apiKey: []
  *     requestBody:
  *       required: true
  *       content:
@@ -211,84 +155,30 @@ router.post('/login', validateRequest(loginSchema), authController.login);
 
 /**
  * @swagger
- * /auth/profile/{id}:
- *   get:
- *     summary: Get user profile
- *     description: Retrieve user profile by ID
+ * /auth/refresh-token:
+ *   post:
+ *     summary: Refresh access token
+ *     description: Generate a new access token using a valid refresh token
  *     tags:
  *       - Authentication
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: User ID
- *     responses:
- *       200:
- *         description: Successfully retrieved user profile
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   $ref: '#/components/schemas/User'
- *       404:
- *         description: User not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: User not found
- */
-router.get('/profile/:id', validateRequest(getProfileSchema), authController.getProfile);
-
-/**
- * @swagger
- * /auth/profile/{id}:
- *   put:
- *     summary: Update user profile
- *     description: Update user profile information
- *     tags:
- *       - Authentication
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: User ID
+ *     security:
+ *       - apiKey: []
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - refreshToken
  *             properties:
- *               email:
+ *               refreshToken:
  *                 type: string
- *                 format: email
- *                 example: newemail@example.com
- *               name:
- *                 type: string
- *                 example: Jane Doe
- *               role:
- *                 type: string
- *                 enum: [user, admin]
- *                 example: admin
+ *                 description: Valid refresh token
+ *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *     responses:
  *       200:
- *         description: Profile updated successfully
+ *         description: Token refreshed successfully
  *         content:
  *           application/json:
  *             schema:
@@ -299,91 +189,153 @@ router.get('/profile/:id', validateRequest(getProfileSchema), authController.get
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: Profile updated successfully
+ *                   example: Token refreshed successfully
  *                 data:
- *                   $ref: '#/components/schemas/User'
+ *                   type: object
+ *                   properties:
+ *                     accessToken:
+ *                       type: string
+ *                       example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *       400:
- *         description: Bad request - validation error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Failed to update profile
+ *         description: Bad request - refresh token is required
+ *       401:
+ *         description: Unauthorized - invalid or expired refresh token
  */
-router.put('/profile/:id', validateRequest(updateProfileSchema), authController.updateProfile);
+router.post('/refresh-token', validateRequest(refreshTokenSchema), authController.refreshToken);
 
 /**
  * @swagger
- * /auth/profile/{id}:
- *   delete:
- *     summary: Delete user account
- *     description: Deactivate user account (soft delete)
- *     tags:
- *       - Authentication
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: User ID
- *     responses:
- *       200:
- *         description: Account deactivated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Account deactivated successfully
- *       400:
- *         description: Bad request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Failed to delete account
- */
-router.delete('/profile/:id', validateRequest(deleteAccountSchema), authController.deleteAccount);
-
-/**
- * @swagger
- * /auth/change-password/{id}:
+ * /auth/verify-token:
  *   post:
- *     summary: Change user password
- *     description: Change the password for a user
+ *     summary: Verify token validity
+ *     description: Check if a token is valid and not expired
  *     tags:
  *       - Authentication
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: User ID
+ *     security:
+ *       - apiKey: []
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/ChangePasswordRequest'
+ *             type: object
+ *             required:
+ *               - token
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: Token to verify
+ *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *     responses:
+ *       200:
+ *         description: Token verification result
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Token is valid
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     valid:
+ *                       type: boolean
+ *                       example: true
+ *       400:
+ *         description: Bad request - token is required
+ *       401:
+ *         description: Unauthorized - authentication required
+ */
+router.post(
+  '/verify-token',
+  authenticate,
+  validateRequest(verifyTokenSchema),
+  authController.verifyToken
+);
+
+/**
+ * @swagger
+ * /auth/logout:
+ *   post:
+ *     summary: Logout user
+ *     description: Invalidate the current access token and optionally the refresh token
+ *     tags:
+ *       - Authentication
+ *     security:
+ *       - apiKey: []
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: Optional refresh token to invalidate
+ *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *     responses:
+ *       200:
+ *         description: Logged out successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Logged out successfully
+ *       401:
+ *         description: Unauthorized - authentication required
+ */
+router.post('/logout', authenticate, validateRequest(logoutSchema), authController.logout);
+
+/**
+ * @swagger
+ * /auth/change-password:
+ *   post:
+ *     summary: Change user password
+ *     description: Change the authenticated user's password and invalidate all existing tokens
+ *     tags:
+ *       - Authentication
+ *     security:
+ *       - apiKey: []
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - currentPassword
+ *               - newPassword
+ *               - confirmPassword
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *                 format: password
+ *                 description: Current password
+ *                 example: OldPassword123!
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *                 description: New password (min 8 chars, must contain uppercase, lowercase, and number)
+ *                 example: NewPassword456!
+ *               confirmPassword:
+ *                 type: string
+ *                 format: password
+ *                 description: Confirm new password
+ *                 example: NewPassword456!
  *     responses:
  *       200:
  *         description: Password changed successfully
@@ -397,50 +349,45 @@ router.delete('/profile/:id', validateRequest(deleteAccountSchema), authControll
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: Password changed successfully
+ *                   example: Password changed successfully. Please login again with your new password.
  *       400:
- *         description: Bad request - validation error or incorrect password
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Current password is incorrect
+ *         description: Bad request - validation error or incorrect current password
+ *       401:
+ *         description: Unauthorized - authentication required
  */
-router.post('/change-password/:id', validateRequest(changePasswordSchema), authController.changePassword);
+router.post(
+  '/change-password',
+  authenticate,
+  validateRequest(changePasswordSchema),
+  authController.changePassword
+);
 
 /**
  * @swagger
- * /auth/users:
- *   get:
- *     summary: Get all users
- *     description: Retrieve a paginated list of all users (admin only)
+ * /auth/refresh-token-rotate:
+ *   post:
+ *     summary: Refresh tokens with rotation
+ *     description: Generate new access and refresh tokens, invalidating the old refresh token
  *     tags:
  *       - Authentication
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           minimum: 1
- *           default: 1
- *         description: Page number for pagination
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           minimum: 1
- *           maximum: 100
- *           default: 10
- *         description: Number of items per page
+ *     security:
+ *       - apiKey: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: Valid refresh token
+ *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *     responses:
  *       200:
- *         description: Successfully retrieved users list
+ *         description: Tokens refreshed successfully
  *         content:
  *           application/json:
  *             schema:
@@ -449,39 +396,30 @@ router.post('/change-password/:id', validateRequest(changePasswordSchema), authC
  *                 success:
  *                   type: boolean
  *                   example: true
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/User'
- *                 pagination:
- *                   type: object
- *                   properties:
- *                     page:
- *                       type: integer
- *                       example: 1
- *                     limit:
- *                       type: integer
- *                       example: 10
- *                     total:
- *                       type: integer
- *                       example: 100
- *                     pages:
- *                       type: integer
- *                       example: 10
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
  *                 message:
  *                   type: string
- *                   example: Failed to fetch users
+ *                   example: Tokens refreshed successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     accessToken:
+ *                       type: string
+ *                       example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                     refreshToken:
+ *                       type: string
+ *                       example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                     expiresAt:
+ *                       type: number
+ *                       example: 1704067200
+ *       400:
+ *         description: Bad request - refresh token is required
+ *       401:
+ *         description: Unauthorized - invalid or expired refresh token
  */
-router.get('/users', validateRequest(getAllUsersSchema), authController.getAllUsers);
+router.post(
+  '/refresh-token-rotate',
+  validateRequest(refreshTokenSchema),
+  authController.refreshTokenWithRotation
+);
 
 export default router;
