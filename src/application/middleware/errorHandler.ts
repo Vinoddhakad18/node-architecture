@@ -17,12 +17,12 @@ export const errorHandler = (
   if (err instanceof AppError) {
     // Only log stack trace for server errors (5xx), not client errors (4xx)
     if (err.statusCode >= 500) {
-      logger.error('Server error occurred', {
+      logger.error({
         message: err.message,
         statusCode: err.statusCode,
         stack: err.stack,
         details: err.details,
-      });
+      },'Server error occurred');
     }
 
     const responseBody: {
@@ -48,11 +48,11 @@ export const errorHandler = (
   }
 
   // Handle generic errors - always log these
-  logger.error('Unexpected error occurred', {
+  logger.error( {
     message: err.message,
     stack: err.stack,
     name: err.name,
-  });
+  }, 'Unexpected error occurred',);
   res.sendServiceUnavailable('An unexpected error occurred');
 };
 

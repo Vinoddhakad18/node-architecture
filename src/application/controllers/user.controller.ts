@@ -33,7 +33,7 @@ class UserController {
 
       res.sendCreated(UserResponseDTO.fromModel(user), 'User created successfully');
     } catch (error: unknown) {
-      logger.error('Error in create user controller:', error);
+      logger.error({error: error}, 'Error in create user controller');
       res.sendServerError(getErrorMessage(error) || 'Failed to create user');
     }
   }
@@ -58,7 +58,7 @@ class UserController {
         'Users retrieved successfully'
       );
     } catch (error: unknown) {
-      logger.error('Error in findAll users controller:', error);
+      logger.error({error: error}, 'Error in findAll users controller');
       res.sendServerError(getErrorMessage(error) || 'Failed to retrieve users');
     }
   }
@@ -75,7 +75,7 @@ class UserController {
 
       res.sendSuccess(UserResponseDTO.fromModel(user), 'User retrieved successfully');
     } catch (error: unknown) {
-      logger.error('Error in findById user controller:', error);
+      logger.error({error: error}, 'Error in findById user controller');
       res.sendServerError(getErrorMessage(error) || 'Failed to retrieve user');
     }
   }
@@ -111,7 +111,7 @@ class UserController {
 
       res.sendSuccess(UserResponseDTO.fromModel(user), 'User updated successfully');
     } catch (error: unknown) {
-      logger.error('Error in update user controller:', error);
+      logger.error({error: error}, 'Error in update user controller');
       res.sendServerError(getErrorMessage(error) || 'Failed to update user');
     }
   }
@@ -129,7 +129,7 @@ class UserController {
 
       res.sendSuccess(null, 'User deleted successfully');
     } catch (error: unknown) {
-      logger.error('Error in delete user controller:', error);
+      logger.error({error: error}, 'Error in delete user controller');
       res.sendServerError(getErrorMessage(error) || 'Failed to delete user');
     }
   }
@@ -139,7 +139,7 @@ class UserController {
       const users = await userService.findAllActive();
       res.sendSuccess(UserSummaryDTO.fromModels(users), 'Active users retrieved successfully');
     } catch (error: unknown) {
-      logger.error('Error in findAllActive users controller:', error);
+      logger.error({error: error}, 'Error in findAllActive users controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to retrieve active users');
     }
   }

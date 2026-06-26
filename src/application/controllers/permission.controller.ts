@@ -33,7 +33,7 @@ class PermissionController {
 
       res.sendSuccess(result, 'Permissions retrieved successfully');
     } catch (error: unknown) {
-      logger.error('Error in getRolePermissions controller:', error);
+      logger.error({error:error}, 'Error in getRolePermissions controller');
       const errorMessage = getErrorMessage(error);
 
       if (errorMessage.includes('not found')) {
@@ -70,7 +70,7 @@ class PermissionController {
         'Permissions retrieved successfully'
       );
     } catch (error: unknown) {
-      logger.error('Error in getMyPermissions controller:', error);
+      logger.error({error: error}, 'Error in getMyPermissions controller');
       const errorMessage = getErrorMessage(error);
       res.sendServerError(errorMessage || 'Failed to retrieve permissions');
     }
@@ -142,7 +142,7 @@ class PermissionController {
 
       res.sendSuccess(result, 'Permissions updated successfully');
     } catch (error: unknown) {
-      logger.error('Error in updateRolePermissions controller:', error);
+      logger.error({error: error}, 'Error in updateRolePermissions controller');
       const errorMessage = getErrorMessage(error);
 
       if (errorMessage.includes('not found')) {

@@ -69,7 +69,7 @@ class CountryMasterService {
       logger.info(`Country created: ${country.name} (${country.code})`);
       return country;
     } catch (error) {
-      logger.error('Error creating country:', error);
+      logger.error({error}, 'Error creating country:');
       throw error;
     }
   }
@@ -119,7 +119,7 @@ class CountryMasterService {
 
       return result;
     } catch (error) {
-      logger.error('Error fetching countries:', error);
+      logger.error({error}, 'Error fetching countries:');
       throw error;
     }
   }
@@ -148,7 +148,7 @@ class CountryMasterService {
 
       return country;
     } catch (error) {
-      logger.error(`Error fetching country with id ${id}:`, error);
+      logger.error({error}, `Error fetching country with id ${id}:`);
       throw error;
     }
   }
@@ -177,7 +177,7 @@ class CountryMasterService {
 
       return country;
     } catch (error) {
-      logger.error(`Error fetching country with code ${code}:`, error);
+      logger.error({error}, `Error fetching country with code ${code}:`);
       throw error;
     }
   }
@@ -228,7 +228,7 @@ class CountryMasterService {
       logger.info(`Country updated: ${updatedCountry.name} (${updatedCountry.code})`);
       return updatedCountry;
     } catch (error) {
-      logger.error(`Error updating country with id ${id}:`, error);
+      logger.error({error}, `Error updating country with id ${id}:`);
       throw error;
     }
   }
@@ -258,7 +258,7 @@ class CountryMasterService {
 
       return result;
     } catch (error) {
-      logger.error(`Error deleting country with id ${id}:`, error);
+      logger.error({error}, `Error deleting country with id ${id}:`);
       throw error;
     }
   }
@@ -286,7 +286,7 @@ class CountryMasterService {
 
       return result;
     } catch (error) {
-      logger.error(`Error hard deleting country with id ${id}:`, error);
+      logger.error({error}, `Error hard deleting country with id ${id}:`);
       throw error;
     }
   }
@@ -317,7 +317,7 @@ class CountryMasterService {
 
       return countries;
     } catch (error) {
-      logger.error('Error fetching active countries:', error);
+      logger.error({error}, 'Error fetching active countries:');
       throw error;
     }
   }
@@ -329,7 +329,7 @@ class CountryMasterService {
     try {
       return countryRepository.isCodeExists(code, excludeId);
     } catch (error) {
-      logger.error(`Error checking country code ${code}:`, error);
+      logger.error({error}, `Error checking country code ${code}:`);
       throw error;
     }
   }
@@ -348,7 +348,7 @@ class CountryMasterService {
       await redisService.del(keysToDelete);
       logger.debug(`Cache invalidated for country id: ${id}, code: ${code}`);
     } catch (error) {
-      logger.error('Error invalidating country cache:', error);
+      logger.error({error}, 'Error invalidating country cache:');
       // Don't throw - cache invalidation failure shouldn't break the operation
     }
   }
@@ -369,7 +369,7 @@ class CountryMasterService {
 
       logger.debug('List caches invalidated for countries');
     } catch (error) {
-      logger.error('Error invalidating list caches:', error);
+      logger.error({error}, 'Error invalidating list caches:');
       // Don't throw - cache invalidation failure shouldn't break the operation
     }
   }

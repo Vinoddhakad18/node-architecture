@@ -16,10 +16,10 @@ import { registerUserHandlers } from './user.handlers';
  * Call this during application startup
  */
 export function initializeEventHandlers(): void {
-  logger.info('Initializing event handlers...');
+  logger.info({}, 'Initializing event handlers...');
 
   registerAuthHandlers();
   registerUserHandlers();
 
-  logger.info('Event handlers initialized successfully');
+  logger.info({}, 'Event handlers initialized successfully');
 }

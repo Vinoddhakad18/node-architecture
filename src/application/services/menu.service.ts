@@ -78,7 +78,7 @@ class MenuService {
       logger.info(`Menu created: ${menu.name} (${menu.route})`);
       return menu;
     } catch (error) {
-      logger.error('Error creating menu:', error);
+      logger.error({error}, 'Error creating menu:');
       throw error;
     }
   }
@@ -121,7 +121,7 @@ class MenuService {
 
       return result;
     } catch (error) {
-      logger.error('Error fetching menus:', error);
+      logger.error({error}, 'Error fetching menus:');
       throw error;
     }
   }
@@ -134,7 +134,7 @@ class MenuService {
       const menu = await menuRepository.findById(id);
       return menu;
     } catch (error) {
-      logger.error(`Error fetching menu with id ${id}:`, error);
+      logger.error({error}, `Error fetching menu with id ${id}:`);
       throw error;
     }
   }
@@ -147,7 +147,7 @@ class MenuService {
       const menu = await menuRepository.findByRoute(route);
       return menu;
     } catch (error) {
-      logger.error(`Error fetching menu with route ${route}:`, error);
+      logger.error({error}, `Error fetching menu with route ${route}:`);
       throw error;
     }
   }
@@ -172,7 +172,7 @@ class MenuService {
       const viewableMenuIds = await this.getViewableMenuIds(roleName);
       return this.filterTreeByPermission(tree, viewableMenuIds);
     } catch (error) {
-      logger.error('Error fetching menu tree:', error);
+      logger.error({error}, 'Error fetching menu tree:');
       throw error;
     }
   }
@@ -228,7 +228,7 @@ class MenuService {
     try {
       return menuRepository.findChildren(parentId);
     } catch (error) {
-      logger.error(`Error fetching children for menu ${parentId}:`, error);
+      logger.error({error}, `Error fetching children for menu ${parentId}:`);
       throw error;
     }
   }
@@ -277,7 +277,7 @@ class MenuService {
       logger.info(`Menu updated: ${updatedMenu.name} (${updatedMenu.route})`);
       return updatedMenu;
     } catch (error) {
-      logger.error(`Error updating menu with id ${id}:`, error);
+      logger.error({error}, `Error updating menu with id ${id}:`);
       throw error;
     }
   }
@@ -317,7 +317,7 @@ class MenuService {
 
       return result;
     } catch (error) {
-      logger.error(`Error deleting menu with id ${id}:`, error);
+      logger.error({error}, `Error deleting menu with id ${id}:`);
       throw error;
     }
   }
@@ -342,7 +342,7 @@ class MenuService {
 
       return result;
     } catch (error) {
-      logger.error(`Error hard deleting menu with id ${id}:`, error);
+      logger.error({error}, `Error hard deleting menu with id ${id}:`);
       throw error;
     }
   }
@@ -355,7 +355,7 @@ class MenuService {
       const menus = await menuRepository.findAllActive();
       return menus;
     } catch (error) {
-      logger.error('Error fetching active menus:', error);
+      logger.error({error}, 'Error fetching active menus:');
       throw error;
     }
   }
@@ -367,7 +367,7 @@ class MenuService {
     try {
       return menuRepository.findRootMenus({ where: { is_active: true } });
     } catch (error) {
-      logger.error('Error fetching root menus:', error);
+      logger.error({error}, 'Error fetching root menus:');
       throw error;
     }
   }
@@ -379,7 +379,7 @@ class MenuService {
     try {
       return menuRepository.isRouteExists(route, excludeId);
     } catch (error) {
-      logger.error(`Error checking menu route ${route}:`, error);
+      logger.error({error}, `Error checking menu route ${route}:`);
       throw error;
     }
   }
@@ -397,7 +397,7 @@ class MenuService {
 
       return result;
     } catch (error) {
-      logger.error('Error reordering menus:', error);
+      logger.error({error}, 'Error reordering menus:');
       throw error;
     }
   }

@@ -32,7 +32,7 @@ class AppEventEmitter {
    * Emit an event
    */
   public emit<K extends AppEvent>(event: K, payload: EventPayloadMap[K]): boolean {
-    logger.debug(`Event emitted: ${event}`, { event, payload });
+    logger.debug({event:event,payload:payload}, `Event emitted: ${event}`);
     return this.emitter.emit(event, payload);
   }
 
@@ -47,10 +47,10 @@ class AppEventEmitter {
       try {
         await handler(payload);
       } catch (error) {
-        logger.error(`Error in event handler for ${event}:`, error);
+        logger.error({error: error}, `Error in event handler for ${event}:`);
       }
     });
-    logger.debug(`Event handler registered: ${event}`);
+    logger.debug({event: event}, `Event handler registered: ${event}`);
   }
 
   /**
@@ -64,7 +64,7 @@ class AppEventEmitter {
       try {
         await handler(payload);
       } catch (error) {
-        logger.error(`Error in one-time event handler for ${event}:`, error);
+        logger.error({error: error}, `Error in one-time event handler for ${event}:`);
       }
     });
   }
@@ -73,6 +73,7 @@ class AppEventEmitter {
    * Unsubscribe from an event
    */
   public off<K extends AppEvent>(event: K, handler: (payload: EventPayloadMap[K]) => void): void {
+    logger.debug({event: event}, `Event handler removed: ${event}`);
     this.emitter.off(event, handler);
   }
 

@@ -91,9 +91,9 @@ export const sequelizeWithoutDB = new Sequelize(configWithoutDB);
 export const testConnection = async (): Promise<void> => {
   try {
     await sequelize.authenticate();
-    logger.info('✓ Database connection has been established successfully.');
+    logger.info({}, '✓ Database connection has been established successfully.');
   } catch (error) {
-    logger.error('✗ Unable to connect to the database:', error);
+    logger.error({error: error}, '✗ Unable to connect to the database:', error);
     throw error;
   }
 };
@@ -103,23 +103,24 @@ export const testConnection = async (): Promise<void> => {
  */
 export const connectDatabase = async (attempt = 1): Promise<void> => {
   try {
-    logger.info(
+    logger.info({},
       `Attempting to connect to database (attempt ${attempt}/${DB_CONNECTION_RETRY_ATTEMPTS})...`
     );
     await testConnection();
-    logger.info('✓ Database connection established successfully');
+    logger.info({}, '✓ Database connection established successfully');
   } catch (error) {
     logger.error(
-      `✗ Database connection failed (attempt ${attempt}/${DB_CONNECTION_RETRY_ATTEMPTS}):`,
-      error
-    );
+      {error: error},
+      `✗ Database connection failed (attempt ${attempt}/${DB_CONNECTION_RETRY_ATTEMPTS})`);
 
     if (attempt < DB_CONNECTION_RETRY_ATTEMPTS) {
-      logger.info(`Retrying in ${DB_CONNECTION_RETRY_DELAY / 1000} seconds...`);
+      logger.info({},
+        `Retrying in ${DB_CONNECTION_RETRY_DELAY / 1000} seconds...`
+      );
       await new Promise((resolve) => setTimeout(resolve, DB_CONNECTION_RETRY_DELAY));
       return connectDatabase(attempt + 1);
     } else {
-      logger.error('✗ Failed to connect to database after maximum retry attempts');
+      logger.error({error: error}, '✗ Failed to connect to database after maximum retry attempts');
       throw new Error('Database connection failed');
     }
   }
@@ -131,9 +132,9 @@ export const connectDatabase = async (attempt = 1): Promise<void> => {
 export const closeConnection = async (): Promise<void> => {
   try {
     await sequelize.close();
-    logger.info('✓ Database connection has been closed successfully.');
+    logger.info({}, '✓ Database connection has been closed successfully.');
   } catch (error) {
-    logger.error('✗ Error closing database connection:', error);
+    logger.error({error: error}, '✗ Error closing database connection:');
     throw error;
   }
 };
@@ -142,20 +143,20 @@ export const closeConnection = async (): Promise<void> => {
  * Graceful shutdown handler
  */
 export const gracefulShutdown = async (signal: string): Promise<void> => {
-  logger.info(`\n${signal} received. Starting graceful shutdown...`);
+  logger.info({}, `\n${signal} received. Starting graceful shutdown...`);
 
   try {
     // Close database connection
     await sequelize.close();
-    logger.info('✓ Database connection closed successfully');
+    logger.info({}, '✓ Database connection closed successfully');
 
     // Close Redis connection
     await redisService.disconnect();
-    logger.info('✓ Redis connection closed successfully');
+    logger.info({}, '✓ Redis connection closed successfully');
 
     process.exit(0);
   } catch (error) {
-    logger.error('✗ Error during graceful shutdown:', error);
+    logger.error({error: error}, '✗ Error during graceful shutdown:');
     process.exit(1);
   }
 };
@@ -173,9 +174,9 @@ export const syncDatabase = async (options?: {
     }
 
     await sequelize.sync(options);
-    console.log('✓ Database models synchronized successfully.');
+    logger.info({}, '✓ Database models synchronized successfully.');
   } catch (error) {
-    console.error('✗ Error synchronizing database models:', error);
+    logger.error({error: error}, '✗ Error synchronizing database models:');
     throw error;
   }
 };

@@ -28,7 +28,7 @@ class RoleController {
 
       res.sendCreated(role, 'Role created successfully');
     } catch (error: unknown) {
-      logger.error('Error in create role controller:', error);
+      logger.error({error: error}, 'Error in create role controller');
       res.sendServerError(getErrorMessage(error) || 'Failed to create role');
     }
   }
@@ -59,7 +59,7 @@ class RoleController {
 
       res.sendSuccess(result, 'Roles retrieved successfully');
     } catch (error: unknown) {
-      logger.error('Error in findAll roles controller:', error);
+      logger.error({error: error}, 'Error in findAll roles controller');
       res.sendServerError(getErrorMessage(error) || 'Failed to retrieve roles');
     }
   }
@@ -81,7 +81,7 @@ class RoleController {
 
       res.sendSuccess(role, 'Role retrieved successfully');
     } catch (error: unknown) {
-      logger.error('Error in findById role controller:', error);
+      logger.error({error: error}, 'Error in findById role controller');
       res.sendServerError(getErrorMessage(error) || 'Failed to retrieve role');
     }
   }
@@ -122,7 +122,7 @@ class RoleController {
 
       res.sendSuccess(role, 'Role updated successfully');
     } catch (error: unknown) {
-      logger.error('Error in update role controller:', error);
+      logger.error({error: error}, 'Error in update role controller');
       res.sendServerError(getErrorMessage(error) || 'Failed to update role');
     }
   }
@@ -145,7 +145,7 @@ class RoleController {
 
       res.sendSuccess(null, 'Role deleted successfully');
     } catch (error: unknown) {
-      logger.error('Error in delete role controller:', error);
+      logger.error({error: error}, 'Error in delete role controller');
       res.sendServerError(getErrorMessage(error) || 'Failed to delete role');
     }
   }
@@ -160,7 +160,7 @@ class RoleController {
 
       res.sendSuccess(roles, 'Active roles retrieved successfully');
     } catch (error: unknown) {
-      logger.error('Error in findAllActive roles controller:', error);
+      logger.error({error: error}, 'Error in findAllActive roles controller');
       res.sendServerError(getErrorMessage(error) || 'Failed to retrieve active roles');
     }
   }

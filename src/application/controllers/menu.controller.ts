@@ -34,7 +34,7 @@ class MenuController {
 
       res.sendCreated(menu, 'Menu created successfully');
     } catch (error: unknown) {
-      logger.error('Error in create menu controller:', error);
+      logger.error({error:error}, 'Error in create menu controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to create menu');
     }
   }
@@ -69,7 +69,7 @@ class MenuController {
 
       res.sendSuccess(result, 'Menus retrieved successfully');
     } catch (error: unknown) {
-      logger.error('Error in findAll menus controller:', error);
+      logger.error({error: error}, 'Error in findAll menus controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to retrieve menus');
     }
   }
@@ -87,7 +87,7 @@ class MenuController {
 
       res.sendSuccess(menus, 'Menu tree retrieved successfully');
     } catch (error: unknown) {
-      logger.error('Error in findMenuTree controller:', error);
+      logger.error({error: error}, 'Error in findMenuTree controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to retrieve menu tree');
     }
   }
@@ -109,7 +109,7 @@ class MenuController {
 
       res.sendSuccess(menu, 'Menu retrieved successfully');
     } catch (error: unknown) {
-      logger.error('Error in findById menu controller:', error);
+      logger.error({error: error}, 'Error in findById menu controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to retrieve menu');
     }
   }
@@ -131,7 +131,7 @@ class MenuController {
 
       res.sendSuccess(menu, 'Menu retrieved successfully');
     } catch (error: unknown) {
-      logger.error('Error in findByRoute menu controller:', error);
+      logger.error({error: error}, 'Error in findByRoute menu controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to retrieve menu');
     }
   }
@@ -155,7 +155,7 @@ class MenuController {
 
       res.sendSuccess(children, 'Menu children retrieved successfully');
     } catch (error: unknown) {
-      logger.error('Error in findChildren menu controller:', error);
+      logger.error({error: error}, 'Error in findChildren menu controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to retrieve menu children');
     }
   }
@@ -193,7 +193,7 @@ class MenuController {
 
       res.sendSuccess(menu, 'Menu updated successfully');
     } catch (error: unknown) {
-      logger.error('Error in update menu controller:', error);
+      logger.error({error: error}, 'Error in update menu controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to update menu');
     }
   }
@@ -215,7 +215,7 @@ class MenuController {
 
       res.sendSuccess(null, 'Menus reordered successfully');
     } catch (error: unknown) {
-      logger.error('Error in reorderMenus controller:', error);
+      logger.error({error: error}, 'Error in reorderMenus controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to reorder menus');
     }
   }
@@ -237,7 +237,7 @@ class MenuController {
 
       res.sendSuccess(null, 'Menu deleted successfully');
     } catch (error: unknown) {
-      logger.error('Error in delete menu controller:', error);
+      logger.error({error: error}, 'Error in delete menu controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to delete menu');
     }
   }
@@ -259,7 +259,7 @@ class MenuController {
 
       res.sendSuccess(null, 'Menu permanently deleted');
     } catch (error: unknown) {
-      logger.error('Error in hardDelete menu controller:', error);
+      logger.error({error: error}, 'Error in hardDelete menu controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to permanently delete menu');
     }
   }
@@ -274,7 +274,7 @@ class MenuController {
 
       res.sendSuccess(menus, 'Active menus retrieved successfully');
     } catch (error: unknown) {
-      logger.error('Error in findAllActive menus controller:', error);
+      logger.error({error: error}, 'Error in findAllActive menus controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to retrieve active menus');
     }
   }

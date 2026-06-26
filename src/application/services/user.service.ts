@@ -70,7 +70,7 @@ class UserService {
       // Reload with associations so role/branch details are present in the response
       return (await userRepository.findById(user.id)) ?? user;
     } catch (error) {
-      logger.error('Error creating user:', error);
+      logger.error({error}, 'Error creating user:');
       throw error;
     }
   }
@@ -97,7 +97,7 @@ class UserService {
         },
       };
     } catch (error) {
-      logger.error('Error fetching users:', error);
+      logger.error({error}, 'Error fetching users:');
       throw error;
     }
   }
@@ -106,7 +106,7 @@ class UserService {
     try {
       return userRepository.findById(id);
     } catch (error) {
-      logger.error(`Error fetching user with id ${id}:`, error);
+      logger.error({error}, `Error fetching user with id ${id}:`);
       throw error;
     }
   }
@@ -144,7 +144,7 @@ class UserService {
       logger.info(`User updated: ${updatedUser?.email ?? user.email} by user ${userId || 'system'}`);
       return updatedUser;
     } catch (error) {
-      logger.error(`Error updating user with id ${id}:`, error);
+      logger.error({error}, `Error updating user with id ${id}:`);
       throw error;
     }
   }
@@ -158,7 +158,7 @@ class UserService {
       if (result) logger.info(`User deleted (soft): ${user.email}`);
       return result;
     } catch (error) {
-      logger.error(`Error deleting user with id ${id}:`, error);
+      logger.error({error}, `Error deleting user with id ${id}:`);
       throw error;
     }
   }
@@ -167,7 +167,7 @@ class UserService {
     try {
       return userRepository.findAllActive();
     } catch (error) {
-      logger.error('Error fetching active users:', error);
+      logger.error({error}, 'Error fetching active users:');
       throw error;
     }
   }
@@ -176,7 +176,7 @@ class UserService {
     try {
       return userRepository.isEmailExists(email, excludeId);
     } catch (error) {
-      logger.error(`Error checking email ${email}:`, error);
+      logger.error({error}, `Error checking email ${email}:`);
       throw error;
     }
   }
@@ -185,7 +185,7 @@ class UserService {
     try {
       return userRepository.isMobileExists(mobile, excludeId);
     } catch (error) {
-      logger.error(`Error checking mobile ${mobile}:`, error);
+      logger.error({error}, `Error checking mobile ${mobile}:`);
       throw error;
     }
   }

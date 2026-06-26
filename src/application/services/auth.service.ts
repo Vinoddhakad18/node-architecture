@@ -25,24 +25,30 @@ class AuthService {
 
       // Check if password exists in database
       if (!user.getDataValue('password')) {
-        logger.error('Password field is missing from user record');
+        logger.error({ email: user?.getDataValue('email') }, 'Password field is missing from user record');
         throw new Error('Invalid password');
       }
 
       // Check if user is active
       if (!user.isActive) {
+        logger.error({ email: user?.getDataValue('email') }, 'User account is deactivated');
         throw new Error('Your account has been deactivated. Please contact support.');
       }
 
       // Verify password
       const isPasswordValid = await user.comparePassword(password);
       if (!isPasswordValid) {
+        logger.error({ email: user?.getDataValue('email') }, 'Invalid email or password');
         throw new Error('Invalid email or password');
       }
 
       // Update last login using repository
       await userRepository.updateLastLogin(user.getDataValue('id'));
-      logger.info(`User logged in: ${user.getDataValue('email')}`);
+      console.log('User last login updated successfully for user:', user.getDataValue('email'));
+      logger.info(
+                { email: user?.getDataValue('email') },
+                'User logged in'
+              );
 
       // Generate JWT tokens - role name is resolved from the associated role
       const tokens = jwtUtil.generateTokenPair({
@@ -51,8 +57,8 @@ class AuthService {
         role: user.role?.name,
       });
       return { user, tokens };
-    } catch (error) {
-      logger.error('Error in login service:', error);
+    } catch (error:any) {
+      logger.error({ err: error }, 'Error in login service');
       throw error;
     }
   }
@@ -63,10 +69,10 @@ class AuthService {
   async refreshToken(refreshToken: string): Promise<{ accessToken: string }> {
     try {
       const accessToken = jwtUtil.refreshAccessToken(refreshToken);
-      logger.info('Access token refreshed successfully');
+      logger.info({}, 'Access token refreshed successfully');
       return { accessToken };
-    } catch (error) {
-      logger.error('Error refreshing token:', error);
+    } catch (error:any) {
+      logger.error({ err: error }, 'Error refreshing token');
       throw new Error('Failed to refresh token');
     }
   }
@@ -85,8 +91,8 @@ class AuthService {
       }
 
       return true;
-    } catch (error) {
-      logger.error('Token verification failed:', error);
+    } catch (error:any) {
+      logger.error({ err: error }, 'Token verification failed');
       return false;
     }
   }
@@ -105,9 +111,10 @@ class AuthService {
       }
 
       const decoded = jwtUtil.decodeToken(accessToken);
-      logger.info(`User logged out: ${decoded?.email}`);
-    } catch (error) {
-      logger.error('Error in logout service:', error);
+      
+      logger.info({ email: decoded?.email }, 'User logged out');
+    } catch (error:any) {
+      logger.error({ err: error }, 'Error in logout service');
       throw new Error('Failed to logout');
     }
   }
@@ -144,9 +151,9 @@ class AuthService {
       // Invalidate all existing tokens for this user
       await tokenBlacklistService.invalidateAllUserTokens(userId, 'password_change');
 
-      logger.info(`Password changed for user ${userId}`);
-    } catch (error) {
-      logger.error('Error changing password:', error);
+      logger.info({ userId }, 'Password changed successfully');
+    } catch (error:any) {
+      logger.error({ err: error, userId }, 'Error changing password');
       throw error;
     }
   }
@@ -155,37 +162,43 @@ class AuthService {
    * Refresh tokens with rotation (invalidates old refresh token)
    */
   async refreshTokenWithRotation(refreshToken: string): Promise<TokenPair> {
+    
     try {
-      // Verify refresh token
       const decoded = jwtUtil.verifyRefreshToken(refreshToken);
+      try {
+        // Verify refresh token
 
-      // Check if refresh token is blacklisted
-      const isBlacklisted = await tokenBlacklistService.isBlacklisted(refreshToken);
-      if (isBlacklisted) {
-        throw new Error('Refresh token has been revoked');
+        // Check if refresh token is blacklisted
+        const isBlacklisted = await tokenBlacklistService.isBlacklisted(refreshToken);
+        if (isBlacklisted) {
+          throw new Error('Refresh token has been revoked');
+        }
+
+        // Check if user's tokens have been invalidated
+        const isUserInvalidated = await tokenBlacklistService.isTokenInvalidatedByUser(refreshToken);
+        if (isUserInvalidated) {
+          throw new Error('Session has been invalidated. Please login again.');
+        }
+
+        // Generate new token pair
+        const newTokens = jwtUtil.generateTokenPair({
+          userId: decoded.userId,
+          email: decoded.email,
+          role: decoded.role,
+        });
+
+        // Blacklist old refresh token (rotation)
+        await tokenBlacklistService.addToBlacklist(refreshToken, 'token_rotation');
+
+        logger.info({ email: decoded.email }, 'Tokens refreshed with rotation');
+        return newTokens;
+      } catch (error:any) {
+        logger.error({ err: error, email: decoded?.email }, 'Error refreshing token with rotation');
+        throw error;
       }
-
-      // Check if user's tokens have been invalidated
-      const isUserInvalidated = await tokenBlacklistService.isTokenInvalidatedByUser(refreshToken);
-      if (isUserInvalidated) {
-        throw new Error('Session has been invalidated. Please login again.');
-      }
-
-      // Generate new token pair
-      const newTokens = jwtUtil.generateTokenPair({
-        userId: decoded.userId,
-        email: decoded.email,
-        role: decoded.role,
-      });
-
-      // Blacklist old refresh token (rotation)
-      await tokenBlacklistService.addToBlacklist(refreshToken, 'token_rotation');
-
-      logger.info(`Tokens refreshed with rotation for user: ${decoded.email}`);
-      return newTokens;
-    } catch (error) {
-      logger.error('Error refreshing token with rotation:', error);
-      throw error;
+    } catch (error:any) {
+      logger.error({ err: error }, 'Invalid refresh token');
+      throw new Error('Invalid refresh token');
     }
   }
 }

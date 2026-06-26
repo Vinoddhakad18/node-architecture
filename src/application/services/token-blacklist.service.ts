@@ -40,14 +40,14 @@ class TokenBlacklistService {
           ttl
         );
 
-        logger.info(`Token blacklisted: ${reason}`, {
+        logger.info( {
           userId: decoded.userId,
           email: decoded.email,
           ttl,
-        });
+        },`Token blacklisted: ${reason}`);
       }
     } catch (error) {
-      logger.error('Error adding token to blacklist:', error);
+      logger.error({error}, 'Error adding token to blacklist:');
       throw new Error('Failed to blacklist token');
     }
   }
@@ -63,7 +63,7 @@ class TokenBlacklistService {
       const exists = await redisService.exists(blacklistKey);
       return exists;
     } catch (error) {
-      logger.error('Error checking token blacklist:', error);
+      logger.error({error}, 'Error checking token blacklist:');
       // In case of Redis error, fail open (allow the request)
       // You might want to fail closed in high-security environments
       return false;
@@ -103,7 +103,7 @@ class TokenBlacklistService {
 
       logger.info(`All tokens invalidated for user ${userId}: ${reason}`);
     } catch (error) {
-      logger.error('Error invalidating all user tokens:', error);
+      logger.error({error}, 'Error invalidating all user tokens:');
       throw new Error('Failed to invalidate user tokens');
     }
   }
@@ -132,7 +132,7 @@ class TokenBlacklistService {
       // Token is invalid if it was issued before the invalidation timestamp
       return decoded.iat < invalidationData.invalidatedAt;
     } catch (error) {
-      logger.error('Error checking user token invalidation:', error);
+      logger.error({error}, 'Error checking user token invalidation:');
       return false;
     }
   }
@@ -146,7 +146,7 @@ class TokenBlacklistService {
       await redisService.del(blacklistKey);
       logger.info('Token removed from blacklist');
     } catch (error) {
-      logger.error('Error removing token from blacklist:', error);
+      logger.error({error}, 'Error removing token from blacklist:');
       throw new Error('Failed to remove token from blacklist');
     }
   }
@@ -164,7 +164,7 @@ class TokenBlacklistService {
       const blacklistKey = CacheKeys.tokenBlacklist(token);
       return await redisService.get(blacklistKey);
     } catch (error) {
-      logger.error('Error getting blacklist info:', error);
+      logger.error({error}, 'Error getting blacklist info:');
       return null;
     }
   }

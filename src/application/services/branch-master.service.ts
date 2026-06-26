@@ -48,7 +48,7 @@ class BranchMasterService {
       logger.info(`Branch created: ${branch.branch_name} (${branch.branch_code})`);
       return branch;
     } catch (error) {
-      logger.error('Error creating branch:', error);
+      logger.error({error:error}, 'Error creating branch:');
       throw error;
     }
   }
@@ -75,7 +75,7 @@ class BranchMasterService {
         },
       };
     } catch (error) {
-      logger.error('Error fetching branches:', error);
+      logger.error({error}, 'Error fetching branches:');
       throw error;
     }
   }
@@ -84,7 +84,7 @@ class BranchMasterService {
     try {
       return branchMasterRepository.findById(id);
     } catch (error) {
-      logger.error(`Error fetching branch with id ${id}:`, error);
+      logger.error({error}, `Error fetching branch with id ${id}:`);
       throw error;
     }
   }
@@ -115,7 +115,7 @@ class BranchMasterService {
       logger.info(`Branch updated: ${updatedBranch.branch_name} (${updatedBranch.branch_code})`);
       return updatedBranch;
     } catch (error) {
-      logger.error(`Error updating branch with id ${id}:`, error);
+      logger.error({error}, `Error updating branch with id ${id}:`);
       throw error;
     }
   }
@@ -133,7 +133,7 @@ class BranchMasterService {
       }
       return result;
     } catch (error) {
-      logger.error(`Error deleting branch with id ${id}:`, error);
+      logger.error({error}, `Error deleting branch with id ${id}:`);
       throw error;
     }
   }
@@ -142,7 +142,7 @@ class BranchMasterService {
     try {
       return branchMasterRepository.findAllActive();
     } catch (error) {
-      logger.error('Error fetching active branches:', error);
+      logger.error({error}, 'Error fetching active branches:');
       throw error;
     }
   }
@@ -151,7 +151,7 @@ class BranchMasterService {
     try {
       return branchMasterRepository.isBranchCodeExists(branch_code, excludeId);
     } catch (error) {
-      logger.error(`Error checking branch code ${branch_code}:`, error);
+      logger.error({error}, `Error checking branch code ${branch_code}:`);
       throw error;
     }
   }

@@ -76,19 +76,19 @@ export const cacheMiddleware = (options: CacheOptions = {}) => {
       const cachedData = await redisService.get(cacheKey);
 
       if (cachedData) {
-        logger.info(`Cache hit: ${cacheKey}`, {
+        logger.info( {
           requestId: req.requestId,
           url: req.originalUrl,
-        });
+        }, `Cache hit: ${cacheKey}`);
 
         // Return cached response
         return res.json(JSON.parse(cachedData));
       }
 
-      logger.debug(`Cache miss: ${cacheKey}`, {
+      logger.debug( {
         requestId: req.requestId,
         url: req.originalUrl,
-      });
+      },`Cache miss: ${cacheKey}`);
 
       // Store the original res.json method
       const originalJson = res.json.bind(res);
@@ -99,17 +99,13 @@ export const cacheMiddleware = (options: CacheOptions = {}) => {
         redisService
           .set(cacheKey, JSON.stringify(data), ttl)
           .then(() => {
-            logger.info(`Response cached: ${cacheKey}`, {
+            logger.info( {
               requestId: req.requestId,
               ttl,
-            });
+            }, `Response cached: ${cacheKey}`);
           })
           .catch((err) => {
-            logger.error('Cache set error:', {
-              error: err.message,
-              key: cacheKey,
-              requestId: req.requestId,
-            });
+            logger.error({error: err}, 'Cache set error:');
           });
 
         // Call original json method
@@ -118,11 +114,11 @@ export const cacheMiddleware = (options: CacheOptions = {}) => {
 
       next();
     } catch (error) {
-      logger.error('Cache middleware error:', {
+      logger.error({
         error: error instanceof Error ? error.message : 'Unknown error',
         key: cacheKey,
         requestId: req.requestId,
-      });
+      }, 'Cache middleware error:');
 
       // Continue without cache on error (fail-safe)
       next();
@@ -161,18 +157,18 @@ export const invalidateCacheMiddleware = (options: { pattern: string; keyPrefix?
           })
           .then((deletedCount) => {
             if (deletedCount > 0) {
-              logger.info(`Cache invalidated: ${deletedCount} key(s) deleted`, {
+              logger.info({
                 pattern: fullPattern,
                 requestId: req.requestId,
-              });
+              },`Cache invalidated: ${deletedCount} key(s) deleted`);
             }
           })
           .catch((err) => {
-            logger.error('Cache invalidation error:', {
+            logger.error( {
               error: err.message,
               pattern: fullPattern,
               requestId: req.requestId,
-            });
+            },'Cache invalidation error:');
           });
       }
 
@@ -191,13 +187,13 @@ export const clearCache = async (key: string, prefix = 'cache'): Promise<number>
   try {
     const fullKey = key.startsWith(prefix) ? key : `${prefix}:${key}`;
     const deleted = await redisService.del(fullKey);
-    logger.info(`Cache cleared: ${fullKey}`, { deleted });
+    logger.info( { deleted },`Cache cleared: ${fullKey}`);
     return deleted;
   } catch (error) {
-    logger.error('Clear cache error:', {
+    logger.error( {
       error: error instanceof Error ? error.message : 'Unknown error',
       key,
-    });
+    }, 'Clear cache error:');
     throw error;
   }
 };
@@ -217,16 +213,13 @@ export const clearCachePattern = async (pattern: string, prefix = 'cache'): Prom
     }
 
     const deleted = await redisService.del(keys);
-    logger.info(`Cache pattern cleared: ${fullPattern}`, {
-      deleted,
-      keys: keys.length,
-    });
+    logger.info( { deleted, keys: keys.length },`Cache pattern cleared: ${fullPattern}`);
     return deleted;
   } catch (error) {
-    logger.error('Clear cache pattern error:', {
+    logger.error( {
       error: error instanceof Error ? error.message : 'Unknown error',
       pattern,
-    });
+    }, 'Clear cache pattern error:');
     throw error;
   }
 };

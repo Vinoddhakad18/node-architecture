@@ -27,7 +27,7 @@ class BranchMasterController {
 
       res.sendCreated(branch, 'Branch created successfully');
     } catch (error: unknown) {
-      logger.error('Error in create branch controller:', error);
+      logger.error({error:error}, 'Error in create branch controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to create branch');
     }
   }
@@ -54,7 +54,7 @@ class BranchMasterController {
 
       res.sendSuccess(result, 'Branches retrieved successfully');
     } catch (error: unknown) {
-      logger.error('Error in findAll branches controller:', error);
+      logger.error({error: error}, 'Error in findAll branches controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to retrieve branches');
     }
   }
@@ -71,7 +71,7 @@ class BranchMasterController {
 
       res.sendSuccess(branch, 'Branch retrieved successfully');
     } catch (error: unknown) {
-      logger.error('Error in findById branch controller:', error);
+      logger.error({error: error}, 'Error in findById branch controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to retrieve branch');
     }
   }
@@ -108,7 +108,7 @@ class BranchMasterController {
 
       res.sendSuccess(branch, 'Branch updated successfully');
     } catch (error: unknown) {
-      logger.error('Error in update branch controller:', error);
+      logger.error({error: error}, 'Error in update branch controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to update branch');
     }
   }
@@ -126,7 +126,7 @@ class BranchMasterController {
 
       res.sendSuccess(null, 'Branch deleted successfully');
     } catch (error: unknown) {
-      logger.error('Error in delete branch controller:', error);
+      logger.error({error: error}, 'Error in delete branch controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to delete branch');
     }
   }
@@ -136,7 +136,7 @@ class BranchMasterController {
       const branches = await branchMasterService.findAllActive();
       res.sendSuccess(branches, 'Active branches retrieved successfully');
     } catch (error: unknown) {
-      logger.error('Error in findAllActive branches controller:', error);
+      logger.error({error: error}, 'Error in findAllActive branches controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to retrieve active branches');
     }
   }

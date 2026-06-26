@@ -55,7 +55,7 @@ class RoleService {
       logger.info(`Role created: ${role.name} by user ${userId || 'system'}`);
       return role;
     } catch (error) {
-      logger.error('Error creating role:', error);
+      logger.error({error}, 'Error creating role:');
       throw error;
     }
   }
@@ -89,7 +89,7 @@ class RoleService {
 
       return result;
     } catch (error) {
-      logger.error('Error fetching roles:', error);
+      logger.error({error}, 'Error fetching roles:');
       throw error;
     }
   }
@@ -102,7 +102,7 @@ class RoleService {
       const role = await roleRepository.findById(id);
       return role;
     } catch (error) {
-      logger.error(`Error fetching role with id ${id}:`, error);
+      logger.error({error}, `Error fetching role with id ${id}:`);
       throw error;
     }
   }
@@ -115,7 +115,7 @@ class RoleService {
       const role = await roleRepository.findByName(name);
       return role;
     } catch (error) {
-      logger.error(`Error fetching role with name ${name}:`, error);
+      logger.error({error}, `Error fetching role with name ${name}:`);
       throw error;
     }
   }
@@ -154,7 +154,7 @@ class RoleService {
       logger.info(`Role updated: ${updatedRole.name} by user ${userId || 'system'}`);
       return updatedRole;
     } catch (error) {
-      logger.error(`Error updating role with id ${id}:`, error);
+      logger.error({error}, `Error updating role with id ${id}:`);
       throw error;
     }
   }
@@ -178,7 +178,7 @@ class RoleService {
 
       return result;
     } catch (error) {
-      logger.error(`Error deleting role with id ${id}:`, error);
+      logger.error({error}, `Error deleting role with id ${id}:`);
       throw error;
     }
   }
@@ -191,7 +191,7 @@ class RoleService {
       const roles = await roleRepository.findAllActive();
       return roles;
     } catch (error) {
-      logger.error('Error fetching active roles:', error);
+      logger.error({error}, 'Error fetching active roles:');
       throw error;
     }
   }
@@ -203,7 +203,7 @@ class RoleService {
     try {
       return roleRepository.isNameExists(name, excludeId);
     } catch (error) {
-      logger.error(`Error checking role name ${name}:`, error);
+      logger.error({error}, `Error checking role name ${name}:`);
       throw error;
     }
   }

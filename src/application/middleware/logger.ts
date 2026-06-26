@@ -1,97 +1,91 @@
-import { stream, logger as winstonLogger } from '@config/logger';
-import { Request, RequestHandler } from 'express';
-import morgan from 'morgan';
+import pinoHttp from 'pino-http';
+import { Request } from 'express';
+
+import { logger } from '@config/logger';
 
 import { config } from '@/config';
 
-/**
- * Custom Morgan token for real IP address
- */
-morgan.token('real-ip', (req) => {
-  return (
-    (req.headers['x-forwarded-for'] as string) ||
-    (req.headers['x-real-ip'] as string) ||
-    req.socket.remoteAddress ||
-    'unknown'
-  );
+export const httpLogger = pinoHttp({
+  logger,
+
+  enabled: config.logging.http.enabled,
+
+  genReqId(req) {
+    return (
+      (req.headers['x-request-id'] as string) ||
+      (req as Request).requestId ||
+      crypto.randomUUID()
+    );
+  },
+
+  customProps(req) {
+    return {
+      requestId: (req as Request).requestId,
+    };
+  },
+
+  customLogLevel(_req, res, err) {
+    if (err || res.statusCode >= 500) return 'error';
+    if (res.statusCode >= 400) return 'warn';
+    return 'info';
+  },
+
+  autoLogging: {
+    ignore(req) {
+      return (
+        req.url === '/health' ||
+        req.url === '/favicon.ico'
+      );
+    },
+  },
+
+  serializers: {
+    req(req) {
+      const body =
+        req.body && typeof req.body === 'object'
+          ? sanitizeBody(req.body)
+          : undefined;
+
+      return {
+        id: (req as Request).requestId,
+        method: req.method,
+        url: req.url,
+        ip:
+          req?.headers['x-forwarded-for'] ||
+          req?.headers['x-real-ip'] ||
+          req?.socket?.remoteAddress,
+        userAgent: req?.headers['user-agent'],
+        body,
+      };
+    },
+
+    res(res) {
+      return {
+        statusCode: res.statusCode,
+      };
+    },
+  },
 });
 
-/**
- * Custom Morgan token for request body (sanitized)
- */
-morgan.token('request-body', (req) => {
-  const expressReq = req as unknown as Request;
-  if (expressReq.body && Object.keys(expressReq.body).length > 0) {
-    const sanitized = { ...expressReq.body };
-    // Remove sensitive fields
-    if (sanitized.password) {
-      sanitized.password = '***';
+function sanitizeBody(body: Record<string, unknown>) {
+  const clone = { ...body };
+
+  const fields = [
+    'password',
+    'confirmPassword',
+    'token',
+    'accessToken',
+    'refreshToken',
+    'authorization',
+    'apiKey',
+    'secret',
+  ];
+
+  for (const field of fields) {
+    if (field in clone) {
+      clone[field] = '***';
     }
-    if (sanitized.token) {
-      sanitized.token = '***';
-    }
-    if (sanitized.apiKey) {
-      sanitized.apiKey = '***';
-    }
-    return JSON.stringify(sanitized);
   }
-  return '-';
-});
 
-/**
- * Custom Morgan token for process ID
- */
-morgan.token('pid', () => process.pid.toString());
-
-/**
- * Custom Morgan token for request ID
- */
-morgan.token('request-id', (req) => {
-  const expressReq = req as unknown as Request;
-  return expressReq.requestId || '-';
-});
-
-/**
- * Enhanced Morgan HTTP request logger middleware with Winston integration
- *
- * Logs detailed information including:
- * - HTTP method and URL
- * - Status code and response time
- * - User agent and real IP address
- * - Request body (sanitized)
- * - Content length, process ID, and request ID
- */
-const morganFormat =
-  ':real-ip - :method :url :status :res[content-length] - :response-time ms - :user-agent - PID::pid - ReqID::request-id';
-
-/**
- * Morgan middleware with conditional logging based on status code
- * Returns a no-op middleware if HTTP logging is disabled
- */
-export const logger: RequestHandler = config.logging.http.enabled
-  ? morgan(morganFormat, {
-      stream,
-      skip: (req, _res) => {
-        // Skip logging for health check endpoint
-        return req.url === '/health';
-      },
-    })
-  : (_req, _res, next) => next(); // No-op middleware when HTTP logging is disabled
-
-/**
- * Additional Morgan middleware for error logging (4xx and 5xx status codes)
- * Returns a no-op middleware if HTTP logging is disabled
- */
-export const errorLogger: RequestHandler = config.logging.http.enabled
-  ? morgan(morganFormat, {
-      stream: {
-        write: (message: string) => {
-          winstonLogger.error(message.trim());
-        },
-      },
-      skip: (_req, res) => {
-        // Only log errors (4xx and 5xx)
-        return res.statusCode < 400;
-      },
-    })
-  : (_req, _res, next) => next(); // No-op middleware when HTTP logging is disabled
+  return clone;
+}

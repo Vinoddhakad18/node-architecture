@@ -83,7 +83,7 @@ class PermissionService {
         permissions,
       };
     } catch (error) {
-      logger.error(`Error fetching permissions for role ${roleId}:`, error);
+      logger.error({error}, `Error fetching permissions for role ${roleId}:`);
       throw error;
     }
   }
@@ -175,7 +175,7 @@ class PermissionService {
         );
 
         // Bulk upsert permissions
-        logger.info(`Starting bulk upsert for role ${data.roleId}`, {
+        logger.info( {
           roleId: data.roleId,
           recordCount: permissionRecords.length,
           records: permissionRecords.map((r) => ({
@@ -188,7 +188,7 @@ class PermissionService {
             can_export: r.can_export,
             can_status: r.can_status,
           })),
-        });
+        }, `Starting bulk upsert for role ${data.roleId}`);
 
         const upsertedRecords = await roleMenuPermissionRepository.bulkUpsert(
           permissionRecords,
@@ -196,12 +196,12 @@ class PermissionService {
         );
 
         logger.info(
-          `Bulk upsert completed for role ${data.roleId}. Upserted ${upsertedRecords.length} records`,
           {
             roleId: data.roleId,
             upsertedCount: upsertedRecords.length,
             userId,
-          }
+          },
+          `Bulk upsert completed for role ${data.roleId}`
         );
 
         // Verify updates by checking database directly within transaction
@@ -213,16 +213,17 @@ class PermissionService {
           );
           if (verify) {
             // verify is a Sequelize model instance (not raw), so we can use direct property access
-            logger.info(`Verified permission for role ${record.role_id}, menu ${record.menu_id}`, {
+            logger.info( {
               can_view: verify.can_view,
               can_add: verify.can_add,
               can_edit: verify.can_edit,
               can_delete: verify.can_delete,
               can_export: verify.can_export,
               can_status: verify.can_status,
-            });
+            },`Verified permission for role ${record.role_id}, menu ${record.menu_id}`);
           } else {
             logger.warn(
+              { roleId: record.role_id, menuId: record.menu_id },
               `Failed to verify permission for role ${record.role_id}, menu ${record.menu_id}`
             );
           }
@@ -245,7 +246,7 @@ class PermissionService {
       const result = await this.getRolePermissions(data.roleId);
 
       // Log the result for debugging
-      logger.info(`Retrieved permissions after update for role ${data.roleId}`, {
+      logger.info({
         roleId: data.roleId,
         permissionCount: result.permissions.length,
         permissions: result.permissions.map((p) => ({
@@ -257,11 +258,11 @@ class PermissionService {
           export: p.permissions.export,
           status: p.permissions.status,
         })),
-      });
+      },`Retrieved permissions after update for role ${data.roleId}`);
 
       return result;
     } catch (error) {
-      logger.error(`Error updating permissions for role ${data.roleId}:`, error);
+      logger.error({error}, `Error updating permissions for role ${data.roleId}:`);
       throw error;
     }
   }
@@ -303,6 +304,7 @@ class PermissionService {
           );
 
           logger.info(
+            { roleId, menuId, userId },
             `Select-all permissions set for role ${roleId}, menu ${menuId} by user ${userId || 'system'}`
           );
 
@@ -312,7 +314,7 @@ class PermissionService {
         }
       );
     } catch (error) {
-      logger.error(`Error setting select-all for role ${roleId}, menu ${menuId}:`, error);
+      logger.error({error}, `Error setting select-all for role ${roleId}, menu ${menuId}:`);
       throw error;
     }
   }
@@ -354,6 +356,7 @@ class PermissionService {
           );
 
           logger.info(
+            { roleId, menuId, userId },
             `Permissions cleared for role ${roleId}, menu ${menuId} by user ${userId || 'system'}`
           );
 
@@ -363,7 +366,7 @@ class PermissionService {
         }
       );
     } catch (error) {
-      logger.error(`Error clearing permissions for role ${roleId}, menu ${menuId}:`, error);
+      logger.error({error}, `Error clearing permissions for role ${roleId}, menu ${menuId}:`);
       throw error;
     }
   }

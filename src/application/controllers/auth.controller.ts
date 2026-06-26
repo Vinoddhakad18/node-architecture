@@ -18,7 +18,7 @@ class AuthController {
       const { tokens } = await authService.login(email, password);
       res.sendSuccess(tokens, 'Login successful');
     } catch (error: unknown) {
-      logger.error('Error in login controller:', error);
+      logger.error({error: error}, 'Error in login controller:');
       res.sendUnauthorized(getErrorMessage(error) || 'Login failed');
     }
   }
@@ -40,7 +40,7 @@ class AuthController {
 
       res.sendSuccess({ accessToken }, 'Token refreshed successfully');
     } catch (error: unknown) {
-      logger.error('Error in refresh token controller:', error);
+      logger.error({error: error}, 'Error in refresh token controller:');
       res.sendUnauthorized(getErrorMessage(error) || 'Token refresh failed');
     }
   }
@@ -62,7 +62,7 @@ class AuthController {
 
       res.sendSuccess({ valid: isValid }, isValid ? 'Token is valid' : 'Token is invalid');
     } catch (error: unknown) {
-      logger.error('Error in verify token controller:', error);
+      logger.error({error: error}, 'Error in verify token controller:');
       res.sendBadRequest(getErrorMessage(error) || 'Token verification failed');
     }
   }
@@ -85,7 +85,7 @@ class AuthController {
 
       res.sendSuccess(null, 'Logged out successfully');
     } catch (error: unknown) {
-      logger.error('Error in logout controller:', error);
+      logger.error({error: error}, 'Error in logout controller:');
       res.sendBadRequest(getErrorMessage(error) || 'Logout failed');
     }
   }
@@ -116,7 +116,7 @@ class AuthController {
         'Password changed successfully. Please login again with your new password.'
       );
     } catch (error: unknown) {
-      logger.error('Error in change password controller:', error);
+      logger.error({error: error}, 'Error in change password controller:');
       res.sendBadRequest(getErrorMessage(error) || 'Password change failed');
     }
   }
@@ -138,7 +138,7 @@ class AuthController {
 
       res.sendSuccess(tokens, 'Tokens refreshed successfully');
     } catch (error: unknown) {
-      logger.error('Error in refresh token rotation controller:', error);
+      logger.error({error: error}, 'Error in refresh token rotation controller:');
       res.sendUnauthorized(getErrorMessage(error) || 'Token refresh failed');
     }
   }

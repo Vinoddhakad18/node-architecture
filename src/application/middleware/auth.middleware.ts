@@ -69,7 +69,7 @@ export const authenticate = async (
     logger.info(`Authenticated user: ${decoded.email}`);
     next();
   } catch (error) {
-    logger.error('Authentication error:', error);
+    logger.error({error: error}, 'Authentication error:');
 
     if (error instanceof Error) {
       if (error.message === 'Token expired') {
@@ -127,7 +127,7 @@ export const optionalAuthenticate = async (
     next();
   } catch (error) {
     // Token verification failed, but we continue without user
-    logger.warn('Optional authentication failed:', error);
+    logger.warn({error: error}, 'Optional authentication failed:');
     next();
   }
 };
@@ -194,7 +194,7 @@ export const requirePermission = (menuRoute: string, action: PermissionAction) =
 
       next();
     } catch (error) {
-      logger.error('Permission check failed:', error);
+      logger.error({error: error}, 'Permission check failed:');
       res.sendForbidden('Insufficient permissions');
     }
   };
@@ -235,7 +235,7 @@ export const attachPermissions = (menuRoute: string) => {
         Object.assign(flags, map[menuRoute] ?? {});
       }
     } catch (error) {
-      logger.warn(`attachPermissions failed for ${menuRoute}:`, error);
+      logger.warn({error: error}, `attachPermissions failed for ${menuRoute}:`);
     }
 
     res.locals.permissions = { menu: menuRoute, ...flags };

@@ -42,7 +42,7 @@ class RbacService {
       }
     } catch (error) {
       // Cache read failures must never block authorization; fall back to DB.
-      logger.warn(`RBAC cache read failed for role ${roleName}:`, error);
+      logger.warn({error}, `RBAC cache read failed for role ${roleName}:`);
     }
 
     const map = await this.loadFromDb(roleName);
@@ -50,7 +50,7 @@ class RbacService {
     try {
       await redisService.set(cacheKey, map, CacheTTL.MEDIUM);
     } catch (error) {
-      logger.warn(`RBAC cache write failed for role ${roleName}:`, error);
+      logger.warn({error}, `RBAC cache write failed for role ${roleName}:`);
     }
 
     return map;
@@ -159,7 +159,7 @@ class RbacService {
       await redisService.del(CacheKeys.rolePermissions(roleName));
       logger.info(`RBAC cache invalidated for role ${roleName}`);
     } catch (error) {
-      logger.warn(`RBAC cache invalidation failed for role ${roleName}:`, error);
+      logger.warn({error}, `RBAC cache invalidation failed for role ${roleName}:`);
     }
   }
 }

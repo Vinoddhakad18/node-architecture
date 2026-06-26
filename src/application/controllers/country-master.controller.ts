@@ -31,7 +31,7 @@ class CountryMasterController {
 
       res.sendCreated(country, 'Country created successfully');
     } catch (error: unknown) {
-      logger.error('Error in create country controller:', error);
+      logger.error({error: error}, 'Error in create country controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to create country');
     }
   }
@@ -62,7 +62,7 @@ class CountryMasterController {
 
       res.sendSuccess(result, 'Countries retrieved successfully');
     } catch (error: unknown) {
-      logger.error('Error in findAll countries controller:', error);
+      logger.error({error: error}, 'Error in findAll countries controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to retrieve countries');
     }
   }
@@ -84,7 +84,7 @@ class CountryMasterController {
 
       res.sendSuccess(country, 'Country retrieved successfully');
     } catch (error: unknown) {
-      logger.error('Error in findById country controller:', error);
+      logger.error({error: error}, 'Error in findById country controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to retrieve country');
     }
   }
@@ -106,7 +106,7 @@ class CountryMasterController {
 
       res.sendSuccess(country, 'Country retrieved successfully');
     } catch (error: unknown) {
-      logger.error('Error in findByCode country controller:', error);
+      logger.error({error: error}, 'Error in findByCode country controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to retrieve country');
     }
   }
@@ -148,7 +148,7 @@ class CountryMasterController {
 
       res.sendSuccess(country, 'Country updated successfully');
     } catch (error: unknown) {
-      logger.error('Error in update country controller:', error);
+      logger.error({error: error}, 'Error in update country controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to update country');
     }
   }
@@ -171,7 +171,7 @@ class CountryMasterController {
 
       res.sendSuccess(null, 'Country deleted successfully');
     } catch (error: unknown) {
-      logger.error('Error in delete country controller:', error);
+      logger.error({error: error}, 'Error in delete country controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to delete country');
     }
   }
@@ -193,7 +193,7 @@ class CountryMasterController {
 
       res.sendSuccess(null, 'Country permanently deleted');
     } catch (error: unknown) {
-      logger.error('Error in hardDelete country controller:', error);
+      logger.error({error: error}, 'Error in hardDelete country controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to permanently delete country');
     }
   }
@@ -208,7 +208,7 @@ class CountryMasterController {
 
       res.sendSuccess(countries, 'Active countries retrieved successfully');
     } catch (error: unknown) {
-      logger.error('Error in findAllActive countries controller:', error);
+      logger.error({error: error}, 'Error in findAllActive countries controller:');
       res.sendServerError(getErrorMessage(error) || 'Failed to retrieve active countries');
     }
   }

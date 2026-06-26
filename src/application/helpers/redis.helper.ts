@@ -1,5 +1,6 @@
 import { logger } from '@config/logger';
 import { redisConfig, redisClusterConfig, isClusterMode, getClusterNodes } from '@config/redis';
+import { error } from 'console';
 import Redis, { Cluster } from 'ioredis';
 
 /**
@@ -27,22 +28,22 @@ class RedisService {
       if (this.clusterMode) {
         const clusterNodes = getClusterNodes();
         this.client = new Redis.Cluster(clusterNodes, redisClusterConfig);
-        logger?.info('Redis Cluster client initialization started', {
+        logger?.info({
           nodes: clusterNodes,
           nodeCount: clusterNodes.length,
-        });
+        },'Redis Cluster client initialization started');
       } else {
         this.client = new Redis(redisConfig);
-        logger?.info('Redis standalone client initialization started', {
+        logger?.info({
           host: redisConfig.host,
           port: redisConfig.port,
-        });
+        }, 'Redis standalone client initialization started');
       }
 
       this.setupEventHandlers();
       this.bindProcessEvents();
     } catch (err) {
-      logger?.error('Failed to initialize Redis client:', err);
+      logger?.error({err:err}, 'Failed to initialize Redis client:');
       this.client = null;
       this.isEnabled = false;
     }
@@ -73,41 +74,39 @@ class RedisService {
           }
         })();
 
-        logger?.info('Redis Cluster client connected and ready', {
+        logger?.info( {
           mode: 'cluster',
           nodes: nodesCount,
-        });
+        }, 'Redis Cluster client connected and ready');
       } else {
-        logger?.info('Redis client connected and ready', {
+        logger?.info({
           mode: 'standalone',
           host: redisConfig.host,
           port: redisConfig.port,
           db: redisConfig.db,
-        });
+        }, 'Redis standalone client connected and ready');
       }
     });
 
     this.client.on('error', (err: Error) => {
-      logger?.error(`Redis ${this.clusterMode ? 'cluster' : 'standalone'} client error:`, {
-        error: err.message,
-        stack: err.stack,
-      });
+      logger?.error({err:err}, `Redis ${this.clusterMode ? 'cluster' : 'standalone'} client error:`);
       this.isConnected = false;
     });
 
     this.client.on('close', () => {
-      logger?.warn(`Redis ${this.clusterMode ? 'cluster' : 'standalone'} connection closed`);
+      logger?.warn({mode: this.clusterMode ? 'cluster' : 'standalone'}, `Redis connection closed`);
       this.isConnected = false;
     });
 
     this.client.on('reconnecting', (delay: number) => {
       logger?.info(
+        {delay},
         `Redis ${this.clusterMode ? 'cluster' : 'standalone'} client reconnecting in ${delay}ms...`
       );
     });
 
     this.client.on('end', () => {
-      logger?.warn(`Redis ${this.clusterMode ? 'cluster' : 'standalone'} connection ended`);
+      logger?.warn({mode: this.clusterMode ? 'cluster' : 'standalone'}, `Redis ${this.clusterMode ? 'cluster' : 'standalone'} connection ended`);
       this.isConnected = false;
     });
 
@@ -118,10 +117,10 @@ class RedisService {
 
         // node error
         cluster.on('node error', (err: Error, address: string) => {
-          logger?.error('Redis Cluster node error:', {
+          logger?.error( {
             error: err.message,
             address,
-          });
+          },'Redis Cluster node error');
         });
 
         // +node / -node events
@@ -129,13 +128,19 @@ class RedisService {
           // node.options may be undefined in some versions; guard it
           const host = node?.options?.host;
           const port = node?.options?.port;
-          logger?.info('Redis Cluster node added:', { host, port });
+          logger?.info( {
+            host,
+            port
+          }, 'Redis Cluster node added:');
         });
 
         cluster.on('-node', (node: any) => {
           const host = node?.options?.host;
           const port = node?.options?.port;
-          logger?.info('Redis Cluster node removed:', { host, port });
+          logger?.info( {
+            host,
+            port
+          }, 'Redis Cluster node removed:');
         });
       } catch (err) {
         logger?.warn('Failed to attach cluster-specific events (non-fatal):', err);
@@ -236,14 +241,14 @@ class RedisService {
         logger?.debug(`Redis SET: ${key}`);
       }
     } catch (error) {
-      logger?.error(`Redis SET error for key ${key}:`, { error });
+      logger?.error({error: error}, `Redis SET error for key ${key}:`);
       throw error;
     }
   }
 
   public async get<T = string>(key: string): Promise<T | null> {
     if (!this.isEnabled || !this.client) {
-      logger?.warn('Redis GET operation skipped - Redis is disabled');
+      logger?.warn({key: key}, 'Redis GET operation skipped - Redis is disabled');
       return null;
     }
 
@@ -261,14 +266,14 @@ class RedisService {
         return value as unknown as T;
       }
     } catch (error) {
-      logger?.error(`Redis GET error for key ${key}:`, { error });
+      logger?.error({error: error}, `Redis GET error for key ${key}:`);
       throw error;
     }
   }
 
   public async del(key: string | string[]): Promise<number> {
     if (!this.isEnabled || !this.client) {
-      logger?.warn('Redis DEL operation skipped - Redis is disabled');
+      logger?.warn({key: key}, 'Redis DEL operation skipped - Redis is disabled');
       return 0;
     }
 
@@ -283,16 +288,14 @@ class RedisService {
       logger?.debug(`Redis DEL: ${keys.join(', ')} (deleted ${result} key(s))`);
       return result;
     } catch (error) {
-      logger?.error(`Redis DEL error for key(s) ${Array.isArray(key) ? key.join(',') : key}:`, {
-        error,
-      });
+      logger?.error({error: error}, `Redis DEL error for key(s) ${Array.isArray(key) ? key.join(',') : key}:`);
       throw error;
     }
   }
 
   public async expire(key: string, seconds: number): Promise<boolean> {
     if (!this.isEnabled || !this.client) {
-      logger?.warn('Redis EXPIRE operation skipped - Redis is disabled');
+      logger?.warn({key: key}, 'Redis EXPIRE operation skipped - Redis is disabled');
       return false;
     }
 
@@ -301,14 +304,14 @@ class RedisService {
       logger?.debug(`Redis EXPIRE: ${key} (${seconds}s, result: ${result === 1})`);
       return result === 1;
     } catch (error) {
-      logger?.error(`Redis EXPIRE error for key ${key}:`, { error });
+      logger?.error({error: error}, `Redis EXPIRE error for key ${key}:`);
       throw error;
     }
   }
 
   public async ttl(key: string): Promise<number> {
     if (!this.isEnabled || !this.client) {
-      logger?.warn('Redis TTL operation skipped - Redis is disabled');
+      logger?.warn({key: key}, 'Redis TTL operation skipped - Redis is disabled');
       return -2;
     }
 
@@ -317,7 +320,7 @@ class RedisService {
       logger?.debug(`Redis TTL: ${key} (${ttl}s)`);
       return ttl;
     } catch (error) {
-      logger?.error(`Redis TTL error for key ${key}:`, { error });
+      logger?.error({error: error}, `Redis TTL error for key ${key}:`);
       throw error;
     }
   }
@@ -333,14 +336,14 @@ class RedisService {
       logger?.debug(`Redis EXISTS: ${key} (${result === 1})`);
       return result === 1;
     } catch (error) {
-      logger?.error(`Redis EXISTS error for key ${key}:`, { error });
+      logger?.error({error: error}, `Redis EXISTS error for key ${key}:`);
       throw error;
     }
   }
 
   public async incr(key: string): Promise<number> {
     if (!this.isEnabled || !this.client) {
-      logger?.warn('Redis INCR operation skipped - Redis is disabled');
+      logger?.warn({key: key}, 'Redis INCR operation skipped - Redis is disabled');
       return 0;
     }
 
@@ -349,14 +352,14 @@ class RedisService {
       logger?.debug(`Redis INCR: ${key} (new value: ${result})`);
       return result;
     } catch (error) {
-      logger?.error(`Redis INCR error for key ${key}:`, { error });
+      logger?.error({error: error}, `Redis INCR error for key ${key}:`);
       throw error;
     }
   }
 
   public async incrBy(key: string, increment: number): Promise<number> {
     if (!this.isEnabled || !this.client) {
-      logger?.warn('Redis INCRBY operation skipped - Redis is disabled');
+      logger?.warn({key: key}, 'Redis INCRBY operation skipped - Redis is disabled');
       return 0;
     }
 
@@ -365,14 +368,14 @@ class RedisService {
       logger?.debug(`Redis INCRBY: ${key} by ${increment} (new value: ${result})`);
       return result;
     } catch (error) {
-      logger?.error(`Redis INCRBY error for key ${key}:`, { error });
+      logger?.error({error: error}, `Redis INCRBY error for key ${key}:`);
       throw error;
     }
   }
 
   public async decr(key: string): Promise<number> {
     if (!this.isEnabled || !this.client) {
-      logger?.warn('Redis DECR operation skipped - Redis is disabled');
+      logger?.warn({key: key}, 'Redis DECR operation skipped - Redis is disabled');
       return 0;
     }
 
@@ -381,14 +384,14 @@ class RedisService {
       logger?.debug(`Redis DECR: ${key} (new value: ${result})`);
       return result;
     } catch (error) {
-      logger?.error(`Redis DECR error for key ${key}:`, { error });
+      logger?.error({error: error}, `Redis DECR error for key ${key}:`);
       throw error;
     }
   }
 
   public async decrBy(key: string, decrement: number): Promise<number> {
     if (!this.isEnabled || !this.client) {
-      logger?.warn('Redis DECRBY operation skipped - Redis is disabled');
+      logger?.warn({key: key}, 'Redis DECRBY operation skipped - Redis is disabled');
       return 0;
     }
 
@@ -397,7 +400,7 @@ class RedisService {
       logger?.debug(`Redis DECRBY: ${key} by ${decrement} (new value: ${result})`);
       return result;
     } catch (error) {
-      logger?.error(`Redis DECRBY error for key ${key}:`, { error });
+      logger?.error({error: error}, `Redis DECRBY error for key ${key}:`);
       throw error;
     }
   }
@@ -413,14 +416,14 @@ class RedisService {
       logger?.debug(`Redis HSET: ${key}.${field}`);
       return result;
     } catch (error) {
-      logger?.error(`Redis HSET error for key ${key}:`, { error });
+      logger?.error({error: error}, `Redis HSET error for key ${key}:`);
       throw error;
     }
   }
 
   public async hget(key: string, field: string): Promise<string | null> {
     if (!this.isEnabled || !this.client) {
-      logger?.warn('Redis HGET operation skipped - Redis is disabled');
+      logger?.warn({key: key, field: field}, 'Redis HGET operation skipped - Redis is disabled');
       return null;
     }
 
@@ -429,14 +432,14 @@ class RedisService {
       logger?.debug(`Redis HGET: ${key}.${field} (${result ? 'found' : 'not found'})`);
       return result;
     } catch (error) {
-      logger?.error(`Redis HGET error for key ${key}:`, { error });
+      logger?.error({error: error}, `Redis HGET error for key ${key}:`);
       throw error;
     }
   }
 
   public async hgetall(key: string): Promise<Record<string, string>> {
     if (!this.isEnabled || !this.client) {
-      logger?.warn('Redis HGETALL operation skipped - Redis is disabled');
+      logger?.warn({key: key}, 'Redis HGETALL operation skipped - Redis is disabled');
       return {};
     }
 
@@ -445,14 +448,14 @@ class RedisService {
       logger?.debug(`Redis HGETALL: ${key} (${Object.keys(result).length} fields)`);
       return result;
     } catch (error) {
-      logger?.error(`Redis HGETALL error for key ${key}:`, { error });
+      logger?.error({error: error}, `Redis HGETALL error for key ${key}:`);
       throw error;
     }
   }
 
   public async hdel(key: string, ...field: string[]): Promise<number> {
     if (!this.isEnabled || !this.client) {
-      logger?.warn('Redis HDEL operation skipped - Redis is disabled');
+      logger?.warn({key: key, field: field[0]}, 'Redis HDEL operation skipped - Redis is disabled');
       return 0;
     }
 
@@ -464,14 +467,14 @@ class RedisService {
       logger?.debug(`Redis HDEL: ${key} (deleted ${result} field(s))`);
       return result;
     } catch (error) {
-      logger?.error(`Redis HDEL error for key ${key}:`, { error });
+      logger?.error({error: error}, `Redis HDEL error for key ${key}:`);
       throw error;
     }
   }
 
   public async keys(pattern: string): Promise<string[]> {
     if (!this.isEnabled || !this.client) {
-      logger?.warn('Redis KEYS operation skipped - Redis is disabled');
+      logger?.warn({pattern: pattern}, 'Redis KEYS operation skipped - Redis is disabled');
       return [];
     }
 
@@ -480,7 +483,7 @@ class RedisService {
       logger?.debug(`Redis KEYS: ${pattern} (found ${result.length} key(s))`);
       return result;
     } catch (error) {
-      logger?.error(`Redis KEYS error for pattern ${pattern}:`, { error });
+      logger?.error({error: error}, `Redis KEYS error for pattern ${pattern}:`);
       throw error;
     }
   }
@@ -490,7 +493,7 @@ class RedisService {
    */
   public async scan(pattern: string, count = 100): Promise<string[]> {
     if (!this.isEnabled || !this.client) {
-      logger?.warn('Redis SCAN operation skipped - Redis is disabled');
+      logger?.warn({pattern: pattern}, 'Redis SCAN operation skipped - Redis is disabled');
       return [];
     }
 
@@ -533,7 +536,7 @@ class RedisService {
       );
       return unique;
     } catch (error) {
-      logger?.error(`Redis SCAN error for pattern ${pattern}:`, { error });
+      logger?.error({error: error}, `Redis SCAN error for pattern ${pattern}:`);
       logger?.warn('Falling back to KEYS command for scan');
       return this.keys(pattern);
     }
@@ -556,7 +559,7 @@ class RedisService {
       await (this.client as Redis).flushdb();
       logger?.warn('Redis FLUSHDB: All keys deleted from current database');
     } catch (error) {
-      logger?.error('Redis FLUSHDB error:', { error });
+      logger?.error({error: error}, 'Redis FLUSHDB error:');
       throw error;
     }
   }
@@ -574,7 +577,7 @@ class RedisService {
       await (this.client as Redis).flushall();
       logger?.warn('Redis FLUSHALL: All keys deleted from all databases');
     } catch (error) {
-      logger?.error('Redis FLUSHALL error:', { error });
+      logger?.error({error: error}, 'Redis FLUSHALL error');
       throw error;
     }
   }
@@ -590,7 +593,7 @@ class RedisService {
       logger?.debug('Redis PING: PONG');
       return result;
     } catch (error) {
-      logger?.error('Redis PING error:', { error });
+      logger?.error({error: error}, 'Redis PING error:');
       throw error;
     }
   }
@@ -608,7 +611,7 @@ class RedisService {
       logger?.debug(`Redis INFO: ${section || 'all'}`);
       return result;
     } catch (error) {
-      logger?.error('Redis INFO error:', { error });
+      logger?.error({error: error}, 'Redis INFO error');
       throw error;
     }
   }
@@ -634,7 +637,7 @@ class RedisService {
         logger?.warn('Redis client has no quit/disconnect method; skipping disconnect');
       }
     } catch (error) {
-      logger?.error('Redis disconnect error:', { error });
+      logger?.error({error: error}, 'Redis disconnect error:');
       // attempt force disconnect
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -132,14 +132,14 @@ export const redisRateLimitMiddleware = (options: RateLimitOptions) => {
 
       // Check if rate limit exceeded
       if (currentCount > max) {
-        logger.warn('Rate limit exceeded', {
+        logger.warn( {
           identifier,
           currentCount,
           max,
           ttl,
           requestId: req.requestId,
           url: req.originalUrl,
-        });
+        }, 'Rate limit exceeded');
 
         res.setHeader('Retry-After', ttl.toString());
 
@@ -154,20 +154,21 @@ export const redisRateLimitMiddleware = (options: RateLimitOptions) => {
         } as Required<RateLimitOptions>);
       }
 
-      logger.debug('Rate limit check passed', {
-        identifier,
-        currentCount,
-        max,
-        remaining: max - currentCount,
-        requestId: req.requestId,
-      });
+      logger.debug(
+        {
+          identifier,
+          currentCount,
+          max,
+          remaining: max - currentCount,
+          requestId: req.requestId,
+      }, 'Rate limit check passed');
 
       next();
     } catch (error) {
-      logger.error('Rate limit middleware error:', {
+      logger.error( {
         error: error instanceof Error ? error.message : 'Unknown error',
         requestId: req.requestId,
-      });
+      }, 'Rate limit middleware error:');
 
       // On error, allow the request (fail open)
       next();
@@ -235,13 +236,13 @@ export const resetRateLimit = async (identifier: string): Promise<number> => {
   try {
     const key = RedisKeys.rateLimit(identifier);
     const deleted = await redisService.del(key);
-    logger.info(`Rate limit reset for: ${identifier}`, { deleted });
+    logger.info( { deleted },`Rate limit reset for: ${identifier}`);
     return deleted;
   } catch (error) {
-    logger.error('Reset rate limit error:', {
+    logger.error( {
       error: error instanceof Error ? error.message : 'Unknown error',
       identifier,
-    });
+    }, 'Reset rate limit error:');
     throw error;
   }
 };
@@ -271,7 +272,7 @@ export const getRateLimitStatus = async (
 
     return { current, ttl, resetAt };
   } catch (error) {
-    logger.error('Get rate limit status error:', {
+    logger.error( {
       error: error instanceof Error ? error.message : 'Unknown error',
       identifier,
     });

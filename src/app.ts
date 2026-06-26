@@ -37,8 +37,7 @@ import routes from '@routes/index';
 import {
   errorHandler,
   notFoundHandler,
-  logger,
-  errorLogger,
+  httpLogger,
   attachResponseHandlers,
   requestIdMiddleware,
   apiKeyAuth,
@@ -114,8 +113,8 @@ export const createApp = async (): Promise<Application> => {
     app.use(metricsMiddleware);
   }
 
-  app.use(logger);
-  app.use(errorLogger);
+  app.use(httpLogger);
+ // app.use(errorLogger);
   app.use(attachResponseHandlers);
 
   // Swagger documentation
@@ -141,7 +140,7 @@ export const createApp = async (): Promise<Application> => {
       try {
         const isReady = redisService.isReady();
         if (isReady) {
-          await redisService.ping();
+          //await redisService.ping();
           redisStatus = 'connected';
         }
       } catch (error) {
@@ -201,6 +200,7 @@ export const createApp = async (): Promise<Application> => {
         isHealthy
       );
     } catch (error) {
+      console.error('Migration health check failed:', error);
       res.sendServiceUnavailable('Migration health check failed');
     }
   });

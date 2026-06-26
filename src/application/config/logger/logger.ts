@@ -1,174 +1,193 @@
-import winston from 'winston';
-import DailyRotateFile from 'winston-daily-rotate-file';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+
+import pino, {
+  Level,
+  LoggerOptions,
+  StreamEntry,
+  multistream,
+} from 'pino';
 
 import { config } from '@/config';
 
-/**
- * Winston logger configuration
- */
-const logFormat = winston.format.combine(
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-  winston.format.errors({ stack: true }),
-  winston.format.splat(),
-  winston.format.json()
-);
+const logDir = path.join(process.cwd(), 'logs');
 
-const consoleFormat = winston.format.combine(
-  winston.format.colorize(),
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-  winston.format.printf(({ timestamp, level, message, requestId, ...meta }) => {
-    let msg = `${timestamp} [${level}]`;
-    if (requestId) {
-      msg += ` [ReqID: ${String(requestId)}]`;
-    }
-    msg += `: ${message}`;
-    if (Object.keys(meta).length > 0) {
-      msg += ` ${JSON.stringify(meta)}`;
-    }
-    return msg;
-  })
-);
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
+}
+
+const streams: StreamEntry[] = [];
 
 /**
- * Daily rotate file transport configuration for error logs
+ * Console Logger
  */
-const errorFileRotateTransport = new DailyRotateFile({
-  filename: 'logs/error-%DATE%.log',
-  datePattern: config.logging.file.datePattern,
-  level: 'error',
-  maxSize: config.logging.file.maxSize,
-  maxFiles: config.logging.file.maxDays,
-  format: logFormat,
-});
-
-/**
- * Daily rotate file transport configuration for combined logs (all levels)
- */
-const combinedFileRotateTransport = new DailyRotateFile({
-  filename: 'logs/combined-%DATE%.log',
-  datePattern: config.logging.file.datePattern,
-  maxSize: config.logging.file.maxSize,
-  maxFiles: config.logging.file.maxDays,
-  format: logFormat,
-});
-
-/**
- * Daily rotate file transport configuration for info logs
- */
-const infoFileRotateTransport = new DailyRotateFile({
-  filename: 'logs/info-%DATE%.log',
-  datePattern: config.logging.file.datePattern,
-  level: 'info',
-  maxSize: config.logging.file.maxSize,
-  maxFiles: config.logging.file.maxDays,
-  format: logFormat,
-});
-
-/**
- * Daily rotate file transport for exceptions
- */
-const exceptionFileRotateTransport = new DailyRotateFile({
-  filename: 'logs/exceptions-%DATE%.log',
-  datePattern: config.logging.file.datePattern,
-  maxSize: config.logging.file.maxSize,
-  maxFiles: config.logging.file.maxDays,
-  format: logFormat,
-});
-
-/**
- * Daily rotate file transport for unhandled rejections
- */
-const rejectionFileRotateTransport = new DailyRotateFile({
-  filename: 'logs/rejections-%DATE%.log',
-  datePattern: config.logging.file.datePattern,
-  maxSize: config.logging.file.maxSize,
-  maxFiles: config.logging.file.maxDays,
-  format: logFormat,
-});
-
-/**
- * Build transports array based on configuration
- */
-const transports: winston.transport[] = [];
-
-// Add console transport if enabled
 if (config.logging.console.enabled) {
-  transports.push(
-    new winston.transports.Console({
-      format: consoleFormat,
-    })
-  );
+  streams.push({
+    level: config.logging.level as Level,
+    stream: pino.transport({
+      target: 'pino-pretty',
+      options: {
+        colorize: true,
+        translateTime: 'SYS:standard',
+        ignore: 'pid,hostname',
+        singleLine: true,
+      },
+    }),
+  });
 }
 
-// Add error file transport if enabled
-if (config.logging.file.error.enabled) {
-  transports.push(errorFileRotateTransport);
-}
-
-// Add info file transport if enabled
-if (config.logging.file.info.enabled) {
-  transports.push(infoFileRotateTransport);
-}
-
-// Add combined file transport if enabled
+/**
+ * Combined Log
+ */
 if (config.logging.file.combined.enabled) {
-  transports.push(combinedFileRotateTransport);
+  streams.push({
+    level: config.logging.level as Level,
+    stream: pino.destination({
+      dest: path.join(logDir, 'combined.log'),
+      sync: false,
+    }),
+  });
 }
 
 /**
- * Build exception handlers array based on configuration
+ * Info Log
  */
-const exceptionHandlers: winston.transport[] = [];
-if (config.logging.exception.enabled) {
-  exceptionHandlers.push(exceptionFileRotateTransport);
+if (config.logging.file.info.enabled) {
+  streams.push({
+    level: 'info',
+    stream: pino.destination({
+      dest: path.join(logDir, 'info.log'),
+      sync: false,
+    }),
+  });
 }
 
 /**
- * Build rejection handlers array based on configuration
+ * Error Log
  */
-const rejectionHandlers: winston.transport[] = [];
-if (config.logging.rejection.enabled) {
-  rejectionHandlers.push(rejectionFileRotateTransport);
+if (config.logging.file.error.enabled) {
+  streams.push({
+    level: 'error',
+    stream: pino.destination({
+      dest: path.join(logDir, 'error.log'),
+      sync: false,
+    }),
+  });
 }
 
-/**
- * Create Winston logger instance with conditional transports
- */
-export const logger = winston.createLogger({
-  level: config.logging.level,
-  format: logFormat,
-  defaultMeta: {
+const loggerOptions: LoggerOptions = {
+  level: config.logging.level as Level,
+
+  base: {
     service: 'node-architecture',
     pid: process.pid,
+    hostname: os.hostname(),
   },
-  transports,
-  exceptionHandlers: exceptionHandlers.length > 0 ? exceptionHandlers : undefined,
-  rejectionHandlers: rejectionHandlers.length > 0 ? rejectionHandlers : undefined,
-});
+
+  timestamp: pino.stdTimeFunctions.isoTime,
+
+  formatters: {
+    level(label) {
+      return {
+        level: label,
+      };
+    },
+  },
+
+  serializers: {
+    err: pino.stdSerializers.err,
+    req: pino.stdSerializers.req,
+    res: pino.stdSerializers.res,
+  },
+
+  redact: {
+    paths: [
+      'password',
+      'confirmPassword',
+      'accessToken',
+      'refreshToken',
+      'authorization',
+      'headers.authorization',
+      'cookie',
+      'headers.cookie',
+      'apiKey',
+      'secret',
+    ],
+    remove: true,
+  },
+};
+
+export const logger = pino(
+  loggerOptions,
+  multistream(streams)
+);
 
 /**
- * Stream for Morgan to write to Winston
+ * Morgan Stream
  */
 export const stream = {
-  write: (message: string) => {
+  write(message: string) {
     logger.info(message.trim());
   },
 };
 
 /**
- * Helper function to create a child logger with request ID context
- *
- * @example
- * // In your route handler:
- * const reqLogger = getLoggerWithRequestId(req.requestId);
- * reqLogger.info('User logged in', { userId: user.id });
- *
- * @param requestId - The request ID to include in all logs
- * @returns Winston logger instance with request ID in default metadata
+ * Request Logger
  */
-export const getLoggerWithRequestId = (requestId?: string) => {
-  if (requestId) {
-    return logger.child({ requestId });
-  }
-  return logger;
+export const getLoggerWithRequestId = (
+  requestId?: string
+) => {
+  return requestId
+    ? logger.child({
+        requestId,
+      })
+    : logger;
 };
+
+/**
+ * Graceful Shutdown
+ */
+const shutdown = (signal: string) => {
+  logger.info(`${signal} received. Closing application.`);
+
+  logger.flush();
+
+  process.exit(0);
+};
+
+process.on('SIGINT', () => shutdown('SIGINT'));
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+
+/**
+ * Uncaught Exception
+ */
+process.on('uncaughtException', (err) => {
+  logger.fatal(
+    {
+      err,
+    },
+    'Uncaught Exception'
+  );
+
+  logger.flush();
+
+  process.exit(1);
+});
+
+/**
+ * Unhandled Rejection
+ */
+process.on('unhandledRejection', (reason) => {
+  logger.fatal(
+    {
+      err: reason,
+    },
+    'Unhandled Rejection'
+  );
+
+  logger.flush();
+
+  process.exit(1);
+});

@@ -9,12 +9,12 @@ import { AppEvent, AuthLoginPayload, AuthLoginFailedPayload } from '../event-typ
 export function registerAuthHandlers(): void {
   // Handle successful login
   appEvents.on(AppEvent.AUTH_LOGIN, async (payload: AuthLoginPayload) => {
-    logger.info('User logged in', {
+    logger.info( {
       userId: payload.userId,
       email: payload.email,
       ipAddress: payload.ipAddress,
       timestamp: payload.timestamp,
-    });
+    }, 'User logged in');
 
     // Add any additional login logic here:
     // - Update user's last login timestamp
@@ -25,12 +25,12 @@ export function registerAuthHandlers(): void {
 
   // Handle failed login attempts
   appEvents.on(AppEvent.AUTH_LOGIN_FAILED, async (payload: AuthLoginFailedPayload) => {
-    logger.warn('Login attempt failed', {
+    logger.warn({
       email: payload.email,
       reason: payload.reason,
       ipAddress: payload.ipAddress,
       timestamp: payload.timestamp,
-    });
+    }, 'Login attempt failed');
 
     // Add security measures here:
     // - Track failed attempts for rate limiting
@@ -40,10 +40,10 @@ export function registerAuthHandlers(): void {
 
   // Handle logout
   appEvents.on(AppEvent.AUTH_LOGOUT, async (payload) => {
-    logger.info('User logged out', {
+    logger.info({
       userId: payload.userId,
       timestamp: payload.timestamp,
-    });
+    }, 'User logged out');
 
     // Add logout logic here:
     // - Clear user sessions
@@ -53,10 +53,10 @@ export function registerAuthHandlers(): void {
 
   // Handle password change
   appEvents.on(AppEvent.AUTH_PASSWORD_CHANGED, async (payload) => {
-    logger.info('User password changed', {
+    logger.info({
       userId: payload.userId,
       timestamp: payload.timestamp,
-    });
+    }, 'User password changed');
 
     // Add password change logic:
     // - Send notification email
@@ -66,9 +66,27 @@ export function registerAuthHandlers(): void {
 
   // Handle token refresh
   appEvents.on(AppEvent.AUTH_TOKEN_REFRESHED, async (payload) => {
-    logger.debug('Token refreshed', {
+    logger.debug({
       userId: payload.userId,
       timestamp: payload.timestamp,
-    });
+    }, 'Token refreshed');
+
+    // Add password change logic:
+    // - Send notification email
+    // - Invalidate all existing sessions
+    // - Record in audit log
+  });
+
+  // Handle token refresh
+  appEvents.on(AppEvent.AUTH_TOKEN_REFRESHED, async (payload) => {
+    logger.debug({
+      userId: payload.userId,
+      timestamp: payload.timestamp,
+    }, 'Token refreshed');
+
+    // Add token refresh logic:
+    // - Send notification email
+    // - Invalidate all existing sessions
+    // - Record in audit log
   });
 }
