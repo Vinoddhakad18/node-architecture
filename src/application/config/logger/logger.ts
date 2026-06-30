@@ -6,12 +6,15 @@ import pino, {
   Level,
   LoggerOptions,
   StreamEntry,
-  multistream,
+  multistream
 } from 'pino';
 
 import { config } from '@/config';
 
-const logDir = path.join(process.cwd(), 'logs');
+
+
+const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+const logDir = path.join(process.cwd(), 'logs', today);
 
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
